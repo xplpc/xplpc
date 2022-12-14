@@ -1,0 +1,57 @@
+name: Swift
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "macOS Latest Clang",
+            os: macos-12
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Python Requirements
+        run: python3 -m pip install -r requirements.txt --user
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.24.0"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: "1.10.0"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+
+      - name: Test
+        run: python3 xplpc.py swift-test
+
+      - name: Build
+        run: python3 xplpc.py swift-build
+
+      - name: Generate XCFramework
+        run: python3 xplpc.py swift-build-xcframework

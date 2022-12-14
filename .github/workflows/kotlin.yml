@@ -1,0 +1,76 @@
+name: Kotlin
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Python Requirements
+        run: python3 -m pip install -r requirements.txt --user
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.24.0"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: "1.10.0"
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "11"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+          java -version
+
+      - name: Get AVD info
+        uses: ./.github/actions/get-avd-info
+        id: avd-info
+        with:
+            api-level: 31
+
+      - name: Test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 31
+          arch: ${{ steps.avd-info.outputs.arch }}
+          target: ${{ steps.avd-info.outputs.target }}
+          disable-animations: true
+          force-avd-creation: false
+          ram-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
+          script: python3 xplpc.py kotlin-test
+
+      - name: Build
+        run: python3 xplpc.py kotlin-build-aar
