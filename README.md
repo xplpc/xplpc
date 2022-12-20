@@ -77,7 +77,13 @@ let response: String = RemoteClient.call(request) ?? "ERROR"
 print("Returned Value: \(response)")
 ```
 
-## How to build
+## Supported platforms
+
+* C++
+* Kotlin
+* Swift
+
+## Documentation
 
 * [General](docs/general.md)
 * [C++](docs/cxx.md)
