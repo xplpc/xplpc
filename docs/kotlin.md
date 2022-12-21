@@ -44,3 +44,9 @@ Execute on terminal:
 ```
 python3 xplpc.py kotlin-format
 ```
+
+## Sample project
+
+You can see the sample project in directory `kotlin/sample`.
+
+<img width="280" src="https://github.com/xplpc/xplpc/extras/images/screenshot-android.png">
