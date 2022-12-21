@@ -18,7 +18,7 @@ python3 xplpc.py -h
 
 To install the code formatters, you need install:
 
-* ClangFormat (C++)
-* Black (Python)
-* SwiftFormat (Swift)
-* Ktlint (Kotlin)
+*  ClangFormat (C++)
+*  Black (Python)
+*  SwiftFormat (Swift)
+*  Ktlint (Kotlin)

@@ -79,24 +79,24 @@ print("Returned Value: \(response)")
 
 ## Supported platforms
 
-* C++
-* Kotlin
-* Swift
+*  C++
+*  Kotlin
+*  Swift
 
 ## Documentation
 
-* [General](docs/general.md)
-* [C++](docs/cxx.md)
-* [Kotlin](docs/kotlin.md)
-* [Swift](docs/swift.md)
-* [Python](docs/python.md)
+*  [General](docs/general.md)
+*  [C++](docs/cxx.md)
+*  [Kotlin](docs/kotlin.md)
+*  [Swift](docs/swift.md)
+*  [Python](docs/python.md)
 
 ## Contribution
 
 Special thanks to:
 
-* [Yevgeniy Zakharov](https://github.com/fnc12) and [Arthur O'Dwyer](https://github.com/quuxplusone) for the help with C++ code
-* [Brett Best](https://github.com/Brett-Best) for the help with Swift code
+*  [Yevgeniy Zakharov](https://github.com/fnc12) and [Arthur O'Dwyer](https://github.com/quuxplusone) for the help with C++ code
+*  [Brett Best](https://github.com/Brett-Best) for the help with Swift code
 
 ## License
 
