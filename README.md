@@ -77,6 +77,10 @@ let response: String = RemoteClient.call(request) ?? "ERROR"
 print("Returned Value: \(response)")
 ```
 
+You can use `LocalClient` instead of `RemoteClient` to call `local` mapped methods.
+
+And you can use `ProxyClient` to send manually the `serialized message` to simulate a call by a client.
+
 ## Supported platforms
 
 *  C++
