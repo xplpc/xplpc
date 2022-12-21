@@ -49,4 +49,4 @@ python3 xplpc.py swift-format
 
 You can see the sample project in directory `swift/sample`.
 
-<img width="280" src="https://github.com/xplpc/xplpc/extras/images/screenshot-ios.png">
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-ios.png?raw=true">

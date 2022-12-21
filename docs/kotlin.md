@@ -49,4 +49,4 @@ python3 xplpc.py kotlin-format
 
 You can see the sample project in directory `kotlin/sample`.
 
-<img width="280" src="https://github.com/xplpc/xplpc/extras/images/screenshot-android.png">
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-android.png?raw=true">
