@@ -25,7 +25,7 @@ It is `Lite Procedure Call` because the `Platform Proxy` class connect both `lan
 
 For example, you can call a procedure of `C++ code` from `mobile application` or call a `mobile application` procedure from `C++ code`.
 
-As the `XPLPC` project does not use `generators` or `tools`, the generated library can be added to your project `without rewriting` your code or your application, as it is `plug-and-play`, making it possible to fully reuse of code.
+As the `XPLPC` project does not use `generators` or it `own tools`, the generated library can be added to your project `without rewriting` your code or your application, as it is `plug-and-play`, making it possible to fully reuse of code.
 
 ## Workflow
 
