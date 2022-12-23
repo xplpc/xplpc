@@ -81,7 +81,8 @@ print("Returned Value: \(response)")
 Using WASM with Typescript:
 
 ```typescript
-const request = new XRequest("sample.login",
+const request = new XRequest(
+    "sample.login",
     new XParam("username", "paulo"),
     new XParam("password", "123456"),
     new XParam("remember", true),
