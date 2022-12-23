@@ -114,7 +114,7 @@ def run_task_test():
 
     # test
     l.i("Testing...")
-    r.run(["npm", "run", "test:unit"], cwd=sample_dir, shell=True)
+    r.run(["npm", "run", "test:unit"], cwd=sample_dir)
 
     l.ok()
 
