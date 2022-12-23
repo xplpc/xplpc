@@ -1,5 +1,8 @@
 name: WASM
 
+permissions:
+  contents: write
+
 on:
   push:
     paths-ignore:
