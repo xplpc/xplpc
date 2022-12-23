@@ -78,10 +78,6 @@ let response: String = RemoteClient.call(request) ?? "ERROR"
 print("Returned Value: \(response)")
 ```
 
-You can use `LocalClient` instead of `RemoteClient` to call `local` mapped methods.
-
-And you can use `ProxyClient` to send manually the `serialized message` to simulate a call by a client.
-
 Using WASM with Typescript:
 
 ```typescript
@@ -94,6 +90,10 @@ const request = new XRequest("sample.login",
 const response = XLocalClient.call<string>(request);
 console.log("Returned Value: " + response);
 ```
+
+You can use `LocalClient` instead of `RemoteClient` to call `local` mapped methods.
+
+And you can use `ProxyClient` to send manually the `serialized message` to simulate a call by a client.
 
 On WASM (Web Assembly) you have only the `LocalClient`, since it is not connected to other platform.
 
