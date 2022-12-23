@@ -22,7 +22,8 @@
         "types": [
             "vite/client",
             "@types/jest",
-            "@types/emscripten"
+            "@types/emscripten",
+            "@types/node"
         ],
         "plugins": [
             {

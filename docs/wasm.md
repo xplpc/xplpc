@@ -109,3 +109,7 @@ python3 xplpc.py wasm-format
 You can see the sample project in directory `wasm/sample`.
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-wasm.png?raw=true">
+
+Or you can see the demo online:
+
+[https://xplpc.github.io/wasm-demo/](https://xplpc.github.io/wasm-demo/)
