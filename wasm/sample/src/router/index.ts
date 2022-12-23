@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
+const BASE_URL = import.meta.env.BASE_URL || '/';
+
 const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
@@ -14,7 +16,7 @@ const routes: Array<RouteRecordRaw> = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(`${import.meta.env.BASE_UR}/`),
+    history: createWebHistory(BASE_URL),
     routes,
 })
 
