@@ -163,3 +163,39 @@ def check_tool_leaks():
 
     l.e("Leaks tool is not installed, check: https://developer.apple.com/xcode/")
     return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_emsdk():
+    try:
+        subprocess.check_output(["emsdk", "help"])
+
+        if os.environ.get("EMSDK") is not None:
+            return True
+
+        return False
+    except OSError:
+        l.e(
+            "Emscripten SDK is not installed, check: https://github.com/emscripten-core/emsdk"
+        )
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_npm():
+    try:
+        subprocess.check_output(["npm", "--version"])
+        return True
+    except OSError:
+        l.e("NPM is not installed, check: https://www.npmjs.com/")
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_node():
+    try:
+        subprocess.check_output(["node", "--version"])
+        return True
+    except OSError:
+        l.e("Node is not installed, check: https://nodejs.org/")
+        return False

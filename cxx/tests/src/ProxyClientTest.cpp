@@ -20,3 +20,11 @@ TEST_F(GeneralTest, ProxyClientTestLoginAsync)
 
     EXPECT_EQ("{\"r\":\"LOGGED-WITH-REMEMBER\"}", ret);
 }
+
+TEST_F(GeneralTest, ProxyClientTestLoginWithNullData)
+{
+    auto request = R"({"f":"sample.login","p":[{"n":"username","v":null},{"n":"password","v":null},{"n":"remember","v":null}]})";
+    auto ret = ProxyClient::call(request);
+
+    EXPECT_EQ("{\"r\":\"NOT-LOGGED\"}", ret);
+}

@@ -74,7 +74,10 @@ public:
 
                     if (lastParamName == params[paramsCount])
                     {
-                        message[lastParamName] = fp["v"].get<Ts>();
+                        if (!fp["v"].is_null()) {
+                            message[lastParamName] = fp["v"].get<Ts>();
+                        }
+
                         break;
                     }
                 }

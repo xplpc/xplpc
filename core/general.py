@@ -48,6 +48,10 @@ def run_task_clear():
     f.remove_dir(os.path.join(c.proj_path, "kotlin", "sample", "app", "build"))
     f.remove_dir(os.path.join(c.proj_path, "kotlin", "sample", "app", ".cxx"))
 
+    f.remove_dir(os.path.join(c.proj_path, "wasm", "sample", "dist"))
+    f.remove_dir(os.path.join(c.proj_path, "wasm", "sample", "node_modules"))
+    f.remove_file(os.path.join(c.proj_path, "wasm", "sample", "package-lock.json"))
+
     l.ok()
 
 
