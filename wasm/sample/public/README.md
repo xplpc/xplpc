@@ -12,6 +12,6 @@
 
 <p align="center">
     <a href="https://github.com/xplpc/xplpc" target="_blank" rel="noopener noreferrer">
-        <img src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-wasm.png?raw=true" alt="XPLPC Screenshot">
+        <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-wasm.png?raw=true" alt="XPLPC Screenshot">
     </a>
 </p>
