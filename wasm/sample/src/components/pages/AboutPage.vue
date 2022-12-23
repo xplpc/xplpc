@@ -1,10 +1,8 @@
 <script lang="ts" setup>
-import { useRouter } from "vue-router";
 import { useWasmModuleStore } from "../../store/wasm-module";
 
 const wm = useWasmModuleStore();
 const currentDateTime = import.meta.env.CURRENT_DATE_TIME;
-const router = useRouter();
 </script>
 
 <template>
@@ -43,7 +41,9 @@ const router = useRouter();
 
             <br />
 
-            <button type="button" class="btn btn-primary" @click="router.push('/')">Back to Home</button>
+            <router-link class="btn btn-primary" :to="{ name: 'main' }">
+                Back to Home
+            </router-link>
         </div>
     </div>
 </template>

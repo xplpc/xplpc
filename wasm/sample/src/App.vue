@@ -1,15 +1,9 @@
-<script lang="ts" setup>
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-</script>
-
 <template>
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#" @click="router.push('/')">
+            <router-link class="navbar-brand" :to="{ name: 'main' }">
                 <img src="@/assets/images/logo.png" alt="Logo" width="120" class="d-inline-block align-text-top">
-            </a>
+            </router-link>
 
             <button
 type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav"
@@ -20,10 +14,14 @@ type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-control
             <div id="navbarNav" class="collapse navbar-collapse">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" @click="router.push('/')">Home</a>
+                        <router-link class="nav-link" :to="{ name: 'main' }">
+                            Home
+                        </router-link>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" @click="router.push('/about')">About</a>
+                        <router-link class="nav-link" :to="{ name: 'about' }">
+                            About
+                        </router-link>
                     </li>
                 </ul>
             </div>
