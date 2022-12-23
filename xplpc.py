@@ -42,6 +42,13 @@ Tasks:
   - swift-build
   - swift-test
   - swift-build-xcframework
+
+  - wasm-format
+  - wasm-build
+  - wasm-test
+  - wasm-build-sample
+  - wasm-run-sample
+  - wasm-serve-sample
 """
 
 import os
@@ -56,6 +63,7 @@ import core.general as general
 import core.kotlin as kotlin
 import core.python as python
 import core.swift as swift
+import core.wasm as wasm
 from core import util
 
 
@@ -172,6 +180,34 @@ def main(options):
     # build xcframework
     elif task == "swift-build-xcframework":
         swift.run_task_build_xcframework()
+
+    #######################
+    # WASM
+    #######################
+
+    # format
+    elif task == "wasm-format":
+        wasm.run_task_format()
+
+    # build
+    elif task == "wasm-build":
+        wasm.run_task_build()
+
+    # test
+    elif task == "wasm-test":
+        wasm.run_task_test()
+
+    # build sample
+    elif task == "wasm-build-sample":
+        wasm.run_task_build_sample()
+
+    # run sample for development
+    elif task == "wasm-run-sample":
+        wasm.run_task_run_sample()
+
+    # serve sample
+    elif task == "wasm-serve-sample":
+        wasm.run_task_serve_sample()
 
     #######################
     # INVALID

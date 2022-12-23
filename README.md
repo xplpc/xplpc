@@ -81,19 +81,36 @@ You can use `LocalClient` instead of `RemoteClient` to call `local` mapped metho
 
 And you can use `ProxyClient` to send manually the `serialized message` to simulate a call by a client.
 
+Using WASM with Typescript:
+
+```typescript
+const request = new XRequest("sample.login",
+    new XParam("username", "paulo"),
+    new XParam("password", "123456"),
+    new XParam("remember", true),
+);
+
+const response = XLocalClient.call<string>(request);
+console.log("Returned Value: " + response);
+```
+
+On WASM (Web Assembly) you have only the `LocalClient`, since it is not connected to other platform.
+
 ## Supported platforms
 
 *  C++
 *  Kotlin
 *  Swift
+*  WASM
 
 ## Documentation
 
 *  [General](docs/general.md)
 *  [C++](docs/cxx.md)
 *  [Kotlin](docs/kotlin.md)
-*  [Swift](docs/swift.md)
 *  [Python](docs/python.md)
+*  [Swift](docs/swift.md)
+*  [WASM](docs/wasm.md)
 
 ## Contribution
 

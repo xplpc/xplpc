@@ -67,3 +67,10 @@ swift_test_list = [
         "arch": "macos-arm64",
     },
 ]
+
+# http
+http_server_host = "127.0.0.1"
+http_server_port = "8000"
+
+# wasm
+wasm_base_url = "https://xplpc.github.io/wasm-demo"
