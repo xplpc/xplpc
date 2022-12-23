@@ -1,5 +1,7 @@
 # Web Assembly (WASM)
 
+On Web Assembly you have only the `LocalClient`, since it is not connected to other platform.
+
 ## Requirements
 
 *  Node JS
