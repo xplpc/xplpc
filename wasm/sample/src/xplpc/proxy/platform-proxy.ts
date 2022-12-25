@@ -15,7 +15,7 @@ export interface IXNativePlatformProxy extends IXNativePlatformProxyShared {
     hasProxy(): boolean;
 }
 
-export class XWebPlatformClient implements IXPlatformProxy {
+export class XWebPlatformProxy implements IXPlatformProxy {
     call(data: string): string {
         return XProxyClient.call(data);
     }
