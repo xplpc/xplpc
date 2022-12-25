@@ -1,9 +1,9 @@
-import { XWasmModule } from "@/xplpc/interface/wasm-module";
+import { XPLPCModule } from "@/xplpc/module/xplpc";
 import { defineStore } from "pinia";
 
 type WasmModuleState = {
     loaded: boolean
-    module?: XWasmModule
+    module?: XPLPCModule
 }
 
 export const useWasmModuleStore = defineStore("wasm-module", {

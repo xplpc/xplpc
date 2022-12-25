@@ -2,7 +2,7 @@
 debug = False
 task = ""
 proj_path = ""
-build_type = "Release"
+build_type = "Debug"
 
 # swift
 swift_framework_list = [

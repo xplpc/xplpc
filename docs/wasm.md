@@ -1,6 +1,6 @@
 # Web Assembly (WASM)
 
-On Web Assembly you have only the `LocalClient`, since it is not connected to other platform.
+All the Web Assembly client code use Typescript and is inside directory `wasm/sample/src/xplpc`.
 
 ## Requirements
 

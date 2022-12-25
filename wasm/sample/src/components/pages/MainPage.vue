@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { XLocalClient as client } from "@/xplpc/client/local-client";
+import { XRemoteClient as client } from "@/xplpc/client/remote-client";
 import { XParam } from "@/xplpc/message/param";
 import { XRequest } from "@/xplpc/message/request";
 import { ref } from "vue";

@@ -1,17 +1,17 @@
 import { XRequest } from "../message/request";
 import { XPLPCModule } from "../module/xplpc";
 
-export class XLocalClient {
+export class XRemoteClient {
     static wasmModule: XPLPCModule;
 
     static call<T>(request: XRequest): T | null {
-        if (!XLocalClient.wasmModule) {
+        if (!XRemoteClient.wasmModule) {
             console.error("The WASM module is not initialized");
             return null;
         }
 
         try {
-            return JSON.parse(XLocalClient.wasmModule.ProxyClient.call(request.data())).r;
+            return JSON.parse(XRemoteClient.wasmModule.ProxyClient.call(request.data())).r;
         } catch (e: unknown) {
             let error = "unknown";
 
@@ -21,7 +21,7 @@ export class XLocalClient {
                 error = e.message
             }
 
-            console.error("[XLocalClient : call] Error when call function: " + error);
+            console.error("[XRemoteClient : call] Error when call function: " + error);
 
             return null;
         }
@@ -30,7 +30,7 @@ export class XLocalClient {
     static callAsync<T>(request: XRequest): Promise<T | null> {
         return new Promise<T | null>((resolve) => {
             (async function () {
-                resolve(XLocalClient.call<T>(request));
+                resolve(XRemoteClient.call<T>(request));
             })();
         });
     }

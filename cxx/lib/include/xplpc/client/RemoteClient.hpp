@@ -5,7 +5,6 @@
 #include <optional>
 #include <utility>
 
-#include "xplpc/data/MappingData.hpp"
 #include "xplpc/message/Request.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 #include "xplpc/serializer/Serializer.hpp"
@@ -35,32 +34,14 @@ public:
             return std::nullopt;
         }
 
-        auto functionName = Serializer::decodeFunctionName(request.data());
-
-        if (functionName.empty())
+        try
         {
-            spdlog::error("[RemoteClient : call] Function name is empty");
-            return std::nullopt;
+            return Serializer::decodeFunctionReturnValue<T>(PlatformProxy::shared()->call(request.data()));
         }
-
-        auto mappingItem = MappingData::find(functionName);
-
-        if (mappingItem)
+        catch (std::exception &e)
         {
-            auto returnedData = PlatformProxy::shared()->call(request.data());
-
-            try
-            {
-                return Serializer::decodeFunctionReturnValue<T>(returnedData);
-            }
-            catch (std::exception &e)
-            {
-                spdlog::error("[RemoteClient : call] Error when try to convert return value for function: {}", functionName);
-                return std::nullopt;
-            }
+            spdlog::error("[RemoteClient : call] Error when try to convert return value");
         }
-
-        spdlog::error("[RemoteClient : call] Mapping not found for function: {}", functionName);
 
         return std::nullopt;
     }
