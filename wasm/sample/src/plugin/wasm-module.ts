@@ -27,6 +27,8 @@ export default {
                 XRemoteClient.wasmModule = wm.module;
 
                 // TODO: XPLPC - REMOVE AFTER TEST
+                // eslint-disable-next-line
+                // @ts-ignore:next-line
                 wm.module.HelloClass.SayHello("testeeee");
 
                 wm.setLoaded(true);
