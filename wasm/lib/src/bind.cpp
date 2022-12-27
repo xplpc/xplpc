@@ -62,6 +62,8 @@ EMSCRIPTEN_BINDINGS(xplpc_proxy_platform_proxy)
         .function("doProxyCall", &xplpc::proxy::PlatformProxy::doProxyCall, em::pure_virtual());
 }
 
+// TODO: XPLPC - REMOVE ALL AFTER TESTS
+
 #include "xplpc/xplpc.hpp"
 
 class HelloClass

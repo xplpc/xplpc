@@ -14,7 +14,7 @@ export class XProxyClient {
             return "";
         }
 
-        // TODO: NEED IMPLEMENTS
+        // TODO: XPLPC - NEED IMPLEMENTS
         console.log("[XProxyClient : call] Received data: ", data);
         return "";
     }
