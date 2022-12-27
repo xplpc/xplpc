@@ -1,22 +1,21 @@
-import { XProxyClient } from "../client/proxy-client";
-
-interface IXPlatformProxy {
-    call(data: string): string;
-}
-
 interface IXNativePlatformProxyShared {
     shared: () => IXNativePlatformProxy;
 }
 
 export interface IXNativePlatformProxy extends IXNativePlatformProxyShared {
+    createFromPtr(proxy: IXNativePlatformProxy): void;
     createDefault(): void;
     initialize(): void;
-    create(proxy: IXPlatformProxy): void;
     hasProxy(): boolean;
+    extend(name: string, obj: unknown): unknown;
 }
 
-export class XWebPlatformProxy implements IXPlatformProxy {
-    call(data: string): string {
-        return XProxyClient.call(data);
+const XWebPlatformProxy = {
+    doProxyCall: function (data: string): string {
+        // TODO: XPLPC - NEED IMPLEMENT
+        console.log("[XWebPlatformProxy : doProxyCall] Called: " + data);
+        return '{"r": "test-ok"}';
     }
 }
+
+export default XWebPlatformProxy;

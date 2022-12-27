@@ -5,7 +5,7 @@
 
 @protocol XPLPCNativePlatformProxyProtocol
 @required
-- (NSString *)call:(NSString *)data;
+- (NSString *)doProxyCall:(NSString *)data;
 @optional
 - (NSString *)onRemoteClientCall:(NSString *)data;
 @end

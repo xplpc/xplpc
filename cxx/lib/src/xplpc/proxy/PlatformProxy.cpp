@@ -16,6 +16,11 @@ void PlatformProxy::create(std::shared_ptr<PlatformProxy> proxy)
     PlatformProxy::proxy = proxy;
 }
 
+void PlatformProxy::createFromPtr(PlatformProxy *proxy)
+{
+    PlatformProxy::proxy = std::shared_ptr<PlatformProxy>(proxy);
+}
+
 void PlatformProxy::createDefault()
 {
     PlatformProxy::proxy = std::make_shared<PlatformProxy>();
@@ -42,7 +47,7 @@ void PlatformProxy::finalize()
     // ignore
 }
 
-std::string PlatformProxy::call(const std::string &data)
+std::string PlatformProxy::doProxyCall(const std::string &data)
 {
     return "";
 }

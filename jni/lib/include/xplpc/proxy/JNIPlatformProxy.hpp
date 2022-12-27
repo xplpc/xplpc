@@ -14,7 +14,7 @@ namespace proxy
 class JNIPlatformProxy : public PlatformProxy
 {
 public:
-    virtual std::string call(const std::string &data) override;
+    virtual std::string doProxyCall(const std::string &data) override;
     virtual void finalize() override;
 
     void initializeNativePlatform(JavaVM *jvm);

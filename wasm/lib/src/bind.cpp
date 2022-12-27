@@ -38,15 +38,57 @@ EMSCRIPTEN_BINDINGS(xplpc_client_proxy_client)
 #include <emscripten/bind.h>
 namespace em = emscripten;
 
+struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
+{
+    EMSCRIPTEN_WRAPPER(PlatformProxyWrapper);
+    std::string doProxyCall(const std::string &data)
+    {
+        return call<std::string>("doProxyCall", data);
+    }
+};
+
 EMSCRIPTEN_BINDINGS(xplpc_proxy_platform_proxy)
 {
     em::class_<xplpc::proxy::PlatformProxy>("PlatformProxy")
+        .constructor<>()
         .smart_ptr<std::shared_ptr<xplpc::proxy::PlatformProxy>>("PlatformProxy")
+        .allow_subclass<PlatformProxyWrapper>("PlatformProxyWrapper")
         .class_function("shared", &xplpc::proxy::PlatformProxy::shared)
-        .class_function("createDefault", &xplpc::proxy::PlatformProxy::createDefault)
         .class_function("create", &xplpc::proxy::PlatformProxy::create)
+        .class_function("createDefault", &xplpc::proxy::PlatformProxy::createDefault)
+        .class_function("createFromPtr", &xplpc::proxy::PlatformProxy::createFromPtr, em::allow_raw_pointer<em::arg<0>>())
         .class_function("hasProxy", &xplpc::proxy::PlatformProxy::hasProxy)
         .function("initialize", &xplpc::proxy::PlatformProxy::initialize)
-        .function("call", &xplpc::proxy::PlatformProxy::call);
+        .function("doProxyCall", &xplpc::proxy::PlatformProxy::doProxyCall, em::pure_virtual());
+}
+
+#include "xplpc/xplpc.hpp"
+
+class HelloClass
+{
+public:
+    static std::string SayHello(const std::string &data)
+    {
+        spdlog::info("[SayHello 1] {}", data);
+
+        auto request = xplpc::message::Request{
+            "platform.battery.level",
+            xplpc::message::Param<std::string>{"suffix", "%"},
+        };
+
+        spdlog::info("[SayHello 2] {}", request.data());
+
+        auto response = xplpc::client::RemoteClient::call<std::string>(request);
+        spdlog::info("[SayHello 3] {}", response.value());
+
+        return "";
+    };
+};
+
+EMSCRIPTEN_BINDINGS(Hello)
+{
+    emscripten::class_<HelloClass>("HelloClass")
+        .constructor<>()
+        .class_function("SayHello", &HelloClass::SayHello);
 }
 #endif

@@ -13,7 +13,7 @@ import kotlinx.coroutines.async
 object RemoteClient {
     inline fun <reified T> call(request: Request, defValue: T? = null): T? {
         try {
-            val data = PlatformProxy.call(request.data)
+            val data = PlatformProxy.doProxyCall(request.data)
             val type = object : TypeToken<T>() {}
             return XPLPC.config.serializer.decodeFunctionReturnValue(data, type)
         } catch (e: Exception) {

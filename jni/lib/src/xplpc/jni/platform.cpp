@@ -26,7 +26,7 @@ extern "C"
     }
 
     JNIEXPORT jstring JNICALL
-    Java_com_xplpc_proxy_PlatformProxy_call(JNIEnv *env, jclass thiz, jstring data)
+    Java_com_xplpc_proxy_PlatformProxy_doProxyCall(JNIEnv *env, jclass thiz, jstring data)
     {
         return jniStringFromUTF8(env, ProxyClient::call(jniUTF8FromString(env, data)));
     }

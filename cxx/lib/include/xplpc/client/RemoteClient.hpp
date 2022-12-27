@@ -36,7 +36,7 @@ public:
 
         try
         {
-            return Serializer::decodeFunctionReturnValue<T>(PlatformProxy::shared()->call(request.data()));
+            return Serializer::decodeFunctionReturnValue<T>(PlatformProxy::shared()->doProxyCall(request.data()));
         }
         catch (std::exception &e)
         {

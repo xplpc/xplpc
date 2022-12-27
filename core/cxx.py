@@ -171,6 +171,10 @@ def run_task_format():
             "path": os.path.join(c.proj_path, "objc"),
             "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
         },
+        {
+            "path": os.path.join(c.proj_path, "wasm"),
+            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
+        },
     ]
 
     if path_list:

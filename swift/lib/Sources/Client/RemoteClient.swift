@@ -4,7 +4,7 @@ public class RemoteClient {
     }
 
     public static func call<T: Decodable>(_ request: Request, _ defValue: T? = nil) -> T? {
-        let json = PlatformProxy.shared.call(request.data) ?? ""
+        let json = PlatformProxy.shared.doProxyCall(request.data) ?? ""
 
         if let response: RemoteClientReturn<T> = XPLPC.shared.config.serializer.decodeFunctionReturnValue(json) {
             return response.r

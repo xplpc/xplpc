@@ -170,35 +170,28 @@ public:
     template <typename... Args>
     static std::string encodeRequest(const std::string &functionName, Args &&...params)
     {
-        auto mappingItem = MappingData::find(functionName);
-
         json j;
 
-        if (mappingItem)
-        {
-            j["f"] = functionName;
-            j["p"] = json::array();
+        j["f"] = functionName;
+        j["p"] = json::array();
 
-            // clang-format off
-            ([&]() {
-                json o;
-                o["n"] = params.n;
+        // clang-format off
+        ([&]() {
+            json o;
+            o["n"] = params.n;
 
-                if (params.v.has_value())
-                {
-                    o["v"] = params.v.value();
-                }
-                else
-                {
-                    o["v"] = nullptr;
-                }
+            if (params.v.has_value())
+            {
+                o["v"] = params.v.value();
+            }
+            else
+            {
+                o["v"] = nullptr;
+            }
 
-                j["p"].push_back(o);
-            }(),...);
-            // clang-format on
-
-            return std::move(j.dump());
-        }
+            j["p"].push_back(o);
+        }(),...);
+        // clang-format on
 
         return std::move(j.dump());
     }
