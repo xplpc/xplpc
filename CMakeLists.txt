@@ -115,7 +115,7 @@ elseif(XPLPC_TARGET STREQUAL "swift")
         PUBLIC_HEADER "${XPLPC_PUBLIC_HEADER_FILES}"
     )
 elseif(XPLPC_TARGET STREQUAL "wasm")
-    set(WASM_FLAGS "--bind -s MALLOC=emmalloc -s WASM_BIGINT=1 -s ALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -s MODULARIZE=1 -s EXPORT_ES6=1")
+    set(WASM_FLAGS "--bind -s MALLOC=emmalloc -s WASM_BIGINT=1 -s ALLOW_MEMORY_GROWTH=1 -fexceptions -s MODULARIZE=1 -s EXPORT_ES6=1 -s ASYNCIFY=1")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${WASM_FLAGS}")
 
     add_compile_definitions(XPLPC_TARGET_WASM)

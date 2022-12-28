@@ -1,49 +1,40 @@
-// Bind: XPLPC
+#include "xplpc/client/ProxyClient.hpp"
 #include "xplpc/core/XPLPC.hpp"
+#include "xplpc/proxy/PlatformProxy.hpp"
 
-#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
+
 namespace em = emscripten;
 
+// Bind: XPLPC
 EMSCRIPTEN_BINDINGS(xplpc_core_xplpc)
 {
     em::class_<xplpc::core::XPLPC>("XPLPC")
         .class_function("initialize", &xplpc::core::XPLPC::initialize)
         .class_function("isInitialized", &xplpc::core::XPLPC::isInitialized);
 }
-#endif
 
 // Bind: ProxyClient
-#include "xplpc/client/ProxyClient.hpp"
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/bind.h>
-namespace em = emscripten;
-
 EMSCRIPTEN_BINDINGS(xplpc_client_proxy_client)
 {
     em::class_<xplpc::client::ProxyClient>("ProxyClient")
         .class_function("call", &xplpc::client::ProxyClient::call)
         .class_function("callAsync", &xplpc::client::ProxyClient::callAsync);
 }
-#endif
 
 // Bind: PlatformProxy
-#include "xplpc/proxy/PlatformProxy.hpp"
-
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/bind.h>
-namespace em = emscripten;
-
 struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
 {
     EMSCRIPTEN_WRAPPER(PlatformProxyWrapper);
     std::string doProxyCall(const std::string &data)
     {
-        return call<std::string>("doProxyCall", data);
+        spdlog::info("[PlatformProxyWrapper : doProxyCall] 1", data);
+
+        auto response = call<em::val>("onRemoteProxyCall", data).await(); // the resolve need happen here
+        spdlog::info("[PlatformProxyWrapper : doProxyCall] 2");
+
+        return response.as<std::string>();
     }
 };
 
@@ -59,7 +50,7 @@ EMSCRIPTEN_BINDINGS(xplpc_proxy_platform_proxy)
         .class_function("createFromPtr", &xplpc::proxy::PlatformProxy::createFromPtr, em::allow_raw_pointer<em::arg<0>>())
         .class_function("hasProxy", &xplpc::proxy::PlatformProxy::hasProxy)
         .function("initialize", &xplpc::proxy::PlatformProxy::initialize)
-        .function("doProxyCall", &xplpc::proxy::PlatformProxy::doProxyCall, em::pure_virtual());
+        .function("onRemoteProxyCall", &xplpc::proxy::PlatformProxy::doProxyCall, em::pure_virtual());
 }
 
 // TODO: XPLPC - REMOVE ALL AFTER TESTS
@@ -93,4 +84,3 @@ EMSCRIPTEN_BINDINGS(Hello)
         .constructor<>()
         .class_function("SayHello", &HelloClass::SayHello);
 }
-#endif

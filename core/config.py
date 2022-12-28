@@ -2,6 +2,8 @@
 debug = False
 task = ""
 proj_path = ""
+
+# TODO: XPLPC - CHANGE TO RELEASE AFTER TEST
 build_type = "Debug"
 
 # swift
