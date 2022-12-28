@@ -16,6 +16,8 @@ const XWebPlatformProxy = {
         console.log("[XWebPlatformProxy : onRemoteProxyCall] Called: " + data);
 
         const promise = new Promise<string>(function (resolve, reject) {
+            // eslint-disable-next-line
+            // @ts-ignore:next-line
             navigator.getBattery().then((battery: any) => {
                 resolve('{"r": "' + (battery.level * 100) + '%"}');
             });

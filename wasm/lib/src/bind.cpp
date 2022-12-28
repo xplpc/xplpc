@@ -29,12 +29,7 @@ struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
     EMSCRIPTEN_WRAPPER(PlatformProxyWrapper);
     std::string doProxyCall(const std::string &data)
     {
-        spdlog::info("[PlatformProxyWrapper : doProxyCall] 1", data);
-
-        auto response = call<em::val>("onRemoteProxyCall", data).await(); // the resolve need happen here
-        spdlog::info("[PlatformProxyWrapper : doProxyCall] 2");
-
-        return response.as<std::string>();
+        return call<em::val>("onRemoteProxyCall", data).await().as<std::string>();
     }
 };
 
