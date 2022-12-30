@@ -11,15 +11,26 @@ export interface IXNativePlatformProxy extends IXNativePlatformProxyShared {
 }
 
 const XWebPlatformProxy = {
-    onRemoteProxyCall: function (data: string): Promise<string> {
+    sleep: function (time: number) {
+        return new Promise((resolve) => setTimeout(resolve, time));
+    },
+    onRemoteProxyCall: function (data: string): string {
         // TODO: XPLPC - NEED REAL IMPLEMENTATION
         console.log("[XWebPlatformProxy : onRemoteProxyCall] Called: " + data);
+
+        return '{"r": "sync-test-ok"}';
+    },
+    onRemoteProxyCallAsync: function (data: string): Promise<string> {
+        // TODO: XPLPC - NEED REAL IMPLEMENTATION
+        console.log("[XWebPlatformProxy : onRemoteProxyCallAsync] Called: " + data);
 
         const promise = new Promise<string>(function (resolve, reject) {
             // eslint-disable-next-line
             // @ts-ignore:next-line
             navigator.getBattery().then((battery: any) => {
-                resolve('{"r": "' + (battery.level * 100) + '%"}');
+                XWebPlatformProxy.sleep(5000).then(() => {
+                    resolve('{"r": "' + (battery.level * 100) + '%"}');
+                });
             });
         });
 

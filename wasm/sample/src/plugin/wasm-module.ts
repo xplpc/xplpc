@@ -30,6 +30,7 @@ export default {
                 // eslint-disable-next-line
                 // @ts-ignore:next-line
                 wm.module.HelloClass.SayHello("testeeee");
+                wm.module.HelloClass.SayHello("testeeee");
 
                 wm.setLoaded(true);
             });

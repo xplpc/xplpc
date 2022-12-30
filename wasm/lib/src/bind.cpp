@@ -1,3 +1,5 @@
+#include <future>
+
 #include "xplpc/client/ProxyClient.hpp"
 #include "xplpc/core/XPLPC.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
@@ -27,9 +29,16 @@ EMSCRIPTEN_BINDINGS(xplpc_client_proxy_client)
 struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
 {
     EMSCRIPTEN_WRAPPER(PlatformProxyWrapper);
-    std::string doProxyCall(const std::string &data)
+
+    std::string callProxy(const std::string &data)
     {
-        return call<em::val>("onRemoteProxyCall", data).await().as<std::string>();
+        return call<std::string>("onRemoteProxyCall", data);
+    }
+
+    std::future<std::string> callProxyAsync(const std::string &data)
+    {
+        return std::async([&]()
+                          { return call<em::val>("onRemoteProxyCallAsync", data).await().as<std::string>(); });
     }
 };
 
@@ -45,7 +54,8 @@ EMSCRIPTEN_BINDINGS(xplpc_proxy_platform_proxy)
         .class_function("createFromPtr", &xplpc::proxy::PlatformProxy::createFromPtr, em::allow_raw_pointer<em::arg<0>>())
         .class_function("hasProxy", &xplpc::proxy::PlatformProxy::hasProxy)
         .function("initialize", &xplpc::proxy::PlatformProxy::initialize)
-        .function("onRemoteProxyCall", &xplpc::proxy::PlatformProxy::doProxyCall, em::pure_virtual());
+        .function("onRemoteProxyCall", &xplpc::proxy::PlatformProxy::callProxy, em::pure_virtual())
+        .function("onRemoteProxyCallAsync", &xplpc::proxy::PlatformProxy::callProxyAsync, em::pure_virtual());
 }
 
 // TODO: XPLPC - REMOVE ALL AFTER TESTS
@@ -66,7 +76,7 @@ public:
 
         spdlog::info("[SayHello 2] {}", request.data());
 
-        auto response = xplpc::client::RemoteClient::call<std::string>(request);
+        auto response = xplpc::client::RemoteClient::callAsync<std::string>(request).get();
         spdlog::info("[SayHello 3] {}", response.value());
 
         return "";

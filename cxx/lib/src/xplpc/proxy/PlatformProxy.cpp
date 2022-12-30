@@ -1,5 +1,6 @@
 #include "xplpc/proxy/PlatformProxy.hpp"
 #include "xplpc/core/XPLPC.hpp"
+#include <future>
 #include <utility>
 
 namespace xplpc
@@ -47,9 +48,15 @@ void PlatformProxy::finalize()
     // ignore
 }
 
-std::string PlatformProxy::doProxyCall(const std::string &data)
+std::string PlatformProxy::callProxy(const std::string &data)
 {
-    return "";
+    return std::string{};
+}
+
+std::future<std::string> PlatformProxy::callProxyAsync(const std::string &data)
+{
+    return std::async([&]()
+                      { return std::string{}; });
 }
 
 /*

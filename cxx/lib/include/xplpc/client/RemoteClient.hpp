@@ -36,7 +36,7 @@ public:
 
         try
         {
-            return Serializer::decodeFunctionReturnValue<T>(PlatformProxy::shared()->doProxyCall(request.data()));
+            return Serializer::decodeFunctionReturnValue<T>(PlatformProxy::shared()->callProxy(request.data()));
         }
         catch (std::exception &e)
         {
@@ -50,7 +50,29 @@ public:
     static std::future<std::optional<T>> callAsync(const Request &request)
     {
         return std::async([&]()
-                          { return call<T>(request); });
+                          { return internalCallAsync<T>(request); });
+    }
+
+private:
+    template <typename T>
+    static std::optional<T> internalCallAsync(const Request &request)
+    {
+        if (!PlatformProxy::hasProxy())
+        {
+            spdlog::error("[RemoteClient : callAsync] Platform proxy was not configured");
+            return std::nullopt;
+        }
+
+        try
+        {
+            return Serializer::decodeFunctionReturnValue<T>(PlatformProxy::shared()->callProxyAsync(request.data()).get());
+        }
+        catch (std::exception &e)
+        {
+            spdlog::error("[RemoteClient : callAsync] Error when try to convert return value");
+        }
+
+        return std::nullopt;
     }
 };
 

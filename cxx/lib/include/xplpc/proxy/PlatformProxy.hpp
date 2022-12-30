@@ -1,5 +1,6 @@
 #pragma once
 
+#include <future>
 #include <memory>
 #include <string>
 
@@ -19,7 +20,8 @@ public:
     virtual void initialize();
     virtual void initializePlatform();
     virtual void finalize();
-    virtual std::string doProxyCall(const std::string &data);
+    virtual std::string callProxy(const std::string &data);
+    virtual std::future<std::string> callProxyAsync(const std::string &data);
 
 private:
     static std::shared_ptr<PlatformProxy> proxy;
