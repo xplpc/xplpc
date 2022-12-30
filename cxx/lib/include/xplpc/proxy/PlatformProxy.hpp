@@ -4,8 +4,6 @@
 #include <memory>
 #include <string>
 
-#include <emscripten/val.h>
-
 namespace xplpc
 {
 namespace proxy
