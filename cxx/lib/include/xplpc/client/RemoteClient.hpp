@@ -47,32 +47,29 @@ public:
     }
 
     template <typename T>
-    static std::future<std::optional<T>> callAsync(const Request &request)
-    {
-        return std::async([&]()
-                          { return internalCallAsync<T>(request); });
-    }
-
-private:
-    template <typename T>
-    static std::optional<T> internalCallAsync(const Request &request)
+    static void callAsync(const Request &request, std::function<void(const std::optional<T> &)> callback)
     {
         if (!PlatformProxy::hasProxy())
         {
             spdlog::error("[RemoteClient : callAsync] Platform proxy was not configured");
-            return std::nullopt;
+            callback(std::nullopt);
         }
 
         try
         {
-            return Serializer::decodeFunctionReturnValue<T>(PlatformProxy::shared()->callProxyAsync(request.data()).get());
+            spdlog::info("[RemoteClient : callAsync] 1");
+
+            // TODO: XPLPC - WHAT I NEED USE FOR WASM CALLBACK?
+            PlatformProxy::shared()->callProxyAsync(request.data(), [&](const std::string &data)
+                                                    {
+                spdlog::info("[RemoteClient : callAsync] 2 with data: {}", data);
+                callback(Serializer::decodeFunctionReturnValue<T>(data)); });
         }
         catch (std::exception &e)
         {
             spdlog::error("[RemoteClient : callAsync] Error when try to convert return value");
+            callback(std::nullopt);
         }
-
-        return std::nullopt;
     }
 };
 

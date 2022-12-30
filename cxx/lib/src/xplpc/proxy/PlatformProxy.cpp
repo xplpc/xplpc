@@ -53,10 +53,11 @@ std::string PlatformProxy::callProxy(const std::string &data)
     return std::string{};
 }
 
-std::future<std::string> PlatformProxy::callProxyAsync(const std::string &data)
+// TODO: XPLPC - WHAT I NEED USE FOR WASM CALLBACK?
+
+void PlatformProxy::callProxyAsync(const std::string &data, std::function<void(const std::string &)> callback)
 {
-    return std::async([&]()
-                      { return std::string{}; });
+    callback(std::string{});
 }
 
 /*

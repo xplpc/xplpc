@@ -17,24 +17,15 @@ const XWebPlatformProxy = {
     onRemoteProxyCall: function (data: string): string {
         // TODO: XPLPC - NEED REAL IMPLEMENTATION
         console.log("[XWebPlatformProxy : onRemoteProxyCall] Called: " + data);
-
         return '{"r": "sync-test-ok"}';
     },
-    onRemoteProxyCallAsync: function (data: string): Promise<string> {
+    // TODO: XPLPC - WHAT IS THE CORRECT METHOD SIGNATURE FOR ASYNC AND CALL THE CALLBACK?
+    onRemoteProxyCallAsync: async function (data: string, callback: (response: string) => void) {
+        // TODO: XPLPC - THIS CODE IS NEVER CALLED
         // TODO: XPLPC - NEED REAL IMPLEMENTATION
         console.log("[XWebPlatformProxy : onRemoteProxyCallAsync] Called: " + data);
 
-        const promise = new Promise<string>(function (resolve, reject) {
-            // eslint-disable-next-line
-            // @ts-ignore:next-line
-            navigator.getBattery().then((battery: any) => {
-                XWebPlatformProxy.sleep(5000).then(() => {
-                    resolve('{"r": "' + (battery.level * 100) + '%"}');
-                });
-            });
-        });
-
-        return promise;
+        callback('{"r": "async-test-ok"}');
     }
 }
 

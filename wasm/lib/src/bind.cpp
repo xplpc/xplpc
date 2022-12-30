@@ -32,13 +32,22 @@ struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
 
     std::string callProxy(const std::string &data)
     {
+        // TODO: XPLPC - REMOVE LOG
+        spdlog::info("[callProxy 1] {}", data);
         return call<std::string>("onRemoteProxyCall", data);
     }
 
-    std::future<std::string> callProxyAsync(const std::string &data)
+    void callProxyAsync(const std::string &data, std::function<void(const std::string &)> &callback)
     {
-        return std::async([&]()
-                          { return call<em::val>("onRemoteProxyCallAsync", data).await().as<std::string>(); });
+        // TODO: XPLPC - THIS CODE IS NEVER CALLED
+        // TODO: XPLPC - REMOVE LOGS
+        spdlog::info("[callProxyAsync 1] {}", data);
+
+        auto x = call<em::val>("onRemoteProxyCallAsync", data);
+        spdlog::info("[callProxyAsync 2]");
+
+        // TODO: XPLPC - HOW TO CALL THE CALLBACK HERE?
+        // callback(x.as<std::string>());
     }
 };
 
@@ -76,8 +85,18 @@ public:
 
         spdlog::info("[SayHello 2] {}", request.data());
 
-        auto response = xplpc::client::RemoteClient::callAsync<std::string>(request).get();
-        spdlog::info("[SayHello 3] {}", response.value());
+        auto isAsync = true;
+
+        if (isAsync)
+        {
+            xplpc::client::RemoteClient::callAsync<std::string>(request, [](const std::optional<std::string> &response)
+                                                                { spdlog::info("[SayHello 3] {}", response.value()); });
+        }
+        else
+        {
+            auto response = xplpc::client::RemoteClient::call<std::string>(request);
+            spdlog::info("[SayHello 3] {}", response.value());
+        }
 
         return "";
     };
