@@ -60,10 +60,31 @@ public:
             spdlog::info("[RemoteClient : callAsync] 1");
 
             // TODO: XPLPC - WHAT I NEED USE FOR WASM CALLBACK?
-            PlatformProxy::shared()->callProxyAsync(request.data(), [&](const std::string &data)
-                                                    {
-                spdlog::info("[RemoteClient : callAsync] 2 with data: {}", data);
-                callback(Serializer::decodeFunctionReturnValue<T>(data)); });
+            // struct Context {
+            //     std::function<void(const std::optional<T> &)> callback;
+            // };
+
+            // auto ctx = new Context{callback};
+
+            // auto cb = [&](std::string data){
+            //     spdlog::info("[RemoteClient : callAsync] CB: 2 with data: {}", data);
+            //     callback(data);
+            // };
+
+            // auto fun = [](void *arg){
+            //     spdlog::info("[RemoteClient : callAsync] FUN OK");
+            //     //auto data = static_cast<std::string *>(arg);
+            //     //cb(*data);
+            //     //(*static_cast<decltype(cb)*>(*data))();
+            // };
+
+
+            // PlatformProxy::shared()->callProxyAsync(request.data(), &cb);
+
+           PlatformProxy::shared()->callProxyAsync(request.data(), [&](const std::string &data) {
+               spdlog::info("[RemoteClient : callAsync] 2 with data: {}", data);
+               callback(data);
+           });
         }
         catch (std::exception &e)
         {

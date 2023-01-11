@@ -9,7 +9,8 @@
 
 namespace em = emscripten;
 
-// Bind: XPLPC
+// BIND: XPLPC
+
 EMSCRIPTEN_BINDINGS(xplpc_core_xplpc)
 {
     em::class_<xplpc::core::XPLPC>("XPLPC")
@@ -17,7 +18,8 @@ EMSCRIPTEN_BINDINGS(xplpc_core_xplpc)
         .class_function("isInitialized", &xplpc::core::XPLPC::isInitialized);
 }
 
-// Bind: ProxyClient
+// BIND: ProxyClient
+
 EMSCRIPTEN_BINDINGS(xplpc_client_proxy_client)
 {
     em::class_<xplpc::client::ProxyClient>("ProxyClient")
@@ -25,7 +27,17 @@ EMSCRIPTEN_BINDINGS(xplpc_client_proxy_client)
         .class_function("callAsync", &xplpc::client::ProxyClient::callAsync);
 }
 
-// Bind: PlatformProxy
+// BIND: std::function
+
+EMSCRIPTEN_BINDINGS(xplpc_std_function)
+{
+    em::class_<std::function<void(const std::string &)>>("XVoidFunctorString")
+        .constructor<>()
+        .function("exec", &std::function<void(const std::string &)>::operator());
+}
+
+// BIND: PlatformProxy
+
 struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
 {
     EMSCRIPTEN_WRAPPER(PlatformProxyWrapper);
@@ -37,13 +49,14 @@ struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
         return call<std::string>("onRemoteProxyCall", data);
     }
 
-    void callProxyAsync(const std::string &data, std::function<void(const std::string &)> &callback)
+    void callProxyAsync(const std::string &data, std::function<void(const std::string &)> callback)
     {
         // TODO: XPLPC - THIS CODE IS NEVER CALLED
         // TODO: XPLPC - REMOVE LOGS
         spdlog::info("[callProxyAsync 1] {}", data);
 
-        auto x = call<em::val>("onRemoteProxyCallAsync", data);
+        call<void>("onRemoteProxyCallAsync", data, callback);
+
         spdlog::info("[callProxyAsync 2]");
 
         // TODO: XPLPC - HOW TO CALL THE CALLBACK HERE?
@@ -66,6 +79,7 @@ EMSCRIPTEN_BINDINGS(xplpc_proxy_platform_proxy)
         .function("onRemoteProxyCall", &xplpc::proxy::PlatformProxy::callProxy, em::pure_virtual())
         .function("onRemoteProxyCallAsync", &xplpc::proxy::PlatformProxy::callProxyAsync, em::pure_virtual());
 }
+
 
 // TODO: XPLPC - REMOVE ALL AFTER TESTS
 
