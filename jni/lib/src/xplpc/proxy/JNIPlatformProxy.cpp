@@ -5,7 +5,7 @@ namespace xplpc
 namespace proxy
 {
 
-std::string JNIPlatformProxy::call(const std::string &data)
+std::string JNIPlatformProxy::doProxyCall(const std::string &data)
 {
     auto env = jniGetThreadEnv();
     jclass clazz = env->FindClass("com/xplpc/proxy/PlatformProxy");

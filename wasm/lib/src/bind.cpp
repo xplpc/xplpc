@@ -1,10 +1,24 @@
-// Bind: ProxyClient
-#include "xplpc/client/ProxyClient.hpp"
+#include <future>
 
-#ifdef __EMSCRIPTEN__
+#include "xplpc/client/ProxyClient.hpp"
+#include "xplpc/core/XPLPC.hpp"
+#include "xplpc/proxy/PlatformProxy.hpp"
+
 #include <emscripten.h>
 #include <emscripten/bind.h>
+
 namespace em = emscripten;
+
+// BIND: XPLPC
+
+EMSCRIPTEN_BINDINGS(xplpc_core_xplpc)
+{
+    em::class_<xplpc::core::XPLPC>("XPLPC")
+        .class_function("initialize", &xplpc::core::XPLPC::initialize)
+        .class_function("isInitialized", &xplpc::core::XPLPC::isInitialized);
+}
+
+// BIND: ProxyClient
 
 EMSCRIPTEN_BINDINGS(xplpc_client_proxy_client)
 {
@@ -12,38 +26,99 @@ EMSCRIPTEN_BINDINGS(xplpc_client_proxy_client)
         .class_function("call", &xplpc::client::ProxyClient::call)
         .class_function("callAsync", &xplpc::client::ProxyClient::callAsync);
 }
-#endif
 
-// Bind: XPLPC
-#include "xplpc/core/XPLPC.hpp"
+// BIND: std::function
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/bind.h>
-namespace em = emscripten;
-
-EMSCRIPTEN_BINDINGS(xplpc_core_xplpc)
+EMSCRIPTEN_BINDINGS(xplpc_std_function)
 {
-    em::class_<xplpc::core::XPLPC>("XPLPC")
-        .class_function("initialize", xplpc::core::XPLPC::initialize)
-        .class_function("isInitialized", xplpc::core::XPLPC::isInitialized);
+    em::class_<std::function<void(const std::string &)>>("XVoidFunctorString")
+        .constructor<>()
+        .function("exec", &std::function<void(const std::string &)>::operator());
 }
-#endif
 
-// Bind: PlatformProxy
-#include "xplpc/proxy/PlatformProxy.hpp"
+// BIND: PlatformProxy
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/bind.h>
-namespace em = emscripten;
+struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
+{
+    EMSCRIPTEN_WRAPPER(PlatformProxyWrapper);
+
+    std::string callProxy(const std::string &data)
+    {
+        // TODO: XPLPC - REMOVE LOG
+        spdlog::info("[callProxy 1] {}", data);
+        return call<std::string>("onRemoteProxyCall", data);
+    }
+
+    void callProxyAsync(const std::string &data, std::function<void(const std::string &)> callback)
+    {
+        // TODO: XPLPC - THIS CODE IS NEVER CALLED
+        // TODO: XPLPC - REMOVE LOGS
+        spdlog::info("[callProxyAsync 1] {}", data);
+
+        call<void>("onRemoteProxyCallAsync", data, callback);
+
+        spdlog::info("[callProxyAsync 2]");
+
+        // TODO: XPLPC - HOW TO CALL THE CALLBACK HERE?
+        // callback(x.as<std::string>());
+    }
+};
 
 EMSCRIPTEN_BINDINGS(xplpc_proxy_platform_proxy)
 {
     em::class_<xplpc::proxy::PlatformProxy>("PlatformProxy")
-        .class_function("createDefault", xplpc::proxy::PlatformProxy::createDefault)
-        .class_function("shared", xplpc::proxy::PlatformProxy::shared)
-        .smart_ptr<std::shared_ptr<xplpc::proxy::PlatformProxy>>("shared")
-        .function("initialize", &xplpc::proxy::PlatformProxy::initialize);
+        .constructor<>()
+        .smart_ptr<std::shared_ptr<xplpc::proxy::PlatformProxy>>("PlatformProxy")
+        .allow_subclass<PlatformProxyWrapper>("PlatformProxyWrapper")
+        .class_function("shared", &xplpc::proxy::PlatformProxy::shared)
+        .class_function("create", &xplpc::proxy::PlatformProxy::create)
+        .class_function("createDefault", &xplpc::proxy::PlatformProxy::createDefault)
+        .class_function("createFromPtr", &xplpc::proxy::PlatformProxy::createFromPtr, em::allow_raw_pointer<em::arg<0>>())
+        .class_function("hasProxy", &xplpc::proxy::PlatformProxy::hasProxy)
+        .function("initialize", &xplpc::proxy::PlatformProxy::initialize)
+        .function("onRemoteProxyCall", &xplpc::proxy::PlatformProxy::callProxy, em::pure_virtual())
+        .function("onRemoteProxyCallAsync", &xplpc::proxy::PlatformProxy::callProxyAsync, em::pure_virtual());
 }
-#endif
+
+
+// TODO: XPLPC - REMOVE ALL AFTER TESTS
+
+#include "xplpc/xplpc.hpp"
+
+class HelloClass
+{
+public:
+    static std::string SayHello(const std::string &data)
+    {
+        spdlog::info("[SayHello 1] {}", data);
+
+        auto request = xplpc::message::Request{
+            "platform.battery.level",
+            xplpc::message::Param<std::string>{"suffix", "%"},
+        };
+
+        spdlog::info("[SayHello 2] {}", request.data());
+
+        auto isAsync = true;
+
+        if (isAsync)
+        {
+            xplpc::client::RemoteClient::callAsync<std::string>(request, [](const std::optional<std::string> &response)
+                                                                { spdlog::info("[SayHello 3] {}", response.value()); });
+        }
+        else
+        {
+            auto response = xplpc::client::RemoteClient::call<std::string>(request);
+            spdlog::info("[SayHello 3] {}", response.value());
+        }
+
+        return "";
+    };
+};
+
+EMSCRIPTEN_BINDINGS(Hello)
+{
+    emscripten::class_<HelloClass>("HelloClass")
+        .constructor<>()
+        .class_function("SayHello", &HelloClass::SayHello);
+}

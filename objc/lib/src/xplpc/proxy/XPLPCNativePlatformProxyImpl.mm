@@ -7,7 +7,7 @@ using namespace xplpc::client;
 @implementation XPLPCNativePlatformProxyImpl
 
 // methods
-- (NSString *)call:(NSString *)data
+- (NSString *)doProxyCall:(NSString *)data
 {
     auto convertedData = ObjCSupport::xplpcObjcStringToCppString(std::move(data));
     return ObjCSupport::xplpcCppStringToObjcString(ProxyClient::call(std::move(convertedData)));

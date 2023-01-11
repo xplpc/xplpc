@@ -16,7 +16,7 @@ void XPLPCNativePlatformProxy::initializeNativePlatform(XPLPCNativePlatformProxy
     this->instance = proxy;
 }
 
-std::string XPLPCNativePlatformProxy::call(const std::string &data)
+std::string XPLPCNativePlatformProxy::doProxyCall(const std::string &data)
 {
     if (instance == nullptr)
     {

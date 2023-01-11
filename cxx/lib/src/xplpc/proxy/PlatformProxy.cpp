@@ -1,5 +1,6 @@
 #include "xplpc/proxy/PlatformProxy.hpp"
 #include "xplpc/core/XPLPC.hpp"
+#include <future>
 #include <utility>
 
 namespace xplpc
@@ -14,6 +15,11 @@ std::shared_ptr<PlatformProxy> PlatformProxy::proxy = nullptr;
 void PlatformProxy::create(std::shared_ptr<PlatformProxy> proxy)
 {
     PlatformProxy::proxy = proxy;
+}
+
+void PlatformProxy::createFromPtr(PlatformProxy *proxy)
+{
+    PlatformProxy::proxy = std::shared_ptr<PlatformProxy>(proxy);
 }
 
 void PlatformProxy::createDefault()
@@ -42,9 +48,16 @@ void PlatformProxy::finalize()
     // ignore
 }
 
-std::string PlatformProxy::call(const std::string &data)
+std::string PlatformProxy::callProxy(const std::string &data)
 {
-    return "";
+    return std::string{};
+}
+
+// TODO: XPLPC - WHAT I NEED USE FOR WASM CALLBACK?
+
+void PlatformProxy::callProxyAsync(const std::string &data, std::function<void(const std::string &)> callback)
+{
+    callback(std::string{});
 }
 
 /*

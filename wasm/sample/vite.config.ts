@@ -5,7 +5,7 @@ import { defineConfig } from 'vite'
 import EnvironmentPlugin from "vite-plugin-environment"
 import eslintPLugin from "vite-plugin-eslint"
 
-const BASE_URL = process.env.BASE_URL || '/';
+const BASE_URL = (process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$|$/, '/') : '/');
 
 // https://vitejs.dev/config/
 export default defineConfig({

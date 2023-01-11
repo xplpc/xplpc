@@ -17,7 +17,7 @@ class XPLPCNativePlatformProxy : public PlatformProxy
 public:
     static std::shared_ptr<XPLPCNativePlatformProxy> createNativePlatform();
     void initializeNativePlatform(XPLPCNativePlatformProxyImpl *proxy);
-    virtual std::string call(const std::string &data) override;
+    virtual std::string doProxyCall(const std::string &data) override;
 
 private:
     XPLPCNativePlatformProxyImpl *instance;

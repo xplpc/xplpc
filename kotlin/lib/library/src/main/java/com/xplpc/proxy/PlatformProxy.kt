@@ -6,7 +6,7 @@ import com.xplpc.client.ProxyClient
 class PlatformProxy {
     companion object {
         @JvmStatic
-        external fun call(data: String): String
+        external fun doProxyCall(data: String): String
 
         @JvmStatic
         fun onRemoteClientCall(data: String): String {
