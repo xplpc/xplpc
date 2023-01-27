@@ -20,13 +20,13 @@
 
 ## Project
 
-The `XPLPC` project enables the transfer of serialized data between `languages` and `platforms` without the need for a server, by utilizing local device memory.
+The XPLPC project connects languages and platforms, allowing for the transfer of serialized data between them. This is achieved without the need for a server, but instead by utilizing device memory. This approach is known as Lite Procedure Call.
 
-This is achieved through the use of the `Lite Procedure Call` (LPC) `Platform Proxy` class, which connects the different languages and platforms and facilitates data transfer `without` the use of the HTTP protocol or other client/server mechanism.
+The Platform Proxy class plays a crucial role in this process by connecting both languages and platforms, and facilitating the transfer of data using device memory instead of the HTTP protocol. This allows for a more efficient and streamlined communication process.
 
-This allows for `procedures` to be called between C++ code and any applications (desktop, mobile and web), and also allows for applications to call procedures in C++ code.
+For example, you can call a procedure written in C++ code from a mobile application, or vice versa, with ease. This opens up a wide range of possibilities for developers and allows for a more seamless integration of different languages and platforms.
 
-Additionally, since the XPLPC project does `not require` the use of `generators` or `specialized tools`, the resulting library can easily be integrated into existing projects, allowing for full code reusability and a plug-and-play experience.
+The XPLPC project is also highly user-friendly, as it does not require the use of generators or additional tools. This means that the generated library can be added to your existing project without the need for any rewriting of code. This plug-and-play feature allows for full code reuse and makes the integration process smooth and hassle-free.
 
 ## Workflow
 
