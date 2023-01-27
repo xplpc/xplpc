@@ -1,0 +1,128 @@
+name: C++
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows Latest MSVC",
+            os: windows-latest,
+            artifact: "windows_msvc.7z",
+            build_type: "Release",
+            cc: "cl",
+            cxx: "cl",
+            generators: "Visual Studio 17 2022",
+            codacy: false,
+            codeql: true,
+            leaks: false
+          }
+        - {
+            name: "Windows Latest MinGW",
+            os: windows-latest,
+            artifact: "windows_mingw.7z",
+            build_type: "Release",
+            cc: "gcc",
+            cxx: "g++",
+            generators: "MinGW Makefiles",
+            codacy: false,
+            codeql: false,
+            leaks: false
+          }
+        - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            artifact: "ubuntu_gcc.7z",
+            build_type: "Release",
+            cc: "gcc",
+            cxx: "g++",
+            generators: "Ninja",
+            codacy: true,
+            codeql: true,
+            leaks: false
+          }
+        - {
+            name: "Ubuntu GCC 9",
+            os: ubuntu-latest,
+            artifact: "ubuntu_gcc9.7z",
+            build_type: "Release",
+            cc: "gcc",
+            cxx: "g++",
+            generators: "Ninja",
+            codacy: true,
+            codeql: true,
+            leaks: false
+          }
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            artifact: "macos_clang.7z",
+            build_type: "Release",
+            cc: "clang",
+            cxx: "clang++",
+            generators: "Ninja",
+            codacy: false,
+            codeql: true,
+            leaks: true
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check Code Quality
+        if: matrix.config.codacy == true
+        uses: codacy/codacy-analysis-cli-action@master
+
+      - name: Install Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Python Requirements
+        run: python3 -m pip install -r requirements.txt --user
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.24.0"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: "1.10.0"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+
+      - name: Initialize CodeQL
+        if: matrix.config.codeql == true
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+
+      - name: Test
+        run: python3 xplpc.py cxx-test
+
+      - name: Build
+        run: python3 xplpc.py cxx-build
+
+      - name: Leaks
+        if: matrix.config.leaks == true
+        run: python3 xplpc.py cxx-build-leaks
+
+      - name: Perform CodeQL Analysis
+        if: matrix.config.codeql == true
+        uses: github/codeql-action/analyze@v2

@@ -1,0 +1,6 @@
+framework module xplpc {
+    umbrella header "xplpc.h"
+
+    export *
+    module * { export * }
+}

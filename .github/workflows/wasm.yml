@@ -1,0 +1,96 @@
+name: WASM
+
+permissions:
+  contents: write
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            artifact: "ubuntu_gcc.7z",
+            build_type: "Release",
+            cc: "gcc",
+            cxx: "g++",
+            generators: "Ninja",
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Python Requirements
+        run: python3 -m pip install -r requirements.txt --user
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.24.0"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: "1.10.0"
+
+      - name: Install EMSDK
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          version: "3.1.28"
+
+      - name: Install Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '19'
+          architecture: 'x64'
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+          node --version
+          npm --version
+          emcc -v
+
+      - name: Build
+        run: python3 xplpc.py wasm-build
+
+      - name: Test
+        run: python3 xplpc.py wasm-test
+
+      - name: Build Sample
+        run: python3 xplpc.py wasm-build-sample
+
+      - name: Generate Fallback Files
+        if: github.ref == 'refs/heads/main'
+        working-directory: wasm/sample/dist
+        run: |
+          cp index.html 200.html
+          cp index.html 404.html
+
+      - name: Publish
+        if: github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          token: ${{ secrets.PUBLISH_TOKEN }}
+          repository-name: "xplpc/wasm-demo"
+          folder: wasm/sample/dist
+          single-commit: true
+          branch: main

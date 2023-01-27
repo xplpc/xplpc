@@ -1,0 +1,18 @@
+#pragma once
+
+#include "xplpc/client/LocalClient.hpp"
+#include "xplpc/client/ProxyClient.hpp"
+#include "xplpc/client/RemoteClient.hpp"
+#include "xplpc/core/XPLPC.hpp"
+#include "xplpc/data/CallbackList.hpp"
+#include "xplpc/data/MappingList.hpp"
+#include "xplpc/map/Map.hpp"
+#include "xplpc/map/MappingItem.hpp"
+#include "xplpc/message/Message.hpp"
+#include "xplpc/message/Param.hpp"
+#include "xplpc/message/Request.hpp"
+#include "xplpc/message/Response.hpp"
+#include "xplpc/proxy/PlatformProxy.hpp"
+#include "xplpc/serializer/Serializer.hpp"
+#include "xplpc/util/TSMap.hpp"
+#include "xplpc/util/UniqueID.hpp"

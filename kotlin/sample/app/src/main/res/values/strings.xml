@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">XPLPC</string>
+    <string name="button_submit">SUBMIT</string>
+    <string name="battery_level_result">Battery Level: %s</string>
+    <string name="login_result">Response: %s</string>
+    <string name="hint_form_username">Your username</string>
+    <string name="hint_form_password">Your password</string>
+    <string name="hint_form_remember">Remember</string>
+    <string name="message_press_button">Press Button To Execute</string>
+    <string name="title_battery_level">BATTERY LEVEL</string>
+    <string name="title_login">LOGIN</string>
+</resources>
