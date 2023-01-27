@@ -2,7 +2,6 @@
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
-#include <optional>
 #include <thread>
 
 using namespace xplpc::core;

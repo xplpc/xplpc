@@ -1,11 +1,10 @@
 #pragma once
 
+#include "xplpc/util/TSMap.hpp"
+
 #include <functional>
 #include <memory>
 #include <string>
-#include <unordered_map>
-
-#include "xplpc/util/TSMap.hpp"
 
 namespace xplpc
 {

@@ -2,6 +2,8 @@
 #include "xplpc/client/ProxyClient.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
+#include <codecvt>
+
 using namespace xplpc::client;
 using namespace xplpc::proxy;
 

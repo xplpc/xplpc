@@ -5,7 +5,6 @@
 #include "nlohmann/json.hpp"
 #include "xplpc/custom/AllTypes.hpp"
 #include "xplpc/serializer/JsonSerializerTypes.hpp"
-#include <string>
 
 namespace nlohmann
 {

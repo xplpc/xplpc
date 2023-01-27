@@ -3,6 +3,7 @@
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
+#include <thread>
 #include <vector>
 
 using namespace xplpc::core;

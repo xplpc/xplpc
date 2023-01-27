@@ -1,5 +1,4 @@
 #import "xplpc/proxy/XPLPCNativePlatformProxy.h"
-#include <memory>
 #import <xplpc/XPLPCNativePlatformProxyManager.h>
 
 using namespace xplpc::proxy;

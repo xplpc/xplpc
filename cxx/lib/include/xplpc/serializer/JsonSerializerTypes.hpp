@@ -3,7 +3,6 @@
 #pragma once
 
 #include <chrono>
-#include <iostream>
 #include <optional>
 
 #include "nlohmann/json.hpp"
