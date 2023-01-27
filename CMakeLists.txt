@@ -154,7 +154,7 @@ endif()
 # tests
 if(XPLPC_ENABLE_TESTS)
     if(XPLPC_TARGET STREQUAL "cxx")
-        CPMAddPackage("gh:google/googletest@1.12.1#release-1.12.1")
+        CPMAddPackage("gh:google/googletest@1.13.0")
         find_package(googletest REQUIRED)
 
         enable_testing()
