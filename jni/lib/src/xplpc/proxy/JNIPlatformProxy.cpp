@@ -1,5 +1,7 @@
 #include "xplpc/proxy/JNIPlatformProxy.hpp"
 
+#include <cassert>
+
 namespace xplpc
 {
 namespace proxy

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <exception>
+#include <functional>
 #include <optional>
+#include <string>
 
 #include "xplpc/data/MappingList.hpp"
 #include "xplpc/message/Request.hpp"

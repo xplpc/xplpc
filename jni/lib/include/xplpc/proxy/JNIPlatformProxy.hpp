@@ -3,7 +3,6 @@
 #include "xplpc/jni/support.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
-#include <memory>
 #include <string>
 
 namespace xplpc

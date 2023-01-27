@@ -138,7 +138,7 @@ public:
             const auto key = UniqueID::generate();
 
             // clang-format off
-            CallbackList::shared()->add(key, [callback](const std::string& response) {                
+            CallbackList::shared()->add(key, [callback](const std::string& response) {
                 callback(response);
             });
             // clang-format on

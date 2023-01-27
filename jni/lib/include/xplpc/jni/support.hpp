@@ -1,11 +1,7 @@
 #pragma once
 
-#include <cassert>
-#include <codecvt>
-#include <cstring>
-#include <locale>
-
 #include <jni.h>
+#include <string>
 
 namespace xplpc
 {

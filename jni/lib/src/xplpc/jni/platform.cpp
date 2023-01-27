@@ -2,6 +2,7 @@
 #include "xplpc/data/CallbackList.hpp"
 #include "xplpc/jni/support.hpp"
 #include "xplpc/proxy/JNIPlatformProxy.hpp"
+
 #include <memory>
 
 using namespace xplpc::client;
