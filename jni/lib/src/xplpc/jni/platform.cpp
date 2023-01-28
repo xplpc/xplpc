@@ -55,7 +55,7 @@ extern "C"
     }
 
     JNIEXPORT jlong JNICALL
-    Java_com_xplpc_util_ByteBufferHelper_getByteBufferAddress(JNIEnv *env, jobject /*thiz*/, jobject array)
+    Java_com_xplpc_helper_ByteBufferHelper_getByteBufferAddress(JNIEnv *env, jobject /*thiz*/, jobject array)
     {
         auto pointer = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(array));
         auto address = reinterpret_cast<std::uintptr_t>(pointer);
@@ -63,7 +63,7 @@ extern "C"
     }
 
     JNIEXPORT jobject JNICALL
-    Java_com_xplpc_util_ByteBufferHelper_getByteBufferFromAddress(JNIEnv *env, jobject /*thiz*/, jlong address, jint size)
+    Java_com_xplpc_helper_ByteBufferHelper_getByteBufferFromAddress(JNIEnv *env, jobject /*thiz*/, jlong address, jint size)
     {
         jclass directByteBuffer = env->FindClass("java/nio/DirectByteBuffer");
         jmethodID newDirectByteBuffer = env->GetStaticMethodID(directByteBuffer, "allocateDirect", "(I)Ljava/nio/ByteBuffer;");

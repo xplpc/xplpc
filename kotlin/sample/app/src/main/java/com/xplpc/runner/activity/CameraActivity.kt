@@ -18,7 +18,7 @@ import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.runner.R
 import com.xplpc.runner.databinding.ActivityCameraBinding
-import com.xplpc.util.ByteBufferHelper
+import com.xplpc.helper.ByteBufferHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.nio.ByteBuffer
