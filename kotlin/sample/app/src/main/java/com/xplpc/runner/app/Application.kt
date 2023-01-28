@@ -1,6 +1,8 @@
 package com.xplpc.runner.app
 
 import android.os.StrictMode
+import androidx.camera.camera2.Camera2Config
+import androidx.camera.core.CameraXConfig
 import androidx.multidex.MultiDexApplication
 import com.xplpc.core.Config
 import com.xplpc.core.XPLPC
@@ -9,7 +11,7 @@ import com.xplpc.runner.custom.Mapping
 import com.xplpc.serializer.JsonSerializer
 import com.xplpc.util.Log
 
-class Application : MultiDexApplication() {
+class Application : MultiDexApplication(), CameraXConfig.Provider {
     override fun onCreate() {
         super.onCreate()
 
@@ -33,11 +35,6 @@ class Application : MultiDexApplication() {
         Mapping.initialize()
     }
 
-    override fun onTerminate() {
-        Log.d("[Application : onTerminate] App terminated")
-        super.onTerminate()
-    }
-
     private fun initializeStrictMode() {
         Log.d("[Application : initializeStrictMode] Initializing strict mode...")
 
@@ -57,6 +54,19 @@ class Application : MultiDexApplication() {
                     .build()
             )
         }
+    }
+
+    override fun getCameraXConfig(): CameraXConfig {
+        Log.d("[Application : getCameraXConfig] Camera configuration")
+
+        return CameraXConfig.Builder
+            .fromConfig(Camera2Config.defaultConfig())
+            .build()
+    }
+
+    override fun onTerminate() {
+        Log.d("[Application : onTerminate] App terminated")
+        super.onTerminate()
     }
 
     companion object {

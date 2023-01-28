@@ -82,14 +82,14 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         CVPixelBufferUnlockBaseAddress(frame, CVPixelBufferLockFlags(rawValue: 0))
 
         // convert
+        let startTime = CFAbsoluteTimeGetCurrent()
+
         let request = Request(
             "sample.image.grayscale",
             Param("image", data),
             Param("width", width),
             Param("height", height)
         )
-
-        let startTime = CFAbsoluteTimeGetCurrent()
 
         RemoteClient.call(request) { (response: [UInt8]?) in
             guard let response else {

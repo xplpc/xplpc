@@ -1,7 +1,10 @@
-package com.xplpc.runner.app
+package com.xplpc.runner.activity
 
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.xplpc.client.LocalClient
 import com.xplpc.client.RemoteClient
 import com.xplpc.message.Param
@@ -9,14 +12,18 @@ import com.xplpc.message.Request
 import com.xplpc.runner.R
 import com.xplpc.runner.databinding.ActivityMainBinding
 import com.xplpc.runner.extension.hideKeyboard
+import com.xplpc.runner.permission.PermissionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), CoroutineScope {
     override val coroutineContext = Dispatchers.Main
-
     private lateinit var binding: ActivityMainBinding
+
+    private val permissions = arrayOf(android.Manifest.permission.CAMERA)
+    private val permissionCode = 100
+    private var intentForPermission: Intent? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +41,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
 
         binding.btSubmitForLogin.setOnClickListener {
             onBtSubmitForLoginClick()
+        }
+
+        binding.btSubmitForCamera.setOnClickListener {
+            onBtSubmitForCameraClick()
         }
     }
 
@@ -62,6 +73,47 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
         RemoteClient.call<String>(request) { response ->
             launch {
                 binding.tvFormMessage.text = getString(R.string.login_result, response)
+            }
+        }
+    }
+
+    private fun onBtSubmitForCameraClick() {
+        intentForPermission = Intent(this, CameraActivity::class.java).apply {
+            // you can add values(if any) to pass to the next class or avoid using `.apply`
+        }
+
+        checkPermissions(permissions)
+    }
+
+    private fun checkPermissions(permissions: Array<String>) {
+        val runtimePermissions = PermissionHandler(this, permissions)
+        val gotPermissions = runtimePermissions.hasPermissions()
+
+        if (gotPermissions) {
+            intentForPermission?.let {
+                startActivity(it)
+            }
+        } else {
+            ActivityCompat.requestPermissions(this, permissions, permissionCode)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        for (i in permissions.indices) {
+            if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                checkPermissions(permissions)
+            }
+        }
+
+        if ((permissions.isNotEmpty()) && (!grantResults.contains(PackageManager.PERMISSION_DENIED))) {
+            intentForPermission?.let {
+                startActivity(it)
             }
         }
     }

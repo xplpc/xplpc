@@ -40,3 +40,5 @@ Execute on terminal:
 You can see the sample project in directory `kotlin/sample`.
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-android.png?raw=true">
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-android2.png?raw=true">
