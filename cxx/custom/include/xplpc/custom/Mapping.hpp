@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <thread>
 
 #include "xplpc/custom/AllTypes.hpp"
@@ -34,8 +35,8 @@ public:
         MappingList::shared()->add("sample.alltypes.list", Map::create<std::vector<AllTypes>, std::vector<AllTypes>>({"items"}, &callbackAllTypesList));
         MappingList::shared()->add("sample.async", Map::create<void>({}, &callbackAsync));
         MappingList::shared()->add("sample.reverse", Map::create<std::string>({}, &callbackReverse));
-        MappingList::shared()->add("sample.image.grayscale", Map::create<std::vector<unsigned char>, std::vector<unsigned char>, int, int>({"image", "width", "height"}, &callbackImageToGrayscale));
-        MappingList::shared()->add("sample.image.grayscale.pointer", Map::create<std::string, int64_t, int, int>({"pointer", "width", "height"}, &callbackImageToGrayscaleFromPointer));
+        MappingList::shared()->add("sample.image.grayscale", Map::create<std::vector<uint8_t>, std::vector<uint8_t>, int, int>({"image", "width", "height"}, &callbackImageToGrayscale));
+        MappingList::shared()->add("sample.image.grayscale.pointer", Map::create<std::string, std::uintptr_t, int, int>({"pointer", "width", "height"}, &callbackImageToGrayscaleFromPointer));
     }
 
     static void callbackLogin(const Message &m, const Response r)
@@ -176,7 +177,7 @@ public:
 
     static void callbackImageToGrayscale(const Message &m, const Response r)
     {
-        auto imageDataRaw = m.get<std::vector<unsigned char>>("image");
+        auto imageDataRaw = m.get<std::vector<uint8_t>>("image");
         auto imageWidth = m.get<int>("width");
         auto imageHeight = m.get<int>("height");
 
@@ -213,13 +214,13 @@ public:
 
     static void callbackImageToGrayscaleFromPointer(const Message &m, const Response r)
     {
-        auto pointer = m.get<int64_t>("pointer");
+        auto pointer = m.get<std::uintptr_t>("pointer");
         auto imageWidth = m.get<int>("width");
         auto imageHeight = m.get<int>("height");
 
         if (pointer && imageWidth && imageHeight)
         {
-            unsigned char *imageData = reinterpret_cast<unsigned char *>(pointer.value());
+            uint8_t *imageData = reinterpret_cast<uint8_t *>(pointer.value());
             auto width = imageWidth.value();
             auto height = imageHeight.value();
 

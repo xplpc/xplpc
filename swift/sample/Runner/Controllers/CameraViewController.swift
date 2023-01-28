@@ -54,45 +54,40 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             return
         }
 
-        // lock
-        let status = CVPixelBufferLockBaseAddress(frame, CVPixelBufferLockFlags(rawValue: 0))
-
-        if status != kCVReturnSuccess {
-            debugPrint("[CameraViewController : captureOutput] Unable to lock buffer base address")
-            return
-        }
-
-        // base address
-        guard let baseAddress = CVPixelBufferGetBaseAddress(frame) else {
-            debugPrint("[CameraViewController : captureOutput] Unable to get base address")
-            return
-        }
-
-        // image data
-        let size = CVPixelBufferGetDataSize(frame)
-
+        // image size
         #if DEBUG
-            print("Image size is: \(size)")
+            let size = CVPixelBufferGetDataSize(frame)
+            print("[CameraViewController : captureOutput] Image size is: \(size)")
         #endif
 
-        let data = Data(bytesNoCopy: baseAddress, count: size, deallocator: .none)
-        let width = CVPixelBufferGetWidth(frame)
-        let height = CVPixelBufferGetHeight(frame)
+        // temporary image
+        let tempImage = ImageHelper.imageFromSampleBuffer(sampleBuffer: sampleBuffer, orientation: orientation)
+        let buffer = ImageHelper.getRGBABytes(from: tempImage)
+        let bufferSize = buffer.count
 
-        CVPixelBufferUnlockBaseAddress(frame, CVPixelBufferLockFlags(rawValue: 0))
+        // image dimension
+        let width = Int(tempImage.size.width)
+        let height = Int(tempImage.size.height)
+
+        #if DEBUG
+            print("[CameraViewController : captureOutput] Buffer size is: \(bufferSize)")
+        #endif
+
+        // pointer data
+        let pointerAddress = ByteArrayHelper.getPointerAddress(array: buffer)
 
         // convert
         let startTime = CFAbsoluteTimeGetCurrent()
 
         let request = Request(
-            "sample.image.grayscale",
-            Param("image", data),
+            "sample.image.grayscale.pointer",
+            Param("pointer", pointerAddress),
             Param("width", width),
             Param("height", height)
         )
 
-        RemoteClient.call(request) { (response: [UInt8]?) in
-            guard let response else {
+        RemoteClient.call(request) { (response: String?) in
+            guard response != nil else {
                 debugPrint("[CameraViewController : captureOutput] Unable to get response data")
                 return
             }
@@ -101,25 +96,12 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             let duration = Float(elapsedTime)
 
             #if DEBUG
-                print("Time to process was: \(duration) seconds")
+                print("[CameraViewController : captureOutput] Time to process was: \(duration) seconds")
             #endif
 
-            // create new image with received data
-            var pixelData = response
-            let colorSpace = CGColorSpaceCreateDeviceRGB()
-            let context = CGContext(
-                data: &pixelData,
-                width: Int(width),
-                height: Int(height),
-                bitsPerComponent: 8,
-                bytesPerRow: 4 * Int(width),
-                space: colorSpace,
-                bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
-            )
+            let finalImage = ImageHelper.rgbaBytesToUIImage(imageData: buffer, width: width, height: height)
 
-            let quartzImage = context?.makeImage()
-            let finalImage = CIImage(cgImage: quartzImage!).orientationCorrectedImage(orientation: orientation)
-
+            // draw image
             DispatchQueue.main.async {
                 self.previewImage.image = finalImage
                 self.lbOverlay.text = String(format: "Time to process: %.3f seconds\nImage size: %d kb", duration, size / 1024)
@@ -131,7 +113,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         let device = AVCaptureDevice.default(for: .video)!
         let cameraInput = try! AVCaptureDeviceInput(device: device)
 
-        captureSession.sessionPreset = AVCaptureSession.Preset.low
+        captureSession.sessionPreset = AVCaptureSession.Preset.medium
         captureSession.addInput(cameraInput)
     }
 

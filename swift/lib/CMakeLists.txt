@@ -11,6 +11,7 @@ set(XPLPC_SRC_FILES ${XPLPC_SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Core/Config.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Data/CallbackList.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Data/MappingList.swift"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Helper/ByteArrayHelper.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Map/MappingItem.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Message/Message.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Message/Param.swift"

@@ -33,6 +33,9 @@
 		3AD1B8012984C2F000D76C39 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */; };
 		3AD1B8022984C2F000D76C39 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */; };
 		3AD1B8032984C2F000D76C39 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */; };
+		3AD1B8062985576B00D76C39 /* ImageHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B8052985576B00D76C39 /* ImageHelper.swift */; };
+		3AD1B8072985576B00D76C39 /* ImageHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B8052985576B00D76C39 /* ImageHelper.swift */; };
+		3AD1B8082985576B00D76C39 /* ImageHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B8052985576B00D76C39 /* ImageHelper.swift */; };
 		3AE64222290CE75500B8C1C3 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE64221290CE75500B8C1C3 /* AutoLayout.swift */; };
 		3AE64223290CE75500B8C1C3 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE64221290CE75500B8C1C3 /* AutoLayout.swift */; };
 		3AE64224290CE75500B8C1C3 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE64221290CE75500B8C1C3 /* AutoLayout.swift */; };
@@ -102,6 +105,7 @@
 		3AD1B7F72984756400D76C39 /* ImageOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOrientation.swift; sourceTree = "<group>"; };
 		3AD1B7FC2984C2F000D76C39 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
+		3AD1B8052985576B00D76C39 /* ImageHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageHelper.swift; sourceTree = "<group>"; };
 		3AE64221290CE75500B8C1C3 /* AutoLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoLayout.swift; sourceTree = "<group>"; };
 		3AE64226290CF41C00B8C1C3 /* Rounded.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rounded.swift; sourceTree = "<group>"; };
 		3AE6422A290CF94300B8C1C3 /* Callback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Callback.swift; sourceTree = "<group>"; };
@@ -187,6 +191,7 @@
 				3AD1B7FB2984C2F000D76C39 /* Controllers */,
 				3AE64232290CF9F100B8C1C3 /* Custom */,
 				3A6EE5F7290CD808006F4EA8 /* Extensions */,
+				3AD1B8042985571900D76C39 /* Helper */,
 				3A852F29290640C0007BDC61 /* Info.plist */,
 				3A852F26290640C0007BDC61 /* LaunchScreen.storyboard */,
 			);
@@ -217,6 +222,14 @@
 				3AD1B7FC2984C2F000D76C39 /* MainViewController.swift */,
 			);
 			path = Controllers;
+			sourceTree = "<group>";
+		};
+		3AD1B8042985571900D76C39 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+				3AD1B8052985576B00D76C39 /* ImageHelper.swift */,
+			);
+			path = Helper;
 			sourceTree = "<group>";
 		};
 		3AE64225290CF40E00B8C1C3 /* Components */ = {
@@ -381,6 +394,7 @@
 				3AE64222290CE75500B8C1C3 /* AutoLayout.swift in Sources */,
 				3AD1B7F82984756400D76C39 /* ImageOrientation.swift in Sources */,
 				3A6EE5FD290CD8BE006F4EA8 /* NavigationBarColor.swift in Sources */,
+				3AD1B8062985576B00D76C39 /* ImageHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +415,7 @@
 				3AE6422C290CF94300B8C1C3 /* Callback.swift in Sources */,
 				3A6EE5FA290CD82D006F4EA8 /* ColorFromHex.swift in Sources */,
 				3AE64235290CFE0100B8C1C3 /* UnderlinedTextField.swift in Sources */,
+				3AD1B8072985576B00D76C39 /* ImageHelper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,6 +434,7 @@
 				3A7395E22910869D00E25ED5 /* NavigationBarShadow.swift in Sources */,
 				3AD1B7FA2984756400D76C39 /* ImageOrientation.swift in Sources */,
 				3A6EE5FB290CD82D006F4EA8 /* ColorFromHex.swift in Sources */,
+				3AD1B8082985576B00D76C39 /* ImageHelper.swift in Sources */,
 				3AD1B8032984C2F000D76C39 /* CameraViewController.swift in Sources */,
 				3AE64224290CE75500B8C1C3 /* AutoLayout.swift in Sources */,
 				3A6EE5FF290CD8BE006F4EA8 /* NavigationBarColor.swift in Sources */,

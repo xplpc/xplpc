@@ -2,7 +2,9 @@
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
+#include <cstdint>
 #include <thread>
+#include <vector>
 
 using namespace xplpc::core;
 using namespace xplpc::client;
@@ -92,7 +94,7 @@ TEST_F(GeneralTest, LocalClientTestReverseAsyncWithThread)
 
 TEST_F(GeneralTest, LocalClientTestImageToGrayscale)
 {
-    std::vector<unsigned char> imageData = {
+    std::vector<uint8_t> imageData = {
         255, 0, 0, 255, // red pixel
         0, 255, 0, 255, // green pixel
         0, 0, 255, 255, // blue pixel
@@ -110,7 +112,7 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscale)
     };
 
     // clang-format off
-    LocalClient::call<std::vector<unsigned char>>(request, [](const auto &response) {
+    LocalClient::call<std::vector<uint8_t>>(request, [](const auto &response) {
         EXPECT_EQ(16, response.value().size());
     });
     // clang-format on
@@ -118,7 +120,7 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscale)
 
 TEST_F(GeneralTest, LocalClientTestImageToGrayscaleAsyncWithThread)
 {
-    std::vector<unsigned char> imageData = {
+    std::vector<uint8_t> imageData = {
         255, 0, 0, 255, // red pixel
         0, 255, 0, 255, // green pixel
         0, 0, 255, 255, // blue pixel
@@ -137,7 +139,7 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleAsyncWithThread)
 
     // clang-format off
     std::thread([=] {
-        LocalClient::call<std::vector<unsigned char>>(request, [](const auto &response) {
+        LocalClient::call<std::vector<uint8_t>>(request, [](const auto &response) {
             EXPECT_EQ(16, response.value().size());
         });
     }).join();
@@ -146,7 +148,7 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleAsyncWithThread)
 
 TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointer)
 {
-    std::vector<unsigned char> imageData = {
+    std::vector<uint8_t> imageData = {
         255, 0, 0, 255, // red pixel
         0, 255, 0, 255, // green pixel
         0, 0, 255, 255, // blue pixel
@@ -156,7 +158,7 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointer)
     int width = 1;
     int height = 1;
 
-    unsigned char *pointer = imageData.data();
+    uint8_t *pointer = imageData.data();
     int64_t pointerAddress = reinterpret_cast<int64_t>(pointer);
     size_t pointerSize = imageData.size();
 
@@ -171,8 +173,8 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointer)
     LocalClient::call<std::string>(request, [pointerAddress, pointerSize](const auto &response) {
         EXPECT_EQ("OK", response.value());
 
-        std::vector<unsigned char> originalVector(pointerSize);
-        memcpy(originalVector.data(), reinterpret_cast<unsigned char*>(pointerAddress), pointerSize);
+        std::vector<uint8_t> originalVector(pointerSize);
+        memcpy(originalVector.data(), reinterpret_cast<uint8_t*>(pointerAddress), pointerSize);
 
         EXPECT_EQ(16, originalVector.size());
     });
@@ -181,7 +183,7 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointer)
 
 TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointerAsyncWithThread)
 {
-    std::vector<unsigned char> imageData = {
+    std::vector<uint8_t> imageData = {
         255, 0, 0, 255, // red pixel
         0, 255, 0, 255, // green pixel
         0, 0, 255, 255, // blue pixel
@@ -191,8 +193,8 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointerAsyncWithThread)
     int width = 1;
     int height = 1;
 
-    unsigned char *pointer = imageData.data();
-    int64_t pointerAddress = reinterpret_cast<int64_t>(pointer);
+    uint8_t *pointer = imageData.data();
+    std::uintptr_t pointerAddress = reinterpret_cast<std::uintptr_t>(pointer);
     size_t pointerSize = imageData.size();
 
     auto request = Request{
@@ -207,8 +209,8 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointerAsyncWithThread)
         LocalClient::call<std::string>(request, [pointerAddress, pointerSize](const auto &response) {
             EXPECT_EQ("OK", response.value());
 
-            std::vector<unsigned char> originalVector(pointerSize);
-            memcpy(originalVector.data(), reinterpret_cast<unsigned char*>(pointerAddress), pointerSize);
+            std::vector<uint8_t> originalVector(pointerSize);
+            memcpy(originalVector.data(), reinterpret_cast<uint8_t*>(pointerAddress), pointerSize);
 
             EXPECT_EQ(16, originalVector.size());
         });

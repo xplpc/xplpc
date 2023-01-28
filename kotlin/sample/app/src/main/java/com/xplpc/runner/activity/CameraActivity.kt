@@ -3,7 +3,6 @@ package com.xplpc.runner.activity
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Size
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -19,8 +18,10 @@ import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.runner.R
 import com.xplpc.runner.databinding.ActivityCameraBinding
+import com.xplpc.helper.ByteBufferHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import java.nio.ByteBuffer
 
 class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineScope {
     override val coroutineContext = Dispatchers.Main
@@ -64,7 +65,6 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
         // image analysis use case
         val imageAnalysis = ImageAnalysis.Builder()
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setTargetResolution(Size(240, 320))
             .build()
 
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), this)
@@ -87,27 +87,35 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
     }
 
     override fun analyze(image: ImageProxy) {
-        // process image for current frame
-        var bitmap = binding.vPreview.bitmap
+        // get bitmap buffer data
+        val bitmap = binding.vPreview.bitmap
         image.close()
 
         if (bitmap == null) {
             return
         }
 
-        bitmap = resizeBitmap(bitmap)
+        val bitmapBuffer = bitmapToRgba(bitmap)
 
-        // convert
+        // create a byte-buffer to send by remote-client
+        val pointerSize = bitmapBuffer.size
+        val buffer: ByteBuffer = ByteBuffer.allocateDirect(pointerSize)
+        buffer.put(bitmapBuffer)
+
+        // get memory address
+        val pointerAddress = ByteBufferHelper.getByteBufferAddress(buffer)
+
+        // process image for current frame
         val startTime = System.currentTimeMillis()
 
         val request = Request(
-            "sample.image.grayscale",
-            Param("image", bitmapToRgba(bitmap)),
+            "sample.image.grayscale.pointer",
+            Param("pointer", pointerAddress),
             Param("width", bitmap.width),
             Param("height", bitmap.height)
         )
 
-        RemoteClient.call<ByteArray>(request) { response ->
+        RemoteClient.call<String>(request) { response ->
             if (response == null) {
                 return@call
             }
@@ -115,7 +123,7 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
             val elapsedTime = System.currentTimeMillis() - startTime
             val duration = (elapsedTime / 1000f)
 
-            val processedPreview = bitmapFromRgba(bitmap.width, bitmap.height, response)
+            val processedPreview = bitmapFromRgba(bitmap.width, bitmap.height, buffer.array())
 
             runOnUiThread {
                 binding.vProcessedPreview.setImageBitmap(processedPreview)
@@ -165,12 +173,6 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
         return bitmap
-    }
-
-    private fun resizeBitmap(bitmap: Bitmap, width: Int = 100): Bitmap {
-        val aspectRatio = bitmap.height.toFloat() / bitmap.width.toFloat()
-        val height = (width * aspectRatio).toInt()
-        return Bitmap.createScaledBitmap(bitmap, width, height, false)
     }
 
     override fun onSupportNavigateUp(): Boolean {
