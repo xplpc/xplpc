@@ -34,6 +34,7 @@ public:
         MappingList::shared()->add("sample.alltypes.list", Map::create<std::vector<AllTypes>, std::vector<AllTypes>>({"items"}, &callbackAllTypesList));
         MappingList::shared()->add("sample.async", Map::create<void>({}, &callbackAsync));
         MappingList::shared()->add("sample.reverse", Map::create<std::string>({}, &callbackReverse));
+        MappingList::shared()->add("sample.image.grayscale", Map::create<std::vector<unsigned char>, std::vector<unsigned char>, int, int>({"image", "width", "height"}, &callbackImageToGrayscale));
     }
 
     static void callbackLogin(const Message &m, const Response r)
@@ -170,6 +171,43 @@ public:
             }
         });
         // clang-format on
+    }
+
+    static void callbackImageToGrayscale(const Message &m, const Response r)
+    {
+        auto imageDataRaw = m.get<std::vector<unsigned char>>("image");
+        auto imageWidth = m.get<int>("width");
+        auto imageHeight = m.get<int>("height");
+
+        if (imageDataRaw && imageWidth && imageHeight)
+        {
+            auto imageData = imageDataRaw.value();
+            auto width = imageWidth.value();
+            auto height = imageHeight.value();
+
+            // process rgba image
+            for (auto i = 0; i < width * height * 4; i += 4)
+            {
+                // skip transparent pixels
+                if (imageData[i + 3] == 0)
+                {
+                    continue;
+                }
+
+                int gray = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
+
+                // set the red, green, and blue values to the grayscale value
+                imageData[i] = gray;
+                imageData[i + 1] = gray;
+                imageData[i + 2] = gray;
+            }
+
+            r(imageData);
+        }
+        else
+        {
+            r({});
+        }
     }
 };
 

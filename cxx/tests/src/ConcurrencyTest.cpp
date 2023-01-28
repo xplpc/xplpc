@@ -79,6 +79,32 @@ void testEcho()
     // clang-format on
 }
 
+void testImageToGrayscale()
+{
+    std::vector<unsigned char> imageData = {
+        255, 0, 0, 255, // red pixel
+        0, 255, 0, 255, // green pixel
+        0, 0, 255, 255, // blue pixel
+        0, 0, 0, 0,     // transparent pixel
+    };
+
+    int width = 1;
+    int height = 1;
+
+    auto request = Request{
+        "sample.image.grayscale",
+        Param{"image", imageData},
+        Param{"width", width},
+        Param{"height", height},
+    };
+
+    // clang-format off
+    LocalClient::call<std::vector<unsigned char>>(request, [](const auto &response) {
+        EXPECT_EQ(16, response.value().size());
+    });
+    // clang-format on
+}
+
 void testLoginWithProxyClient()
 {
     auto request = R"({"f":"sample.login","p":[{"n":"username","v":"paulo"},{"n":"password","v":"123456"},{"n":"remember","v":true}]})";
@@ -132,6 +158,7 @@ TEST_F(GeneralTest, ConcurrencyAll)
         threads.push_back(std::thread(testTodoSingle));
         threads.push_back(std::thread(testTodoList));
         threads.push_back(std::thread(testEcho));
+        threads.push_back(std::thread(testImageToGrayscale));
         threads.push_back(std::thread(testLoginWithProxyClient));
         threads.push_back(std::thread(testTodoSingleWithProxyClient));
         threads.push_back(std::thread(testRemoteClient));

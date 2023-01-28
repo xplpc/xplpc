@@ -90,6 +90,60 @@ TEST_F(GeneralTest, LocalClientTestReverseAsyncWithThread)
     // clang-format on
 }
 
+TEST_F(GeneralTest, LocalClientTestImageToGrayscale)
+{
+    std::vector<unsigned char> imageData = {
+        255, 0, 0, 255, // red pixel
+        0, 255, 0, 255, // green pixel
+        0, 0, 255, 255, // blue pixel
+        0, 0, 0, 0,     // transparent pixel
+    };
+
+    int width = 1;
+    int height = 1;
+
+    auto request = Request{
+        "sample.image.grayscale",
+        Param{"image", imageData},
+        Param{"width", width},
+        Param{"height", height},
+    };
+
+    // clang-format off
+    LocalClient::call<std::vector<unsigned char>>(request, [](const auto &response) {
+        EXPECT_EQ(16, response.value().size());
+    });
+    // clang-format on
+}
+
+TEST_F(GeneralTest, LocalClientTestImageToGrayscaleAsyncWithThread)
+{
+    std::vector<unsigned char> imageData = {
+        255, 0, 0, 255, // red pixel
+        0, 255, 0, 255, // green pixel
+        0, 0, 255, 255, // blue pixel
+        0, 0, 0, 0,     // transparent pixel
+    };
+
+    int width = 1;
+    int height = 1;
+
+    auto request = Request{
+        "sample.image.grayscale",
+        Param{"image", imageData},
+        Param{"width", width},
+        Param{"height", height},
+    };
+
+    // clang-format off
+    std::thread([=] {
+        LocalClient::call<std::vector<unsigned char>>(request, [](const auto &response) {
+            EXPECT_EQ(16, response.value().size());
+        });
+    }).join();
+    // clang-format on
+}
+
 TEST_F(GeneralTest, LocalClientTestNotFound)
 {
     auto request = Request{"not.found"};

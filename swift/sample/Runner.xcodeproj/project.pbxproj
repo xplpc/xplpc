@@ -19,12 +19,20 @@
 		3A7395E12910869D00E25ED5 /* NavigationBarShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7395DF2910869D00E25ED5 /* NavigationBarShadow.swift */; };
 		3A7395E22910869D00E25ED5 /* NavigationBarShadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7395DF2910869D00E25ED5 /* NavigationBarShadow.swift */; };
 		3A852F1C290640BF007BDC61 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A852F1B290640BF007BDC61 /* AppDelegate.swift */; };
-		3A852F20290640BF007BDC61 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A852F1F290640BF007BDC61 /* MainViewController.swift */; };
 		3A852F25290640C0007BDC61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A852F24290640C0007BDC61 /* Assets.xcassets */; };
 		3A852F28290640C0007BDC61 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3A852F26290640C0007BDC61 /* LaunchScreen.storyboard */; };
 		3A852F33290640C0007BDC61 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A852F32290640C0007BDC61 /* RunnerTests.swift */; };
 		3A852F3D290640C0007BDC61 /* RunnerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A852F3C290640C0007BDC61 /* RunnerUITests.swift */; };
 		3A852F3F290640C0007BDC61 /* RunnerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A852F3E290640C0007BDC61 /* RunnerUITestsLaunchTests.swift */; };
+		3AD1B7F82984756400D76C39 /* ImageOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7F72984756400D76C39 /* ImageOrientation.swift */; };
+		3AD1B7F92984756400D76C39 /* ImageOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7F72984756400D76C39 /* ImageOrientation.swift */; };
+		3AD1B7FA2984756400D76C39 /* ImageOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7F72984756400D76C39 /* ImageOrientation.swift */; };
+		3AD1B7FE2984C2F000D76C39 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FC2984C2F000D76C39 /* MainViewController.swift */; };
+		3AD1B7FF2984C2F000D76C39 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FC2984C2F000D76C39 /* MainViewController.swift */; };
+		3AD1B8002984C2F000D76C39 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FC2984C2F000D76C39 /* MainViewController.swift */; };
+		3AD1B8012984C2F000D76C39 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */; };
+		3AD1B8022984C2F000D76C39 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */; };
+		3AD1B8032984C2F000D76C39 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */; };
 		3AE64222290CE75500B8C1C3 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE64221290CE75500B8C1C3 /* AutoLayout.swift */; };
 		3AE64223290CE75500B8C1C3 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE64221290CE75500B8C1C3 /* AutoLayout.swift */; };
 		3AE64224290CE75500B8C1C3 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AE64221290CE75500B8C1C3 /* AutoLayout.swift */; };
@@ -83,7 +91,6 @@
 		3A7395DF2910869D00E25ED5 /* NavigationBarShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarShadow.swift; sourceTree = "<group>"; };
 		3A852F18290640BF007BDC61 /* XPLPC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = XPLPC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A852F1B290640BF007BDC61 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		3A852F1F290640BF007BDC61 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		3A852F24290640C0007BDC61 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3A852F27290640C0007BDC61 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3A852F29290640C0007BDC61 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -92,6 +99,9 @@
 		3A852F38290640C0007BDC61 /* RunnerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A852F3C290640C0007BDC61 /* RunnerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerUITests.swift; sourceTree = "<group>"; };
 		3A852F3E290640C0007BDC61 /* RunnerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		3AD1B7F72984756400D76C39 /* ImageOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOrientation.swift; sourceTree = "<group>"; };
+		3AD1B7FC2984C2F000D76C39 /* MainViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
 		3AE64221290CE75500B8C1C3 /* AutoLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoLayout.swift; sourceTree = "<group>"; };
 		3AE64226290CF41C00B8C1C3 /* Rounded.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rounded.swift; sourceTree = "<group>"; };
 		3AE6422A290CF94300B8C1C3 /* Callback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Callback.swift; sourceTree = "<group>"; };
@@ -139,6 +149,7 @@
 			children = (
 				3AE64221290CE75500B8C1C3 /* AutoLayout.swift */,
 				3A6EE5F8290CD82D006F4EA8 /* ColorFromHex.swift */,
+				3AD1B7F72984756400D76C39 /* ImageOrientation.swift */,
 				3AE64237290D047600B8C1C3 /* Keyboard.swift */,
 				3A6EE5FC290CD8BE006F4EA8 /* NavigationBarColor.swift */,
 				3A7395DF2910869D00E25ED5 /* NavigationBarShadow.swift */,
@@ -173,11 +184,11 @@
 				3A852F1B290640BF007BDC61 /* AppDelegate.swift */,
 				3A852F24290640C0007BDC61 /* Assets.xcassets */,
 				3AE64225290CF40E00B8C1C3 /* Components */,
+				3AD1B7FB2984C2F000D76C39 /* Controllers */,
 				3AE64232290CF9F100B8C1C3 /* Custom */,
 				3A6EE5F7290CD808006F4EA8 /* Extensions */,
 				3A852F29290640C0007BDC61 /* Info.plist */,
 				3A852F26290640C0007BDC61 /* LaunchScreen.storyboard */,
-				3A852F1F290640BF007BDC61 /* MainViewController.swift */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -197,6 +208,15 @@
 				3A852F3E290640C0007BDC61 /* RunnerUITestsLaunchTests.swift */,
 			);
 			path = RunnerUITests;
+			sourceTree = "<group>";
+		};
+		3AD1B7FB2984C2F000D76C39 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				3AD1B7FD2984C2F000D76C39 /* CameraViewController.swift */,
+				3AD1B7FC2984C2F000D76C39 /* MainViewController.swift */,
+			);
+			path = Controllers;
 			sourceTree = "<group>";
 		};
 		3AE64225290CF40E00B8C1C3 /* Components */ = {
@@ -349,15 +369,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AE6422B290CF94300B8C1C3 /* Callback.swift in Sources */,
-				3A852F20290640BF007BDC61 /* MainViewController.swift in Sources */,
 				3AE64238290D047600B8C1C3 /* Keyboard.swift in Sources */,
 				3AE64227290CF41C00B8C1C3 /* Rounded.swift in Sources */,
+				3AD1B7FE2984C2F000D76C39 /* MainViewController.swift in Sources */,
+				3AD1B8012984C2F000D76C39 /* CameraViewController.swift in Sources */,
 				3A852F1C290640BF007BDC61 /* AppDelegate.swift in Sources */,
 				3AE64234290CFE0100B8C1C3 /* UnderlinedTextField.swift in Sources */,
 				3AE6422F290CF94C00B8C1C3 /* Mapping.swift in Sources */,
 				3A7395E02910869D00E25ED5 /* NavigationBarShadow.swift in Sources */,
 				3A6EE5F9290CD82D006F4EA8 /* ColorFromHex.swift in Sources */,
 				3AE64222290CE75500B8C1C3 /* AutoLayout.swift in Sources */,
+				3AD1B7F82984756400D76C39 /* ImageOrientation.swift in Sources */,
 				3A6EE5FD290CD8BE006F4EA8 /* NavigationBarColor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -367,7 +389,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				3A6EE5FE290CD8BE006F4EA8 /* NavigationBarColor.swift in Sources */,
+				3AD1B7F92984756400D76C39 /* ImageOrientation.swift in Sources */,
 				3A7395E12910869D00E25ED5 /* NavigationBarShadow.swift in Sources */,
+				3AD1B7FF2984C2F000D76C39 /* MainViewController.swift in Sources */,
+				3AD1B8022984C2F000D76C39 /* CameraViewController.swift in Sources */,
 				3AE64228290CF41C00B8C1C3 /* Rounded.swift in Sources */,
 				3AE64230290CF94C00B8C1C3 /* Mapping.swift in Sources */,
 				3A852F33290640C0007BDC61 /* RunnerTests.swift in Sources */,
@@ -384,6 +409,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3AE6422D290CF94300B8C1C3 /* Callback.swift in Sources */,
+				3AD1B8002984C2F000D76C39 /* MainViewController.swift in Sources */,
 				3A852F3F290640C0007BDC61 /* RunnerUITestsLaunchTests.swift in Sources */,
 				3AE6423A290D047600B8C1C3 /* Keyboard.swift in Sources */,
 				3AE64229290CF41C00B8C1C3 /* Rounded.swift in Sources */,
@@ -391,7 +417,9 @@
 				3AE64236290CFE0100B8C1C3 /* UnderlinedTextField.swift in Sources */,
 				3AE64231290CF94C00B8C1C3 /* Mapping.swift in Sources */,
 				3A7395E22910869D00E25ED5 /* NavigationBarShadow.swift in Sources */,
+				3AD1B7FA2984756400D76C39 /* ImageOrientation.swift in Sources */,
 				3A6EE5FB290CD82D006F4EA8 /* ColorFromHex.swift in Sources */,
+				3AD1B8032984C2F000D76C39 /* CameraViewController.swift in Sources */,
 				3AE64224290CE75500B8C1C3 /* AutoLayout.swift in Sources */,
 				3A6EE5FF290CD8BE006F4EA8 /* NavigationBarColor.swift in Sources */,
 			);

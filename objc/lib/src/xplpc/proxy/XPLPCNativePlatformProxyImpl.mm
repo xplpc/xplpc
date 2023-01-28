@@ -12,9 +12,12 @@ using namespace xplpc::client;
 - (void)nativeProxyCall:(NSString *)key :(NSString *)data
 {
     auto convertedKey = ObjCSupport::xplpcObjcStringToCppString(key);
-    
+
     ProxyClient::call(ObjCSupport::xplpcObjcStringToCppString(data), [convertedKey, &self](const auto &response) {
-        [self callProxyCallback:ObjCSupport::xplpcCppStringToObjcString(convertedKey) :ObjCSupport::xplpcCppStringToObjcString(response)];
+        if (self)
+        {
+            [self callProxyCallback:ObjCSupport::xplpcCppStringToObjcString(convertedKey) :ObjCSupport::xplpcCppStringToObjcString(response)];
+        }
     });
 }
 // clang-format on
