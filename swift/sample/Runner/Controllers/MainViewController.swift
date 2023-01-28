@@ -45,7 +45,7 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         return bt
     }()
 
-    private lazy var divider: UIView = {
+    private lazy var divider1: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
         view.size.height = 1
@@ -122,6 +122,35 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         return bt
     }()
 
+    private lazy var divider2: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.size.height = 1
+        view.backgroundColor = UIColor(rgb: 0xDDDDDD)
+        return view
+    }()
+
+    private lazy var lbTitleCamera: UILabel = {
+        let lb = UILabel()
+        lb.text = "CAMERA"
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        lb.textAlignment = .center
+        lb.textColor = .black
+        lb.font = UIFont.boldSystemFont(ofSize: 20)
+        return lb
+    }()
+
+    private lazy var btSubmitForCamera: RoundedButton = {
+        let bt = RoundedButton(type: .system)
+        bt.setTitle("OPEN", for: .normal)
+        bt.setTitleColor(.white, for: .normal)
+        bt.translatesAutoresizingMaskIntoConstraints = false
+        bt.backgroundColor = UIColor(rgb: 0x1565C0)
+        bt.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+        bt.addTarget(self, action: #selector(btSubmitForCameraClicked), for: .touchUpInside)
+        return bt
+    }()
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -144,7 +173,7 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         container.addSubview(lbTitleBatteryLevel)
         container.addSubview(lbBatteryLevelMessage)
         container.addSubview(btSubmitForBatteryLevel)
-        container.addSubview(divider)
+        container.addSubview(divider1)
         container.addSubview(lbTitleLogin)
         container.addSubview(edUsername)
         container.addSubview(edPassword)
@@ -152,6 +181,9 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         container.addSubview(lbRememberHint)
         container.addSubview(lbFormMessage)
         container.addSubview(btSubmitForLogin)
+        container.addSubview(divider2)
+        container.addSubview(lbTitleCamera)
+        container.addSubview(btSubmitForCamera)
 
         // layout
         scrollContainer.align(with: view)
@@ -160,7 +192,7 @@ class MainViewController: UIViewController, UITextFieldDelegate {
 
         container.align(with: scrollContainer)
         container.constrainWidth(to: view)
-        container.alignBottom(with: btSubmitForLogin, constant: 20) // always last element
+        container.alignBottom(with: btSubmitForCamera, constant: 20) // always last element
 
         lbTitleBatteryLevel.alignTop(with: container, constant: 20)
         lbTitleBatteryLevel.alignLeadingTrailing(with: container)
@@ -173,11 +205,11 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         btSubmitForBatteryLevel.constrainWidth(120)
         btSubmitForBatteryLevel.constrainHeight(44)
 
-        divider.alignTop(to: btSubmitForBatteryLevel.bottomAnchor, constant: 26)
-        divider.alignLeadingTrailing(with: container, constant: 16)
-        divider.constrainHeight(1)
+        divider1.alignTop(to: btSubmitForBatteryLevel.bottomAnchor, constant: 26)
+        divider1.alignLeadingTrailing(with: container, constant: 16)
+        divider1.constrainHeight(1)
 
-        lbTitleLogin.alignTop(to: divider.bottomAnchor, constant: 26)
+        lbTitleLogin.alignTop(to: divider1.bottomAnchor, constant: 26)
         lbTitleLogin.alignLeadingTrailing(with: container)
 
         edUsername.alignTop(to: lbTitleLogin.bottomAnchor, constant: 20)
@@ -203,6 +235,18 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         btSubmitForLogin.centerHorizontal(with: container)
         btSubmitForLogin.constrainWidth(120)
         btSubmitForLogin.constrainHeight(44)
+
+        divider2.alignTop(to: btSubmitForLogin.bottomAnchor, constant: 26)
+        divider2.alignLeadingTrailing(with: container, constant: 16)
+        divider2.constrainHeight(1)
+
+        lbTitleCamera.alignTop(with: divider2, constant: 20)
+        lbTitleCamera.alignLeadingTrailing(with: container)
+
+        btSubmitForCamera.alignTop(to: lbTitleCamera.bottomAnchor, constant: 30)
+        btSubmitForCamera.centerHorizontal(with: container)
+        btSubmitForCamera.constrainWidth(120)
+        btSubmitForCamera.constrainHeight(44)
     }
 
     @objc func btSubmitForBatteryLevelClicked() {
@@ -228,6 +272,11 @@ class MainViewController: UIViewController, UITextFieldDelegate {
                 self.lbFormMessage.text = "Response: " + (response ?? "ERROR")
             }
         }
+    }
+
+    @objc func btSubmitForCameraClicked() {
+        let c = CameraViewController()
+        navigationController?.pushViewController(c, animated: true)
     }
 
     override func viewDidLayoutSubviews() {

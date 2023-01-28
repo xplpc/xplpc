@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <application
         android:name=".app.Application"
         android:allowBackup="true"
@@ -14,18 +16,17 @@
         android:theme="@style/Theme.Runner"
         tools:targetApi="33">
         <activity
-            android:name=".app.MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
+        <activity
+            android:name=".activity.CameraActivity"
+            android:exported="true" />
     </application>
 
 </manifest>

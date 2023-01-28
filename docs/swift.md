@@ -40,3 +40,5 @@ Execute on terminal:
 You can see the sample project in directory `swift/sample`.
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-ios.png?raw=true">
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-ios2.png?raw=true">
