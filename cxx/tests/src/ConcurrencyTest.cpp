@@ -4,6 +4,7 @@
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
+#include <cstdint>
 #include <thread>
 #include <vector>
 
@@ -118,7 +119,7 @@ void testImageToGrayscaleFromPointer()
     int height = 1;
 
     uint8_t *pointer = imageData.data();
-    int64_t pointerAddress = reinterpret_cast<int64_t>(pointer);
+    std::uintptr_t pointerAddress = reinterpret_cast<std::uintptr_t>(pointer);
     size_t pointerSize = imageData.size();
 
     auto request = Request{
