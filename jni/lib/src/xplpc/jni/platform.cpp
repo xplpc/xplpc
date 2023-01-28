@@ -3,6 +3,8 @@
 #include "xplpc/jni/support.hpp"
 #include "xplpc/proxy/JNIPlatformProxy.hpp"
 
+#include <algorithm>
+#include <cstdint>
 #include <memory>
 
 using namespace xplpc::client;
@@ -50,5 +52,26 @@ extern "C"
     Java_com_xplpc_proxy_PlatformProxy_nativeCallProxyCallback(JNIEnv *env, jclass /*clazz*/, jstring key, jstring data)
     {
         CallbackList::shared()->execute(jniUTF8FromString(env, key), jniUTF8FromString(env, data));
+    }
+
+    JNIEXPORT jlong JNICALL
+    Java_com_xplpc_util_ByteBufferHelper_getByteBufferAddress(JNIEnv *env, jobject /*thiz*/, jobject array)
+    {
+        auto pointer = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(array));
+        auto address = reinterpret_cast<std::uintptr_t>(pointer);
+        return static_cast<jlong>(address);
+    }
+
+    JNIEXPORT jobject JNICALL
+    Java_com_xplpc_util_ByteBufferHelper_getByteBufferFromAddress(JNIEnv *env, jobject /*thiz*/, jlong address, jint size)
+    {
+        jclass directByteBuffer = env->FindClass("java/nio/DirectByteBuffer");
+        jmethodID newDirectByteBuffer = env->GetStaticMethodID(directByteBuffer, "allocateDirect", "(I)Ljava/nio/ByteBuffer;");
+        jobject buffer = env->CallStaticObjectMethod(directByteBuffer, newDirectByteBuffer, size);
+
+        void *bufferPointer = env->GetDirectBufferAddress(buffer);
+        std::copy(reinterpret_cast<unsigned char *>(address), (reinterpret_cast<unsigned char *>(address) + size), reinterpret_cast<unsigned char *>(bufferPointer));
+
+        return buffer;
     }
 }

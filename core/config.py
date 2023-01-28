@@ -3,7 +3,8 @@ debug = False
 task = ""
 proj_path = ""
 
-build_type = "Release"
+# TODO: XPLPC - Return to Release
+build_type = "Debug"
 
 # swift
 swift_framework_list = [
