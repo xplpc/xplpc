@@ -3,7 +3,6 @@ package com.xplpc.runner.activity
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Size
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
@@ -66,7 +65,6 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
         // image analysis use case
         val imageAnalysis = ImageAnalysis.Builder()
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setTargetResolution(Size(240, 320))
             .build()
 
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), this)

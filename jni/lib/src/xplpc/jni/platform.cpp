@@ -70,7 +70,7 @@ extern "C"
         jobject buffer = env->CallStaticObjectMethod(directByteBuffer, newDirectByteBuffer, size);
 
         void *bufferPointer = env->GetDirectBufferAddress(buffer);
-        std::copy(reinterpret_cast<unsigned char *>(address), (reinterpret_cast<unsigned char *>(address) + size), reinterpret_cast<unsigned char *>(bufferPointer));
+        std::copy(reinterpret_cast<uint8_t *>(address), (reinterpret_cast<uint8_t *>(address) + size), reinterpret_cast<uint8_t *>(bufferPointer));
 
         return buffer;
     }
