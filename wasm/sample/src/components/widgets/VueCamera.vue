@@ -277,8 +277,8 @@ export default {
 
             if (this.resolution) {
                 constraints.video = {};
-                constraints.video.height = this.resolution.height;
                 constraints.video.width = this.resolution.width;
+                constraints.video.height = this.resolution.height;
             }
 
             navigator.mediaDevices
@@ -301,8 +301,8 @@ export default {
             let constraints = { video: { deviceId: { exact: device } } };
 
             if (this.resolution) {
-                constraints.video.height = this.resolution.height;
                 constraints.video.width = this.resolution.width;
+                constraints.video.height = this.resolution.height;
             }
 
             navigator.mediaDevices
@@ -323,9 +323,13 @@ export default {
             let video = this.$refs.video;
 
             if (!this.ctx) {
+                var aspect = video.videoHeight / video.videoWidth;
+                var wantedWidth = 240;
+                var wantedHeight = Math.round(wantedWidth * aspect);
+
                 let canvas = document.createElement("canvas");
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+                canvas.width = wantedWidth;
+                canvas.height = wantedHeight;
 
                 this.canvas = canvas;
                 this.ctx = canvas.getContext("2d", { willReadFrequently: true });
