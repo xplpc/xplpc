@@ -325,7 +325,7 @@ export default {
             if (!this.ctx) {
                 var destWidth = 240;
                 var destHeight = 320;
-                var ratio = Math.min(destWidth / video.videoWidth, destHeight / video.videoHeight);
+                var ratio = Math.max(destWidth / video.videoWidth, destHeight / video.videoHeight);
                 var wantedWidth = video.videoWidth * ratio;
                 var wantedHeight = video.videoHeight * ratio;
 
