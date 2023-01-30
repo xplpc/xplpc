@@ -148,7 +148,7 @@ function onReset(): void {
                 <h4 id="pageTitle" class="my-5 text-center">CAMERA</h4>
 
                 <div class="mb-5 text-center">
-                    <VueCamera ref="camera" :width="240" :height="320" :resolution="{width: 240, height: 320}" />
+                    <VueCamera ref="camera" :width="240" :height="320" />
                 </div>
 
                 <div class="form-bt-group text-center mb-5">
