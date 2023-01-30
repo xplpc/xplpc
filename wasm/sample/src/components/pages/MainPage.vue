@@ -5,11 +5,13 @@ import { XParam } from "@/xplpc/message/param";
 import { XRequest } from "@/xplpc/message/request";
 import { ref } from "vue";
 import { useWasmModuleStore } from "../../store/wasm-module";
+import VueCamera from "../widgets/VueCamera.vue";
 
 const wm = useWasmModuleStore();
 const fieldUsername = ref(null);
 const fieldPassword = ref(null);
 const fieldRemember = ref(false);
+const camera = ref();
 
 const defaultResponseMessageForForm = "Use account paulo/123456 to success login";
 const responseMessageForForm = ref(defaultResponseMessageForForm);
@@ -57,6 +59,11 @@ async function onSubmitBatteryLevel(e: Event) {
     }
 }
 
+async function onSubmitCamera(e: Event) {
+    e.preventDefault();
+    camera.value?.start();
+}
+
 function showResponseForForm(data: string | undefined): void {
     if (data) {
         responseMessageForForm.value = data;
@@ -101,11 +108,9 @@ function onReset(): void {
                 </div>
 
                 <!-- SEPARATOR -->
-
                 <hr>
 
                 <!-- LOGIN -->
-
                 <h4 id="pageTitle" class="my-5 text-center">LOGIN</h4>
 
                 <form @submit="onSubmitForm">
@@ -135,6 +140,20 @@ function onReset(): void {
                         <button type="button" class="btn btn-primary" @click="onReset">Clear</button>
                     </div>
                 </form>
+
+                <!-- SEPARATOR -->
+                <hr>
+
+                <!-- CAMERA -->
+                <h4 id="pageTitle" class="my-5 text-center">CAMERA</h4>
+
+                <div class="mb-5 text-center">
+                    <VueCamera ref="camera" :width="240" :height="320" />
+                </div>
+
+                <div class="form-bt-group text-center mb-5">
+                    <button type="button" class="btn btn-primary" @click="onSubmitCamera">Open</button>
+                </div>
             </div>
         </div>
         <div v-else>
