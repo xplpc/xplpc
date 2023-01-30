@@ -204,7 +204,7 @@ export default {
         async start() {
             Log.d("[Camera : start]");
 
-            await navigator.mediaDevices.getUserMedia({audio: false, video: true})
+            await navigator.mediaDevices.getUserMedia({ audio: false, video: true })
 
             if (!this.deviceId) {
                 this.loadCameraList();
@@ -323,9 +323,11 @@ export default {
             let video = this.$refs.video;
 
             if (!this.ctx) {
-                var aspect = video.videoHeight / video.videoWidth;
-                var wantedWidth = 240;
-                var wantedHeight = Math.round(wantedWidth * aspect);
+                var destWidth = 240;
+                var destHeight = 320;
+                var ratio = Math.min(destWidth / video.videoWidth, destHeight / video.videoHeight);
+                var wantedWidth = video.videoWidth * ratio;
+                var wantedHeight = video.videoHeight * ratio;
 
                 let canvas = document.createElement("canvas");
                 canvas.width = wantedWidth;
