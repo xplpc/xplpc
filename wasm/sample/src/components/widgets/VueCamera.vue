@@ -7,6 +7,10 @@ ref="video" :width="width" :height="height" :src="source" :autoplay="autoplay"
 
             <img v-if="visible" ref="preview" class="camera-image" />
         </div>
+
+        <div v-if="visible" class="camera-info">
+            <p>{{ cameraInfo }}</p>
+        </div>
     </div>
 </template>
 
@@ -61,7 +65,8 @@ export default {
             cameraList: [],
             deviceId: "",
             visible: false,
-            ctx: null
+            ctx: null,
+            cameraInfo: "XPLPC"
         };
     },
     watch: {
@@ -90,6 +95,8 @@ export default {
 
                 // some browsers just don't implement it, so return a rejected promise with an error to keep a consistent interface
                 if (!getUserMedia) {
+                    Log.d("[Camera : legacyGetUserMediaSupport] The method getUserMedia is not implemented in this browser");
+
                     return Promise.reject(
                         new Error("[Camera : legacyGetUserMediaSupport] The method getUserMedia is not implemented in this browser")
                     );
@@ -194,8 +201,10 @@ export default {
             }
         },
         // start the video
-        start() {
+        async start() {
             Log.d("[Camera : start]");
+
+            await navigator.mediaDevices.getUserMedia({audio: false, video: true})
 
             if (!this.deviceId) {
                 this.loadCameraList();
@@ -235,6 +244,8 @@ export default {
                 var ptr = XPLPC.shared().module._malloc(dataSize);
                 XPLPC.shared().module.HEAPU8.set(dataBuffer, ptr);
 
+                var startTime = performance.now();
+
                 const request = new XRequest(
                     "sample.image.grayscale.pointer",
                     new XParam("pointer", ptr),
@@ -244,6 +255,9 @@ export default {
 
                 await XRemoteClient.call(request);
 
+                var elapsedTime = performance.now();
+                var duration = elapsedTime - startTime;
+
                 var processedData = new Uint8ClampedArray(XPLPC.shared().module.HEAPU8.buffer, ptr, dataSize);
                 this.ctx.putImageData(new ImageData(processedData, this.canvas.width, this.canvas.height), 0, 0);
 
@@ -251,6 +265,8 @@ export default {
                 preview.src = this.canvas.toDataURL();
 
                 XPLPC.shared().module._free(ptr);
+
+                this.cameraInfo = "Time to process: " + (duration / 1000).toFixed(3) + " seconds\nImage size: " + (dataSize / 1024) + " kb";
             }, 16);
         },
         // test access
@@ -347,5 +363,19 @@ export default {
 .camera-image {
     max-width: 240px;
     max-height: 320px;
+}
+
+.camera-info {
+    background: #000000;
+    color: #ffffff;
+    padding: 6px;
+    vertical-align: middle;
+    border-radius: 30px;
+    margin-top: 20px;
+}
+
+.camera-info p {
+    margin: 0;
+    white-space: pre-line;
 }
 </style>
