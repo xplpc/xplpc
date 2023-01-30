@@ -1,8 +1,8 @@
 public class ByteArrayHelper {
-    public static func getPointerAddress(array: [UInt8]) -> UInt {
+    public static func getPointerAddress(data: [UInt8]) -> UInt {
         var pointerAddress: UInt = 0
 
-        array.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
+        data.withUnsafeBytes { (bytes: UnsafeRawBufferPointer) in
             guard let baseAddress = bytes.baseAddress else {
                 return
             }

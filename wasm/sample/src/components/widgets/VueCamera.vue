@@ -11,6 +11,10 @@ ref="video" :width="width" :height="height" :src="source" :autoplay="autoplay"
 </template>
 
 <script lang="js">
+import { XRemoteClient } from '@/xplpc/client/remote-client';
+import { XPLPC } from '@/xplpc/core/xplpc';
+import { XParam } from '@/xplpc/message/param';
+import { XRequest } from '@/xplpc/message/request';
 import { Log } from '@/xplpc/util/log';
 
 export default {
@@ -220,23 +224,33 @@ export default {
         },
         // process image
         processImage() {
-            setInterval(() => {
+            setInterval(async () => {
                 this.getCanvas();
 
                 const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-                const data = imgData.data;
 
-                for (let i = 0; i < data.length; i += 4) {
-                    const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-                    data[i] = avg;
-                    data[i + 1] = avg;
-                    data[i + 2] = avg;
-                }
+                var dataSize = imgData.data.length;
+                var dataBuffer = new Uint8Array(imgData.data);
 
-                this.ctx.putImageData(imgData, 0, 0);
+                var ptr = XPLPC.shared().module._malloc(dataSize);
+                XPLPC.shared().module.HEAPU8.set(dataBuffer, ptr);
+
+                const request = new XRequest(
+                    "sample.image.grayscale.pointer",
+                    new XParam("pointer", ptr),
+                    new XParam("width", this.canvas.width),
+                    new XParam("height", this.canvas.height),
+                );
+
+                await XRemoteClient.call(request);
+
+                var processedData = new Uint8ClampedArray(XPLPC.shared().module.HEAPU8.buffer, ptr, dataSize);
+                this.ctx.putImageData(new ImageData(processedData, this.canvas.width, this.canvas.height), 0, 0);
 
                 const preview = this.$refs.preview;
                 preview.src = this.canvas.toDataURL();
+
+                XPLPC.shared().module._free(ptr);
             }, 16);
         },
         // test access
@@ -298,7 +312,7 @@ export default {
                 canvas.height = video.videoHeight;
 
                 this.canvas = canvas;
-                this.ctx = canvas.getContext("2d", {willReadFrequently : true});
+                this.ctx = canvas.getContext("2d", { willReadFrequently: true });
             }
 
             const { ctx, canvas } = this;
