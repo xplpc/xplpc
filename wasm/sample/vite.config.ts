@@ -42,6 +42,8 @@ export default defineConfig({
         topLevelAwait()
     ],
     server: {
+        https: false,
+        host: true,
         fs: {
             strict: false,
             allow: [".."],
