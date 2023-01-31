@@ -2,8 +2,8 @@
     <div class="text-center">
         <div class="camera-container text-center">
             <video
-ref="video" :width="width" :height="height" :src="source" :autoplay="autoplay"
-                :playsinline="playsinline" style="display: none;" @canplay="canPlay"></video>
+ref="video" :src="source" :autoplay="autoplay" :playsinline="playsinline" style="display: none;"
+                @canplay="canPlay"></video>
 
             <img v-if="visible" ref="preview" class="camera-image" />
         </div>
@@ -11,6 +11,8 @@ ref="video" :width="width" :height="height" :src="source" :autoplay="autoplay"
         <div v-if="visible" class="camera-info">
             <p>{{ cameraInfo }}</p>
         </div>
+
+        <canvas ref="canvas" style="display: none;"></canvas>
     </div>
 </template>
 
@@ -66,7 +68,9 @@ export default {
             deviceId: "",
             visible: false,
             ctx: null,
-            cameraInfo: "XPLPC"
+            cameraInfo: "XPLPC",
+            destWidth: 0,
+            destHeight: 0
         };
     },
     watch: {
@@ -323,22 +327,32 @@ export default {
             let video = this.$refs.video;
 
             if (!this.ctx) {
-                var destWidth = 240;
-                var destHeight = 320;
-                var ratio = Math.max(destWidth / video.videoWidth, destHeight / video.videoHeight);
-                var wantedWidth = video.videoWidth * ratio;
-                var wantedHeight = video.videoHeight * ratio;
+                // calculate proportion
+                this.destWidth = 240;
+                this.destHeight = this.destWidth * video.videoHeight / video.videoWidth;
 
-                let canvas = document.createElement("canvas");
-                canvas.width = wantedWidth;
-                canvas.height = wantedHeight;
+                if (this.destHeight > 320) {
+                    this.destHeight = 320;
+                    this.destWidth = this.destHeight * video.videoWidth / video.videoHeight;
+                }
 
+                // create canvas
+                let canvas = this.$refs.canvas;
+                canvas.width = this.destWidth;
+                canvas.height = this.destHeight;
                 this.canvas = canvas;
-                this.ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+                video.width = this.destWidth;
+                video.height = this.destHeight;
+
+                // create context
+                this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
             }
 
             const { ctx, canvas } = this;
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // draw video frame
+            ctx.drawImage(video, 0, 0, this.destWidth, this.destHeight);
 
             return canvas;
         },
