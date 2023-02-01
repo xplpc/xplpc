@@ -216,6 +216,96 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromDataViewAsyncWithThread)
     // clang-format on
 }
 
+TEST_F(GeneralTest, LocalClientTestDataView)
+{
+    auto request = Request{"sample.dataview"};
+
+    // clang-format off
+    LocalClient::call<DataView>(request, [](const auto &response) {
+        auto dataView = response.value();
+
+        // check current values
+        EXPECT_EQ(16, dataView.size());
+        EXPECT_EQ(dataView.ptr()[0], 255);
+        EXPECT_EQ(dataView.ptr()[5], 255);
+        EXPECT_EQ(dataView.ptr()[10], 255);
+        EXPECT_EQ(dataView.ptr()[12], 0);
+
+        auto request = Request{
+            "sample.image.grayscale.dataview",
+            Param{"dataView", dataView},
+        };
+
+        LocalClient::call<std::string>(request, [&dataView](const auto &response) {
+            EXPECT_EQ("OK", response.value());
+
+            std::vector<uint8_t> originalVector(dataView.size());
+            dataView.copy(originalVector.data());
+
+            // check copied values
+            EXPECT_EQ(16, originalVector.size());
+            EXPECT_EQ(originalVector[0], 85);
+            EXPECT_EQ(originalVector[4], 85);
+            EXPECT_EQ(originalVector[8], 85);
+            EXPECT_EQ(originalVector[12], 0);
+
+            // current original values again
+            EXPECT_EQ(16, dataView.size());
+            EXPECT_EQ(dataView.ptr()[0], 85);
+            EXPECT_EQ(dataView.ptr()[5], 85);
+            EXPECT_EQ(dataView.ptr()[10], 85);
+            EXPECT_EQ(dataView.ptr()[12], 0);
+        });
+    });
+    // clang-format on
+}
+
+TEST_F(GeneralTest, LocalClientTestDataViewAsyncWithThread)
+{
+    auto request = Request{"sample.dataview"};
+
+    // clang-format off
+    std::thread([=] {
+        LocalClient::call<DataView>(request, [](const auto &response) {
+            auto dataView = response.value();
+
+            // check current values
+            EXPECT_EQ(16, dataView.size());
+            EXPECT_EQ(dataView.ptr()[0], 255);
+            EXPECT_EQ(dataView.ptr()[5], 255);
+            EXPECT_EQ(dataView.ptr()[10], 255);
+            EXPECT_EQ(dataView.ptr()[12], 0);
+
+            auto request = Request{
+                "sample.image.grayscale.dataview",
+                Param{"dataView", dataView},
+            };
+
+            LocalClient::call<std::string>(request, [&dataView](const auto &response) {
+                EXPECT_EQ("OK", response.value());
+
+                std::vector<uint8_t> originalVector(dataView.size());
+                dataView.copy(originalVector.data());
+
+                // check copied values
+                EXPECT_EQ(16, originalVector.size());
+                EXPECT_EQ(originalVector[0], 85);
+                EXPECT_EQ(originalVector[4], 85);
+                EXPECT_EQ(originalVector[8], 85);
+                EXPECT_EQ(originalVector[12], 0);
+
+                // current original values again
+                EXPECT_EQ(16, dataView.size());
+                EXPECT_EQ(dataView.ptr()[0], 85);
+                EXPECT_EQ(dataView.ptr()[5], 85);
+                EXPECT_EQ(dataView.ptr()[10], 85);
+                EXPECT_EQ(dataView.ptr()[12], 0);
+            });
+        });
+    }).join();
+    // clang-format on
+}
+
 TEST_F(GeneralTest, LocalClientTestNotFound)
 {
     auto request = Request{"not.found"};

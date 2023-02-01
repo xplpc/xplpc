@@ -38,6 +38,7 @@ public:
         MappingList::shared()->add("sample.reverse", Map::create<std::string>({}, &callbackReverse));
         MappingList::shared()->add("sample.image.grayscale", Map::create<std::vector<uint8_t>, std::vector<uint8_t>, int, int>({"image", "width", "height"}, &callbackImageToGrayscale));
         MappingList::shared()->add("sample.image.grayscale.dataview", Map::create<std::string, DataView>({"dataView"}, &callbackImageToGrayscaleFromDataView));
+        MappingList::shared()->add("sample.dataview", Map::create<DataView>({}, &callbackDataView));
     }
 
     static void callbackLogin(const Message &m, const Response r)
@@ -245,6 +246,20 @@ public:
         {
             r(std::string{"INVALID-DATA"});
         }
+    }
+
+    static void callbackDataView(const Message &m, const Response r)
+    {
+        std::vector<uint8_t> imageData = {
+            255, 0, 0, 255, // red pixel
+            0, 255, 0, 255, // green pixel
+            0, 0, 255, 255, // blue pixel
+            0, 0, 0, 0,     // transparent pixel
+        };
+
+        auto dataView = DataView{imageData.data(), imageData.size()};
+
+        r(dataView);
     }
 };
 
