@@ -106,7 +106,7 @@ void testImageToGrayscale()
     // clang-format on
 }
 
-void testImageToGrayscaleFromPointer()
+void testImageToGrayscaleFromDataView()
 {
     std::vector<uint8_t> imageData = {
         255, 0, 0, 255, // red pixel
@@ -115,28 +115,26 @@ void testImageToGrayscaleFromPointer()
         0, 0, 0, 0,     // transparent pixel
     };
 
-    int width = 1;
-    int height = 1;
-
-    uint8_t *pointer = imageData.data();
-    std::uintptr_t pointerAddress = reinterpret_cast<std::uintptr_t>(pointer);
-    size_t pointerSize = imageData.size();
+    auto dataView = DataView{imageData.data(), imageData.size()};
 
     auto request = Request{
-        "sample.image.grayscale.pointer",
-        Param{"pointer", pointerAddress},
-        Param{"width", width},
-        Param{"height", height},
+        "sample.image.grayscale.dataview",
+        Param{"dataView", dataView},
     };
 
     // clang-format off
-    LocalClient::call<std::string>(request, [pointerAddress, pointerSize](const auto &response) {
+    LocalClient::call<std::string>(request, [&dataView](const auto &response) {
         EXPECT_EQ("OK", response.value());
 
-        std::vector<uint8_t> originalVector(pointerSize);
-        memcpy(originalVector.data(), reinterpret_cast<uint8_t*>(pointerAddress), pointerSize);
+        std::vector<uint8_t> originalVector(dataView.size());
+
+        dataView.copy(originalVector.data());
 
         EXPECT_EQ(16, originalVector.size());
+        EXPECT_EQ(originalVector[0], 85);
+        EXPECT_EQ(originalVector[4], 85);
+        EXPECT_EQ(originalVector[8], 85);
+        EXPECT_EQ(originalVector[12], 0);
     });
     // clang-format on
 }
@@ -195,7 +193,7 @@ TEST_F(GeneralTest, ConcurrencyAll)
         threads.push_back(std::thread(testTodoList));
         threads.push_back(std::thread(testEcho));
         threads.push_back(std::thread(testImageToGrayscale));
-        threads.push_back(std::thread(testImageToGrayscaleFromPointer));
+        threads.push_back(std::thread(testImageToGrayscaleFromDataView));
         threads.push_back(std::thread(testLoginWithProxyClient));
         threads.push_back(std::thread(testTodoSingleWithProxyClient));
         threads.push_back(std::thread(testRemoteClient));

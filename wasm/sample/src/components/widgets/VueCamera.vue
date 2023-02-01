@@ -18,9 +18,9 @@ ref="video" :src="source" :autoplay="autoplay" :playsinline="playsinline" style=
 
 <script lang="js">
 import { XRemoteClient } from '@/xplpc/client/remote-client';
-import { XPLPC } from '@/xplpc/core/xplpc';
 import { XParam } from '@/xplpc/message/param';
 import { XRequest } from '@/xplpc/message/request';
+import { XDataView } from '@/xplpc/type/data-view';
 import { Log } from '@/xplpc/util/log';
 
 export default {
@@ -241,20 +241,13 @@ export default {
                 this.getCanvas();
 
                 const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-
-                var dataSize = imgData.data.length;
-                var dataBuffer = new Uint8Array(imgData.data);
-
-                var ptr = XPLPC.shared().module._malloc(dataSize);
-                XPLPC.shared().module.HEAPU8.set(dataBuffer, ptr);
+                const dataView = XDataView.createFromBuffer(imgData.data);
 
                 var startTime = performance.now();
 
                 const request = new XRequest(
-                    "sample.image.grayscale.pointer",
-                    new XParam("pointer", ptr),
-                    new XParam("width", this.canvas.width),
-                    new XParam("height", this.canvas.height),
+                    "sample.image.grayscale.dataview",
+                    new XParam("dataView", dataView),
                 );
 
                 await XRemoteClient.call(request);
@@ -262,15 +255,15 @@ export default {
                 var elapsedTime = performance.now();
                 var duration = elapsedTime - startTime;
 
-                var processedData = new Uint8ClampedArray(XPLPC.shared().module.HEAPU8.buffer, ptr, dataSize);
+                var processedData = XDataView.createUint8ClampedArrayFromPtr(dataView.ptr, dataView.size);
                 this.ctx.putImageData(new ImageData(processedData, this.canvas.width, this.canvas.height), 0, 0);
 
                 const preview = this.$refs.preview;
                 preview.src = this.canvas.toDataURL();
 
-                XPLPC.shared().module._free(ptr);
+                XDataView.free(dataView);
 
-                this.cameraInfo = "Time to process: " + (duration / 1000).toFixed(3) + " seconds\nImage size: " + (dataSize / 1024) + " kb";
+                this.cameraInfo = "Time to process: " + (duration / 1000).toFixed(3) + " seconds\nImage size: " + (dataView.size / 1024) + " kb";
             }, 16);
         },
         // test access

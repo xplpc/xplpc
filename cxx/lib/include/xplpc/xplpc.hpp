@@ -14,5 +14,6 @@
 #include "xplpc/message/Response.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 #include "xplpc/serializer/Serializer.hpp"
+#include "xplpc/type/DataView.hpp"
 #include "xplpc/util/TSMap.hpp"
 #include "xplpc/util/UniqueID.hpp"

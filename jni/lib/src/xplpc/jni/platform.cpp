@@ -55,22 +55,22 @@ extern "C"
     }
 
     JNIEXPORT jlong JNICALL
-    Java_com_xplpc_helper_ByteBufferHelper_getByteBufferAddress(JNIEnv *env, jobject /*thiz*/, jobject array)
+    Java_com_xplpc_helper_ByteBufferHelper_getPtrAddress(JNIEnv *env, jobject /*thiz*/, jobject data)
     {
-        auto pointer = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(array));
+        auto pointer = reinterpret_cast<uint8_t *>(env->GetDirectBufferAddress(data));
         auto address = reinterpret_cast<std::uintptr_t>(pointer);
         return static_cast<jlong>(address);
     }
 
     JNIEXPORT jobject JNICALL
-    Java_com_xplpc_helper_ByteBufferHelper_getByteBufferFromAddress(JNIEnv *env, jobject /*thiz*/, jlong address, jint size)
+    Java_com_xplpc_helper_ByteBufferHelper_createFromPtr(JNIEnv *env, jobject /*thiz*/, jlong ptr, jint size)
     {
         jclass directByteBuffer = env->FindClass("java/nio/DirectByteBuffer");
         jmethodID newDirectByteBuffer = env->GetStaticMethodID(directByteBuffer, "allocateDirect", "(I)Ljava/nio/ByteBuffer;");
         jobject buffer = env->CallStaticObjectMethod(directByteBuffer, newDirectByteBuffer, size);
 
         void *bufferPointer = env->GetDirectBufferAddress(buffer);
-        std::copy(reinterpret_cast<uint8_t *>(address), (reinterpret_cast<uint8_t *>(address) + size), reinterpret_cast<uint8_t *>(bufferPointer));
+        std::copy(reinterpret_cast<uint8_t *>(ptr), (reinterpret_cast<uint8_t *>(ptr) + size), reinterpret_cast<uint8_t *>(bufferPointer));
 
         return buffer;
     }

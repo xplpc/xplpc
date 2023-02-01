@@ -2,6 +2,7 @@
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <thread>
 #include <vector>
@@ -9,6 +10,7 @@
 using namespace xplpc::core;
 using namespace xplpc::client;
 using namespace xplpc::message;
+using namespace xplpc::type;
 
 TEST_F(GeneralTest, LocalClientTestLogin)
 {
@@ -146,7 +148,7 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleAsyncWithThread)
     // clang-format on
 }
 
-TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointer)
+TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromDataView)
 {
     std::vector<uint8_t> imageData = {
         255, 0, 0, 255, // red pixel
@@ -155,33 +157,31 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointer)
         0, 0, 0, 0,     // transparent pixel
     };
 
-    int width = 1;
-    int height = 1;
-
-    uint8_t *pointer = imageData.data();
-    std::uintptr_t pointerAddress = reinterpret_cast<std::uintptr_t>(pointer);
-    size_t pointerSize = imageData.size();
+    auto dataView = DataView{imageData.data(), imageData.size()};
 
     auto request = Request{
-        "sample.image.grayscale.pointer",
-        Param{"pointer", pointerAddress},
-        Param{"width", width},
-        Param{"height", height},
+        "sample.image.grayscale.dataview",
+        Param{"dataView", dataView},
     };
 
     // clang-format off
-    LocalClient::call<std::string>(request, [pointerAddress, pointerSize](const auto &response) {
+    LocalClient::call<std::string>(request, [&dataView](const auto &response) {
         EXPECT_EQ("OK", response.value());
 
-        std::vector<uint8_t> originalVector(pointerSize);
-        memcpy(originalVector.data(), reinterpret_cast<uint8_t*>(pointerAddress), pointerSize);
+        std::vector<uint8_t> originalVector(dataView.size());
+
+        dataView.copy(originalVector.data());
 
         EXPECT_EQ(16, originalVector.size());
+        EXPECT_EQ(originalVector[0], 85);
+        EXPECT_EQ(originalVector[4], 85);
+        EXPECT_EQ(originalVector[8], 85);
+        EXPECT_EQ(originalVector[12], 0);
     });
     // clang-format on
 }
 
-TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointerAsyncWithThread)
+TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromDataViewAsyncWithThread)
 {
     std::vector<uint8_t> imageData = {
         255, 0, 0, 255, // red pixel
@@ -190,29 +190,27 @@ TEST_F(GeneralTest, LocalClientTestImageToGrayscaleFromPointerAsyncWithThread)
         0, 0, 0, 0,     // transparent pixel
     };
 
-    int width = 1;
-    int height = 1;
-
-    uint8_t *pointer = imageData.data();
-    std::uintptr_t pointerAddress = reinterpret_cast<std::uintptr_t>(pointer);
-    size_t pointerSize = imageData.size();
+    auto dataView = DataView{imageData.data(), imageData.size()};
 
     auto request = Request{
-        "sample.image.grayscale.pointer",
-        Param{"pointer", pointerAddress},
-        Param{"width", width},
-        Param{"height", height},
+        "sample.image.grayscale.dataview",
+        Param{"dataView", dataView},
     };
 
     // clang-format off
     std::thread([=] {
-        LocalClient::call<std::string>(request, [pointerAddress, pointerSize](const auto &response) {
+        LocalClient::call<std::string>(request, [&dataView](const auto &response) {
             EXPECT_EQ("OK", response.value());
 
-            std::vector<uint8_t> originalVector(pointerSize);
-            memcpy(originalVector.data(), reinterpret_cast<uint8_t*>(pointerAddress), pointerSize);
+            std::vector<uint8_t> originalVector(dataView.size());
+
+            dataView.copy(originalVector.data());
 
             EXPECT_EQ(16, originalVector.size());
+            EXPECT_EQ(originalVector[0], 85);
+            EXPECT_EQ(originalVector[4], 85);
+            EXPECT_EQ(originalVector[8], 85);
+            EXPECT_EQ(originalVector[12], 0);
         });
     }).join();
     // clang-format on

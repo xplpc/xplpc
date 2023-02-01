@@ -8,6 +8,7 @@ import { XParam } from "@/xplpc/message/param";
 import { XRequest } from "@/xplpc/message/request";
 import { IXWasmModule } from "@/xplpc/module/xplpc-module";
 import { JsonSerializer } from "@/xplpc/serializer/json-serializer";
+import { XDataView } from "@/xplpc/type/data-view";
 
 import Module from "@xplpc/build/wasm/bin/xplpc";
 
@@ -68,5 +69,58 @@ describe("RemoteClient", () => {
 
         const response = await XRemoteClient.call<string>(request);
         expect(response).toBe("response-is-ok");
+    });
+
+    test("transfer data view", () => {
+        const dataView = XDataView.createFromArrayBuffer(new Uint8Array([
+            255, 0, 0, 255, // red pixel
+            0, 255, 0, 255, // green pixel
+            0, 0, 255, 255, // blue pixel
+            0, 0, 0, 0,     // transparent pixel
+        ]));
+
+        const request = new XRequest("sample.image.grayscale.dataview",
+            new XParam("dataView", dataView)
+        );
+
+        XRemoteClient.call<string>(request).then((response: string | undefined) => {
+            const processedData = XDataView.createUint8ClampedArrayFromPtr(dataView.ptr, dataView.size);
+
+            expect("OK").toBe(response);
+
+            expect(16).toBe(processedData.length);
+            expect(processedData[0]).toBe(85);
+            expect(processedData[4]).toBe(85);
+            expect(processedData[8]).toBe(85);
+            expect(processedData[12]).toBe(0);
+
+            XDataView.free(dataView);
+        });
+    });
+
+    test("transfer data view with await", async () => {
+        const dataView = XDataView.createFromArrayBuffer(new Uint8Array([
+            255, 0, 0, 255, // red pixel
+            0, 255, 0, 255, // green pixel
+            0, 0, 255, 255, // blue pixel
+            0, 0, 0, 0,     // transparent pixel
+        ]));
+
+        const request = new XRequest("sample.image.grayscale.dataview",
+            new XParam("dataView", dataView)
+        );
+
+        const response = await XRemoteClient.call<string>(request);
+        const processedData = XDataView.createUint8ClampedArrayFromPtr(dataView.ptr, dataView.size);
+
+        expect("OK").toBe(response);
+
+        expect(16).toBe(processedData.length);
+        expect(processedData[0]).toBe(85);
+        expect(processedData[4]).toBe(85);
+        expect(processedData[8]).toBe(85);
+        expect(processedData[12]).toBe(0);
+
+        XDataView.free(dataView);
     });
 });

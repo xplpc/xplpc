@@ -68,4 +68,34 @@ final class RemoteClientTest: XCTestCase {
             XCTAssertEqual("response-is-ok", response)
         }
     }
+
+    func testDataView() throws {
+        var data: [UInt8] = [
+            // red pixel
+            255, 0, 0, 255,
+            // green pixel
+            0, 255, 0, 255,
+            // blue pixel
+            0, 0, 255, 255,
+            // transparent pixel
+            0, 0, 0, 0,
+        ]
+
+        let dataView = DataView.createFromByteArray(&data)
+
+        let request = Request(
+            "sample.image.grayscale.dataview",
+            Param("dataView", dataView)
+        )
+
+        RemoteClient.call(request) { response in
+            XCTAssertEqual("OK", response)
+
+            XCTAssertEqual(16, data.count)
+            XCTAssertEqual(data[0], 85)
+            XCTAssertEqual(data[4], 85)
+            XCTAssertEqual(data[8], 85)
+            XCTAssertEqual(data[12], 0)
+        }
+    }
 }
