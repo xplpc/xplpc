@@ -250,14 +250,16 @@ public:
 
     static void callbackDataView(const Message &m, const Response r)
     {
-        std::vector<uint8_t> imageData = {
+        constexpr int size = 16;
+
+        uint8_t *imageData = new uint8_t[size]{
             255, 0, 0, 255, // red pixel
             0, 255, 0, 255, // green pixel
             0, 0, 255, 255, // blue pixel
             0, 0, 0, 0,     // transparent pixel
         };
 
-        auto dataView = DataView{imageData.data(), imageData.size()};
+        auto dataView = DataView{imageData, size};
 
         r(dataView);
     }

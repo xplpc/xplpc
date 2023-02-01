@@ -236,6 +236,7 @@ TEST_F(GeneralTest, LocalClientTestDataView)
             Param{"dataView", dataView},
         };
 
+        // send original data and check modified data
         LocalClient::call<std::string>(request, [&dataView](const auto &response) {
             EXPECT_EQ("OK", response.value());
 
