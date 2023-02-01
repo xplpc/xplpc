@@ -18,8 +18,9 @@ namespace xplpc
 namespace custom
 {
 
-using namespace xplpc::map;
 using namespace xplpc::client;
+using namespace xplpc::map;
+using namespace xplpc::type;
 
 class Mapping
 {
@@ -36,7 +37,8 @@ public:
         MappingList::shared()->add("sample.async", Map::create<void>({}, &callbackAsync));
         MappingList::shared()->add("sample.reverse", Map::create<std::string>({}, &callbackReverse));
         MappingList::shared()->add("sample.image.grayscale", Map::create<std::vector<uint8_t>, std::vector<uint8_t>, int, int>({"image", "width", "height"}, &callbackImageToGrayscale));
-        MappingList::shared()->add("sample.image.grayscale.pointer", Map::create<std::string, std::uintptr_t, int, int>({"pointer", "width", "height"}, &callbackImageToGrayscaleFromPointer));
+        MappingList::shared()->add("sample.image.grayscale.dataview", Map::create<std::string, DataView>({"dataView"}, &callbackImageToGrayscaleFromDataView));
+        MappingList::shared()->add("sample.dataview", Map::create<DataView>({}, &callbackDataView));
     }
 
     static void callbackLogin(const Message &m, const Response r)
@@ -212,33 +214,30 @@ public:
         }
     }
 
-    static void callbackImageToGrayscaleFromPointer(const Message &m, const Response r)
+    static void callbackImageToGrayscaleFromDataView(const Message &m, const Response r)
     {
-        auto pointer = m.get<std::uintptr_t>("pointer");
-        auto imageWidth = m.get<int>("width");
-        auto imageHeight = m.get<int>("height");
+        auto paramDataView = m.get<DataView>("dataView");
 
-        if (pointer && imageWidth && imageHeight)
+        if (paramDataView)
         {
-            uint8_t *imageData = reinterpret_cast<uint8_t *>(pointer.value());
-            auto width = imageWidth.value();
-            auto height = imageHeight.value();
+            auto dataView = paramDataView.value();
+            auto data = dataView.ptr();
 
-            // proccess rgba image
-            for (auto i = 0; i < width * height * 4; i += 4)
+            // process rgba image
+            for (auto i = 0; i < dataView.size(); i += 4)
             {
                 // skip transparent pixels
-                if (imageData[i + 3] == 0)
+                if (data[i + 3] == 0)
                 {
                     continue;
                 }
 
-                int gray = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
+                int gray = (data[i] + data[i + 1] + data[i + 2]) / 3;
 
-                // set the red, green, and blue values to the grayscale value
-                imageData[i] = gray;
-                imageData[i + 1] = gray;
-                imageData[i + 2] = gray;
+                // set the red, green and blue values to the grayscale value
+                data[i] = gray;
+                data[i + 1] = gray;
+                data[i + 2] = gray;
             }
 
             r(std::string{"OK"});
@@ -247,6 +246,22 @@ public:
         {
             r(std::string{"INVALID-DATA"});
         }
+    }
+
+    static void callbackDataView(const Message &m, const Response r)
+    {
+        constexpr int size = 16;
+
+        uint8_t *imageData = new uint8_t[size]{
+            255, 0, 0, 255, // red pixel
+            0, 255, 0, 255, // green pixel
+            0, 0, 255, 255, // blue pixel
+            0, 0, 0, 0,     // transparent pixel
+        };
+
+        auto dataView = DataView{imageData, size};
+
+        r(dataView);
     }
 };
 

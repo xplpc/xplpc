@@ -18,7 +18,7 @@ import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.runner.R
 import com.xplpc.runner.databinding.ActivityCameraBinding
-import com.xplpc.helper.ByteBufferHelper
+import com.xplpc.type.DataView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.nio.ByteBuffer
@@ -87,7 +87,7 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
     }
 
     override fun analyze(image: ImageProxy) {
-        // get bitmap buffer data
+        // bitmap buffer
         val bitmap = binding.vPreview.bitmap
         image.close()
 
@@ -97,22 +97,19 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
 
         val bitmapBuffer = bitmapToRgba(bitmap)
 
-        // create a byte-buffer to send by remote-client
-        val pointerSize = bitmapBuffer.size
-        val buffer: ByteBuffer = ByteBuffer.allocateDirect(pointerSize)
+        // byte buffer
+        val buffer: ByteBuffer = ByteBuffer.allocateDirect(bitmapBuffer.size)
         buffer.put(bitmapBuffer)
 
-        // get memory address
-        val pointerAddress = ByteBufferHelper.getByteBufferAddress(buffer)
+        // data view
+        val dataView = DataView.createFromByteBuffer(buffer)
 
         // process image for current frame
         val startTime = System.currentTimeMillis()
 
         val request = Request(
-            "sample.image.grayscale.pointer",
-            Param("pointer", pointerAddress),
-            Param("width", bitmap.width),
-            Param("height", bitmap.height)
+            "sample.image.grayscale.dataview",
+            Param("dataView", dataView)
         )
 
         RemoteClient.call<String>(request) { response ->
@@ -127,8 +124,9 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
 
             runOnUiThread {
                 binding.vProcessedPreview.setImageBitmap(processedPreview)
-                binding.tvOverlay.text =
-                    getString(R.string.process_info, duration, (bitmap.byteCount / 1024))
+                binding.tvOverlay.text = getString(
+                    R.string.process_info, duration, (bitmap.byteCount / 1024)
+                )
             }
         }
     }

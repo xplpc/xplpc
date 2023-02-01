@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "xplpc/type/DataView.hpp"
+
 #include <chrono>
 #include <optional>
 
@@ -9,6 +11,9 @@
 using json = nlohmann::json;
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
+
+// OPTIONAL TYPE
+
 template <typename T>
 struct adl_serializer<std::optional<T>>
 {
@@ -37,6 +42,8 @@ struct adl_serializer<std::optional<T>>
     }
 };
 
+// CHRONO (DATE AND TIME) TYPE
+
 template <typename Clock, typename Duration>
 struct adl_serializer<std::chrono::time_point<Clock, Duration>>
 {
@@ -59,6 +66,36 @@ struct adl_serializer<std::chrono::time_point<Clock, Duration>>
         }
     }
 };
+
+// DATAVIEW TYPE
+
+template <>
+struct adl_serializer<xplpc::type::DataView>
+{
+    static void to_json(json &j, const xplpc::type::DataView &dataView)
+    {
+        j = nlohmann::json{
+            {"ptr", reinterpret_cast<std::uintptr_t>(dataView.ptr())},
+            {"size", dataView.size()},
+        };
+    };
+
+    static xplpc::type::DataView from_json(const json &j)
+    {
+        if (j.is_null())
+        {
+            return xplpc::type::DataView{0, 0};
+        }
+        else
+        {
+            return xplpc::type::DataView{
+                reinterpret_cast<uint8_t *>(j["ptr"].get<std::uintptr_t>()),
+                j["size"].get<size_t>(),
+            };
+        }
+    }
+};
+
 NLOHMANN_JSON_NAMESPACE_END
 
 #endif

@@ -20,6 +20,7 @@ set(XPLPC_SRC_FILES ${XPLPC_SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Proxy/PlatformProxy.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Serializer/JsonSerializer.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Serializer/Serializer.swift"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Type/DataView.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Util/Log.swift"
     "${CMAKE_CURRENT_SOURCE_DIR}/Sources/Util/UniqueID.swift"
     PARENT_SCOPE

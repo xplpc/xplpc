@@ -14,10 +14,10 @@ public class CallbackList {
 
     public func execute(key: String, data: String) {
         lock.wait()
-        defer { lock.signal() }
 
         if let callback = list[key] {
             list.removeValue(forKey: key)
+            lock.signal()
             callback(data)
         }
     }

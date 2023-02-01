@@ -57,33 +57,26 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         // image size
         #if DEBUG
             let size = CVPixelBufferGetDataSize(frame)
-            print("[CameraViewController : captureOutput] Image size is: \(size)")
+            print("[CameraViewController : captureOutput] Original image size is: " + String(size / 1024) + " kb")
         #endif
 
-        // temporary image
-        let tempImage = ImageHelper.imageFromSampleBuffer(sampleBuffer: sampleBuffer, orientation: orientation)
-        let buffer = ImageHelper.getRGBABytes(from: tempImage)
-        let bufferSize = buffer.count
+        // original image
+        let originalImage = ImageHelper.imageFromSampleBuffer(sampleBuffer: sampleBuffer, orientation: orientation)
+        var buffer = ImageHelper.getRGBABytes(from: originalImage)
 
         // image dimension
-        let width = Int(tempImage.size.width)
-        let height = Int(tempImage.size.height)
+        let width = Int(originalImage.size.width)
+        let height = Int(originalImage.size.height)
 
-        #if DEBUG
-            print("[CameraViewController : captureOutput] Buffer size is: \(bufferSize)")
-        #endif
-
-        // pointer data
-        let pointerAddress = ByteArrayHelper.getPointerAddress(array: buffer)
+        // data view
+        let dataView = DataView.createFromByteArray(&buffer)
 
         // convert
         let startTime = CFAbsoluteTimeGetCurrent()
 
         let request = Request(
-            "sample.image.grayscale.pointer",
-            Param("pointer", pointerAddress),
-            Param("width", width),
-            Param("height", height)
+            "sample.image.grayscale.dataview",
+            Param("dataView", dataView)
         )
 
         RemoteClient.call(request) { (response: String?) in
@@ -95,13 +88,9 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             let elapsedTime = CFAbsoluteTimeGetCurrent() - startTime
             let duration = Float(elapsedTime)
 
-            #if DEBUG
-                print("[CameraViewController : captureOutput] Time to process was: \(duration) seconds")
-            #endif
-
+            // draw image
             let finalImage = ImageHelper.rgbaBytesToUIImage(imageData: buffer, width: width, height: height)
 
-            // draw image
             DispatchQueue.main.async {
                 self.previewImage.image = finalImage
                 self.lbOverlay.text = String(format: "Time to process: %.3f seconds\nImage size: %d kb", duration, size / 1024)

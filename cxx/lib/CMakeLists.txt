@@ -15,6 +15,7 @@ set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/message/Response.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/proxy/PlatformProxy.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/serializer/Serializer.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/type/DataView.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/util/TSMap.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/util/UniqueID.hpp"
     PARENT_SCOPE
