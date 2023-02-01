@@ -3,7 +3,6 @@
 #include "xplpc/jni/support.hpp"
 #include "xplpc/proxy/JNIPlatformProxy.hpp"
 
-#include <algorithm>
 #include <cstdint>
 #include <memory>
 
@@ -62,16 +61,21 @@ extern "C"
         return static_cast<jlong>(address);
     }
 
-    JNIEXPORT jobject JNICALL
-    Java_com_xplpc_helper_ByteBufferHelper_createFromPtr(JNIEnv *env, jobject /*thiz*/, jlong ptr, jint size)
+    JNIEXPORT jlong JNICALL
+    Java_com_xplpc_helper_ByteArrayHelper_getPtrAddress(JNIEnv *env, jobject /*thiz*/, jbyteArray data)
     {
-        jclass directByteBuffer = env->FindClass("java/nio/DirectByteBuffer");
-        jmethodID newDirectByteBuffer = env->GetStaticMethodID(directByteBuffer, "allocateDirect", "(I)Ljava/nio/ByteBuffer;");
-        jobject buffer = env->CallStaticObjectMethod(directByteBuffer, newDirectByteBuffer, size);
+        auto pointer = (jbyte *)env->GetPrimitiveArrayCritical(data, nullptr);
+        auto address = reinterpret_cast<std::uintptr_t>(pointer);
+        env->ReleasePrimitiveArrayCritical(data, pointer, JNI_ABORT);
+        return static_cast<jlong>(address);
+    }
 
-        void *bufferPointer = env->GetDirectBufferAddress(buffer);
-        std::copy(reinterpret_cast<uint8_t *>(ptr), (reinterpret_cast<uint8_t *>(ptr) + size), reinterpret_cast<uint8_t *>(bufferPointer));
-
-        return buffer;
+    JNIEXPORT jbyteArray JNICALL
+    Java_com_xplpc_helper_ByteArrayHelper_createFromPtr(JNIEnv *env, jobject thiz, jlong ptr, jint size)
+    {
+        auto byteArray = env->NewByteArray(static_cast<jsize>(size));
+        auto dataPtr = reinterpret_cast<uint8_t *>(ptr);
+        env->SetByteArrayRegion(byteArray, 0, size, reinterpret_cast<const jbyte *>(dataPtr));
+        return byteArray;
     }
 }

@@ -1,5 +1,6 @@
 package com.xplpc.type
 
+import com.xplpc.helper.ByteArrayHelper
 import com.xplpc.helper.ByteBufferHelper
 import java.nio.ByteBuffer
 
@@ -12,6 +13,11 @@ class DataView(
         fun createFromByteBuffer(data: ByteBuffer): DataView {
             val ptr = ByteBufferHelper.getPtrAddress(data)
             return DataView(ptr, data.capacity())
+        }
+
+        fun createFromByteArray(data: ByteArray): DataView {
+            val ptr = ByteArrayHelper.getPtrAddress(data)
+            return DataView(ptr, data.size)
         }
     }
 }

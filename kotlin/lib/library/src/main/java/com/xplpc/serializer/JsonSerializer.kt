@@ -5,11 +5,13 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.reflect.TypeToken
 import com.xplpc.message.Message
 import com.xplpc.message.Param
+import com.xplpc.type.DataView
 import com.xplpc.util.Log
 import java.lang.reflect.Type
 import java.util.Date
@@ -169,6 +171,41 @@ class JsonSerializer : Serializer {
 
         builder.registerTypeAdapter(Char::class.java, customCharSerializer)
         builder.registerTypeAdapter(Character::class.java, customCharSerializer)
+
+        // data view
+        val customDataViewSerializer =
+            object : JsonDeserializer<Any?>, com.google.gson.JsonSerializer<DataView?> {
+                override fun deserialize(
+                    json: JsonElement,
+                    typeOfT: Type?,
+                    context: JsonDeserializationContext?
+                ): Any? {
+                    return try {
+                        val obj = json.asJsonObject
+                        val ptr = obj["ptr"].asLong
+                        val size = obj["size"].asInt
+
+                        DataView(ptr, size)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+
+                override fun serialize(
+                    src: DataView?,
+                    typeOfSrc: Type?,
+                    context: JsonSerializationContext?
+                ): JsonElement? {
+                    return src?.let {
+                        val obj = JsonObject()
+                        obj.addProperty("ptr", it.ptr)
+                        obj.addProperty("size", it.size)
+                        return obj
+                    }
+                }
+            }
+
+        builder.registerTypeAdapter(DataView::class.java, customDataViewSerializer)
 
         return builder.create()
     }
