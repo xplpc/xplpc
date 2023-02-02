@@ -317,3 +317,27 @@ TEST_F(GeneralTest, LocalClientTestNotFound)
     });
     // clang-format on
 }
+
+TEST_F(GeneralTest, LocalClientTestEcho)
+{
+    std::string value = "paulo";
+    auto request = Request{"sample.echo", Param{"value", value}};
+
+    // clang-format off
+    LocalClient::call<std::string>(request, [](const auto &response) {
+        EXPECT_EQ("paulo", response);
+    });
+    // clang-format on
+}
+
+TEST_F(GeneralTest, LocalClientTestEchoNullOpt)
+{
+    std::optional<std::string> value = std::nullopt;
+    auto request = Request{"sample.echo", Param{"value", value}};
+
+    // clang-format off
+    LocalClient::call<std::string>(request, [](const auto &response) {
+        EXPECT_EQ("<EMPTY>", response);
+    });
+    // clang-format on
+}

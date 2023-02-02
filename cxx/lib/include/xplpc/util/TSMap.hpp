@@ -32,14 +32,14 @@ public:
         list.erase(k);
     }
 
-    size_t count()
+    size_t count() const noexcept
     {
         std::unique_lock<decltype(mtx)> lock(mtx);
         return list.size();
     }
 
 private:
-    std::mutex mtx;
+    mutable std::mutex mtx;
     std::unordered_map<Key, Value> list;
 };
 

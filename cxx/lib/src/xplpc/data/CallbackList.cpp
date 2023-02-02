@@ -23,7 +23,7 @@ void CallbackList::execute(const std::string &key, const std::string &data)
     }
 }
 
-size_t CallbackList::count()
+size_t CallbackList::count() const noexcept
 {
     return list.count();
 }

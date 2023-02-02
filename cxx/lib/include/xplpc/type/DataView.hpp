@@ -12,8 +12,8 @@ namespace type
 class DataView
 {
 public:
-    DataView(const uint8_t *ptr, size_t size)
-        : _ptr(const_cast<uint8_t *>(ptr))
+    DataView(uint8_t *ptr, size_t size)
+        : _ptr(ptr)
         , _size(size)
     {
     }

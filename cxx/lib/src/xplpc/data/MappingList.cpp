@@ -22,7 +22,7 @@ std::optional<MappingItem> MappingList::find(const std::string &name)
     return list[name];
 }
 
-size_t MappingList::count()
+size_t MappingList::count() const noexcept
 {
     return list.size();
 }
