@@ -16,8 +16,8 @@ class Request
 public:
     template <typename... Args>
     Request(const std::string &functionName, Args &&...paramValues)
+        : rawData(Serializer::encodeRequest(functionName, std::forward<Args>(paramValues)...))
     {
-        rawData = Serializer::encodeRequest(functionName, std::forward<Args>(paramValues)...);
     }
 
     const std::string &data() const { return this->rawData; }
