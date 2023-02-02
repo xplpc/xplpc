@@ -19,7 +19,7 @@ public:
     CallbackList() = default;
     void add(const std::string &key, const std::function<void(const std::string &)> callback);
     void execute(const std::string &key, const std::string &data);
-    size_t count();
+    size_t count() const noexcept;
     static std::shared_ptr<CallbackList> shared();
 
 private:

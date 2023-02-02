@@ -4,16 +4,16 @@
 
 #include <any>
 #include <exception>
-#include <map>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace xplpc
 {
 namespace message
 {
 
-class Message : public std::map<std::string, std::any>
+class Message : public std::unordered_map<std::string, std::any>
 {
 public:
     template <typename T>
@@ -21,9 +21,10 @@ public:
     {
         try
         {
-            if (count(name))
+            auto it = find(name);
+            if (it != end())
             {
-                return std::any_cast<T>(at(name));
+                return std::any_cast<T>(it->second);
             }
             else
             {

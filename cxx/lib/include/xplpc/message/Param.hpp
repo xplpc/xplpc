@@ -12,10 +12,10 @@ template <typename T>
 class Param
 {
 public:
-    Param(const std::string &name, const T &value)
+    Param(const std::string &name, T value)
+        : n(name)
+        , v(value)
     {
-        this->n = name;
-        this->v = value;
     }
 
     std::string n;
