@@ -116,6 +116,7 @@ And you can use `ProxyClient` to send manually the `serialized message` to simul
 *   [Swift](docs/swift.md)
 *   [WASM](docs/wasm.md)
 *   [Contribution](docs/contribution.md)
+*   [Purpose](docs/purpose.md)
 
 ## License
 
