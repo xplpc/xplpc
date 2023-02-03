@@ -1,6 +1,6 @@
 # Purpose
 
-## Why this project was created?
+### Why this project was created?
 
 I have been using this approach of integrating C++ with mobile for many years now. I have been working on a project created by Dropbox (Djinni) for some time, but they abandoned the project for internal reasons. The community continued the Dropbox project and the Snapchat team also made a fork of it, adding support for Web Assembly and other interesting features. Today, I am a collaborator in both projects.
 
