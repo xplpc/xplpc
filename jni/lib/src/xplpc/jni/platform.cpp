@@ -50,7 +50,8 @@ extern "C"
     JNIEXPORT void JNICALL
     Java_com_xplpc_proxy_PlatformProxy_nativeCallProxyCallback(JNIEnv *env, jclass /*clazz*/, jstring key, jstring data)
     {
-        CallbackList::shared()->execute(jniUTF8FromString(env, key), jniUTF8FromString(env, data));
+        auto platformProxy = std::static_pointer_cast<JNIPlatformProxy>(PlatformProxy::shared());
+        platformProxy->callProxyCallback(jniUTF8FromString(env, key), jniUTF8FromString(env, data));
     }
 
     JNIEXPORT jlong JNICALL

@@ -2,6 +2,7 @@
 
 #include "xplpc/map/MappingItem.hpp"
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <optional>

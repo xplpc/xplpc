@@ -16,12 +16,12 @@ If you don't implement this method, you will get this error when compile:
 
 Execute on terminal:
 
-    python3 xplpc.py cxx-build
+    python3 xplpc.py cxx-build-static
 
 or
 
-    cmake -S . -B build/cxx
-    cmake --build build/cxx
+    cmake -S . -B build/cxx-static -DXPLPC_TARGET=cxx-static -DXPLPC_ADD_CUSTOM_DATA=ON
+    cmake --build build/cxx-static
 
 ## How to build the C++ sample
 
@@ -31,7 +31,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/cxx-sample -DXPLPC_TARGET=sample -DXPLPC_ADD_CUSTOM_DATA=ON
+    cmake -S . -B build/cxx-sample -DXPLPC_TARGET=cxx-static -DXPLPC_ENABLE_SAMPLES=ON
 
 <!---->
 
@@ -49,7 +49,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/cxx-leaks -DXPLPC_TARGET=sample -DXPLPC_ADD_CUSTOM_DATA=ON -DCMAKE_BUILD_TYPE=Debug
+    cmake -S . -B build/cxx-leaks -DXPLPC_TARGET=cxx-static -DXPLPC_ENABLE_SAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
 
 <!---->
 

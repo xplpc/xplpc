@@ -28,7 +28,8 @@ Tasks:
   - python-format
 
   - cxx-format
-  - cxx-build
+  - cxx-build-static
+  - cxx-build-shared
   - cxx-test
   - cxx-build-sample
   - cxx-run-sample
@@ -51,6 +52,14 @@ Tasks:
   - wasm-build-sample
   - wasm-run-sample
   - wasm-serve-sample
+
+  - c-format
+  - c-build-static
+  - c-build-shared
+  - c-test
+  - c-build-sample
+  - c-run-sample
+  - c-build-leaks
 """
 
 import os
@@ -59,7 +68,8 @@ from docopt import docopt
 from pygemstones.system import bootstrap as b
 from pygemstones.util import log as l
 
-import core.config as c
+import core.c as c
+import core.config as cfg
 import core.cxx as cxx
 import core.docs as docs
 import core.general as general
@@ -71,15 +81,15 @@ from core import util
 
 
 def main(options):
-    c.proj_path = os.path.dirname(os.path.abspath(__file__))
+    cfg.proj_path = os.path.dirname(os.path.abspath(__file__))
 
     # show all params for debug
     if ("--debug" in options and options["--debug"]) or (
         "-d" in options and options["-d"]
     ):
-        c.debug = True
+        cfg.debug = True
 
-    if c.debug:
+    if cfg.debug:
         l.bold("You have executed with options:", l.YELLOW)
         l.m(str(options))
         l.nl()
@@ -132,9 +142,13 @@ def main(options):
     elif task == "cxx-format":
         cxx.run_task_format()
 
-    # build
-    elif task == "cxx-build":
-        cxx.run_task_build()
+    # build static
+    elif task == "cxx-build-static":
+        cxx.run_task_build_static()
+
+    # build shared
+    elif task == "cxx-build-shared":
+        cxx.run_task_build_shared()
 
     # test
     elif task == "cxx-test":
@@ -223,6 +237,38 @@ def main(options):
     # serve sample
     elif task == "wasm-serve-sample":
         wasm.run_task_serve_sample()
+
+    #######################
+    # C
+    #######################
+
+    # format
+    elif task == "c-format":
+        c.run_task_format()
+
+    # build static
+    elif task == "c-build-static":
+        c.run_task_build_static()
+
+    # build shared
+    elif task == "c-build-shared":
+        c.run_task_build_shared()
+
+    # test
+    elif task == "c-test":
+        c.run_task_test()
+
+    # build sample
+    elif task == "c-build-sample":
+        c.run_task_build_sample()
+
+    # run sample
+    elif task == "c-run-sample":
+        c.run_task_run_sample()
+
+    # build leaks
+    elif task == "c-build-leaks":
+        c.run_task_build_leaks()
 
     #######################
     # INVALID

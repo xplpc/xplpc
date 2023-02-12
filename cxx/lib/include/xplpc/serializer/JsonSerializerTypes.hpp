@@ -5,6 +5,7 @@
 #include "xplpc/type/DataView.hpp"
 
 #include <chrono>
+#include <cstddef>
 #include <optional>
 
 #include "nlohmann/json.hpp"

@@ -8,6 +8,7 @@
 </p>
 
 <p align="center">
+    <a href="https://github.com/xplpc/xplpc/actions/workflows/c.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/c.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/cxx.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/cxx.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/swift.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/swift.yml/badge.svg"></a>
@@ -102,6 +103,7 @@ And you can use `ProxyClient` to send manually the `serialized message` to simul
 
 ## Supported platforms
 
+*   C
 *   C++
 *   Kotlin
 *   Swift
@@ -110,6 +112,7 @@ And you can use `ProxyClient` to send manually the `serialized message` to simul
 ## Documentation
 
 *   [General](docs/general.md)
+*   [C](docs/c.md)
 *   [C++](docs/cxx.md)
 *   [Kotlin](docs/kotlin.md)
 *   [Python](docs/python.md)

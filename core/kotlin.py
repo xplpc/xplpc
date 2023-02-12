@@ -34,7 +34,7 @@ def run_task_build():
             build_dir,
             "-DXPLPC_TARGET=kotlin",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            f"-DCMAKE_BUILD_TYPE={c.build_type}",
+            f"-DCMAKE_BUILD_TYPE={c.build_type_kotlin}",
             f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
         ]
     )

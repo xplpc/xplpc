@@ -1,9 +1,5 @@
-#include "xplpc/custom/Mapping.hpp"
-#include "xplpc/xplpc.hpp"
+#include "xplpc/c/platform.hpp"
 #include "gtest/gtest.h"
-
-using namespace xplpc::core;
-using namespace xplpc::proxy;
 
 class GeneralTest : public ::testing::Test
 {
@@ -21,11 +17,7 @@ protected:
     void SetUp() override
     {
         // code here will be called immediately after the constructor (right before each test)
-        XPLPC::initialize();
-
-        // initialize
-        PlatformProxy::createDefault();
-        PlatformProxy::shared()->initialize();
+        xplpc_core_initialize(nullptr, nullptr);
     }
 
     void TearDown() override

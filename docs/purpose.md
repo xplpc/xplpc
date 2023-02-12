@@ -22,5 +22,5 @@ Therefore, for me, the best approach to develop applications is still the one I 
 
 In practice, using the approach I am proposing, your development process would be divided into two parts:
 
-1. The C++ code will make the HTTP call to your backend, parse the JSON and return a Customer class filled with the user data that was returned in the API.
-2. The UI code will only present the visual controls and a button that will call the C++ method created.
+1.  The C++ code will make the HTTP call to your backend, parse the JSON and return a Customer class filled with the user data that was returned in the API.
+2.  The UI code will only present the visual controls and a button that will call the C++ method created.

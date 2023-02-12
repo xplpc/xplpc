@@ -1,4 +1,4 @@
-name: C++
+name: C
 
 on:
   push:
@@ -114,14 +114,14 @@ jobs:
           languages: cpp
 
       - name: Test
-        run: python3 xplpc.py cxx-test
+        run: python3 xplpc.py c-test
 
       - name: Build
-        run: python3 xplpc.py cxx-build-static
+        run: python3 xplpc.py c-build-static
 
       - name: Leaks
         if: matrix.config.leaks == true
-        run: python3 xplpc.py cxx-build-leaks
+        run: python3 xplpc.py c-build-leaks
 
       - name: Perform CodeQL Analysis
         if: matrix.config.codeql == true
