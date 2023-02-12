@@ -18,7 +18,7 @@ def run_task_build_static():
 
     # build
     l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "cxx-static")
+    build_dir = os.path.join(c.proj_path, "build", "c-static")
     f.recreate_dir(build_dir)
 
     r.run(
@@ -28,7 +28,7 @@ def run_task_build_static():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=cxx-static",
+            "-DXPLPC_TARGET=c-static",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DCMAKE_BUILD_TYPE={c.build_type}",
         ]
@@ -49,7 +49,7 @@ def run_task_build_shared():
 
     # build
     l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "cxx-shared")
+    build_dir = os.path.join(c.proj_path, "build", "c-shared")
     f.recreate_dir(build_dir)
 
     r.run(
@@ -59,7 +59,7 @@ def run_task_build_shared():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=cxx-shared",
+            "-DXPLPC_TARGET=c-shared",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DCMAKE_BUILD_TYPE={c.build_type}",
         ]
@@ -80,7 +80,7 @@ def run_task_build_sample():
 
     # build
     l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "cxx-sample")
+    build_dir = os.path.join(c.proj_path, "build", "c-sample")
     f.recreate_dir(build_dir)
 
     r.run(
@@ -90,7 +90,7 @@ def run_task_build_sample():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=cxx-static",
+            "-DXPLPC_TARGET=c-static",
             "-DXPLPC_ENABLE_SAMPLES=ON",
             f"-DCMAKE_BUILD_TYPE={c.build_type}",
         ]
@@ -103,7 +103,7 @@ def run_task_build_sample():
 # -----------------------------------------------------------------------------
 def run_task_run_sample():
     l.i("Running...")
-    build_dir = os.path.join(c.proj_path, "build", "cxx-sample")
+    build_dir = os.path.join(c.proj_path, "build", "c-sample")
     r.run([util.run_name("xplpc")], cwd=os.path.join(build_dir, "bin"))
     l.ok()
 
@@ -120,7 +120,7 @@ def run_task_build_leaks():
 
     # build
     l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "cxx-leaks")
+    build_dir = os.path.join(c.proj_path, "build", "c-leaks")
     f.recreate_dir(build_dir)
 
     r.run(
@@ -130,7 +130,7 @@ def run_task_build_leaks():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=cxx-static",
+            "-DXPLPC_TARGET=c-static",
             "-DXPLPC_ENABLE_SAMPLES=ON",
             "-DCMAKE_BUILD_TYPE=Debug",
         ]
@@ -145,7 +145,7 @@ def run_task_build_leaks():
             "--list",
             "--",
             os.path.join(
-                c.proj_path, "build", "cxx-leaks", "bin", util.exec_name("xplpc")
+                c.proj_path, "build", "c-leaks", "bin", util.exec_name("xplpc")
             ),
         ]
     )
@@ -163,7 +163,7 @@ def run_task_test():
 
     # build
     l.i("Testing...")
-    build_dir = os.path.join(c.proj_path, "build", "cxx-test")
+    build_dir = os.path.join(c.proj_path, "build", "c-test")
     f.recreate_dir(build_dir)
 
     r.run(
@@ -173,7 +173,7 @@ def run_task_test():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=cxx-static",
+            "-DXPLPC_TARGET=c-static",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             "-DXPLPC_ENABLE_TESTS=ON",
         ]
@@ -201,29 +201,13 @@ def run_task_format():
     # format
     path_list = [
         {
-            "path": os.path.join(c.proj_path, "cxx"),
-            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
-        },
-        {
-            "path": os.path.join(c.proj_path, "jni"),
-            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
-        },
-        {
-            "path": os.path.join(c.proj_path, "objc"),
-            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
-        },
-        {
-            "path": os.path.join(c.proj_path, "wasm"),
-            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
-        },
-        {
             "path": os.path.join(c.proj_path, "c"),
             "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
         },
     ]
 
     if path_list:
-        l.i("Formatting C++ files...")
+        l.i("Formatting C files...")
 
         util.run_format(
             path_list=path_list,
@@ -242,4 +226,4 @@ def run_task_format():
 
         l.ok()
     else:
-        l.i("No C++ files found to format")
+        l.i("No C files found to format")

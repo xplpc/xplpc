@@ -1,0 +1,13 @@
+# files
+set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/c/platform.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/c/typedefs.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/proxy/CPlatformProxy.hpp"
+    PARENT_SCOPE
+)
+
+set(XPLPC_SRC_FILES ${XPLPC_SRC_FILES}
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/c/platform.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/proxy/CPlatformProxy.cpp"
+    PARENT_SCOPE
+)

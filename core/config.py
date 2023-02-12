@@ -4,6 +4,7 @@ task = ""
 proj_path = ""
 
 build_type = "Release"
+build_type_kotlin = "RelWithDebInfo"
 
 # swift
 swift_framework_list = [

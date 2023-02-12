@@ -2,6 +2,7 @@
 
 #include "xplpc/util/TSMap.hpp"
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>

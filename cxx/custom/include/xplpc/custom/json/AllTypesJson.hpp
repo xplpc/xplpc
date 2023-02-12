@@ -1,6 +1,6 @@
-#ifdef XPLPC_SERIALIZER_JSON
-
 #pragma once
+
+#ifdef XPLPC_SERIALIZER_JSON
 
 #include "nlohmann/json.hpp"
 #include "xplpc/custom/AllTypes.hpp"

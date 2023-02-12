@@ -1,8 +1,10 @@
 #import "xplpc/client/ProxyClient.hpp"
 #import "xplpc/objc/support.h"
+#import "xplpc/proxy/PlatformProxy.hpp"
 #import <xplpc/XPLPCNativePlatformProxyImpl.h>
 
 using namespace xplpc::client;
+using namespace xplpc::proxy;
 
 @implementation XPLPCNativePlatformProxyImpl
 
@@ -25,7 +27,7 @@ using namespace xplpc::client;
 // clang-format off
 - (void)nativeCallProxyCallback:(NSString *)key :(NSString *)data
 {
-    CallbackList::shared()->execute(ObjCSupport::xplpcObjcStringToCppString(key), ObjCSupport::xplpcObjcStringToCppString(data));
+    PlatformProxy::shared()->callProxyCallback(ObjCSupport::xplpcObjcStringToCppString(key), ObjCSupport::xplpcObjcStringToCppString(data));
 }
 // clang-format on
 
