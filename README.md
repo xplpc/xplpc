@@ -108,6 +108,7 @@ And you can use `ProxyClient` to send manually the `serialized message` to simul
 *   Kotlin
 *   Swift
 *   WASM
+*   Flutter
 
 ## Documentation
 
@@ -118,6 +119,7 @@ And you can use `ProxyClient` to send manually the `serialized message` to simul
 *   [Python](docs/python.md)
 *   [Swift](docs/swift.md)
 *   [WASM](docs/wasm.md)
+*   [Flutter](docs/flutter.md)
 *   [Contribution](docs/contribution.md)
 *   [Purpose](docs/purpose.md)
 

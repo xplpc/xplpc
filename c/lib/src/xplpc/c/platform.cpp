@@ -1,11 +1,10 @@
-#include "xplpc/c/platform.hpp"
+#include "xplpc/c/platform.h"
 #include "xplpc/client/ProxyClient.hpp"
 #include "xplpc/core/XPLPC.hpp"
 #include "xplpc/proxy/CPlatformProxy.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
 #include <memory>
-#include <string>
 
 using namespace xplpc::client;
 using namespace xplpc::core;

@@ -43,8 +43,10 @@ Tasks:
 
   - swift-format
   - swift-build
+  - swift-build-macos
   - swift-test
   - swift-build-xcframework
+  - swift-build-xcframework-macos
 
   - wasm-format
   - wasm-build
@@ -60,6 +62,9 @@ Tasks:
   - c-build-sample
   - c-run-sample
   - c-build-leaks
+
+  - flutter-build-xcframework
+  - flutter-build-xcframework-macos
 """
 
 import os
@@ -72,6 +77,7 @@ import core.c as c
 import core.config as cfg
 import core.cxx as cxx
 import core.docs as docs
+import core.flutter as flutter
 import core.general as general
 import core.kotlin as kotlin
 import core.python as python
@@ -202,6 +208,10 @@ def main(options):
     elif task == "swift-build":
         swift.run_task_build()
 
+    # build for macos
+    elif task == "swift-build-macos":
+        swift.run_task_build_macos()
+
     # test
     elif task == "swift-test":
         swift.run_task_test()
@@ -209,6 +219,10 @@ def main(options):
     # build xcframework
     elif task == "swift-build-xcframework":
         swift.run_task_build_xcframework()
+
+    # build xcframework for macos
+    elif task == "swift-build-xcframework-macos":
+        swift.run_task_build_xcframework_macos()
 
     #######################
     # WASM
@@ -269,6 +283,18 @@ def main(options):
     # build leaks
     elif task == "c-build-leaks":
         c.run_task_build_leaks()
+
+    #######################
+    # FLUTTER
+    #######################
+
+    # build xcframework
+    elif task == "flutter-build-xcframework":
+        flutter.run_task_build_xcframework()
+
+    # build xcframework for macos
+    elif task == "flutter-build-xcframework-macos":
+        flutter.run_task_build_xcframework_macos()
 
     #######################
     # INVALID

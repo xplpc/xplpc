@@ -1,7 +1,7 @@
 # files
 set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/c/platform.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/c/typedefs.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/c/platform.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/c/typedefs.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/proxy/CPlatformProxy.hpp"
     PARENT_SCOPE
 )

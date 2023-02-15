@@ -16,6 +16,7 @@ set(XPLPC_CUSTOM_DATA_INCLUDE_PATH "cxx/custom/include" CACHE STRING "Custom Dat
 set(XPLPC_ENABLE_SERIALIZER_FOR_JSON ON CACHE BOOL "Enable Serializer For Json")
 set(XPLPC_ENABLE_TESTS OFF CACHE BOOL "Enable Tests")
 set(XPLPC_ENABLE_SAMPLES OFF CACHE BOOL "Enable Samples")
+set(XPLPC_ENABLE_INTERFACE OFF CACHE BOOL "Enable Interface")
 set(XPLPC_INC_FILES "" CACHE INTERNAL "Include Files")
 set(XPLPC_SRC_FILES "" CACHE INTERNAL "Source Files")
 set(XPLPC_TESTS_INC_FILES "" CACHE INTERNAL "Tests Include Files")
@@ -64,6 +65,14 @@ endif()
 
 # xplpc files
 add_subdirectory(cxx/lib)
+
+# xplpc interface
+if(XPLPC_ENABLE_INTERFACE)
+    message(STATUS "XPLPC Interface: Enabled")
+    add_subdirectory(c/lib)
+else()
+    message(STATUS "XPLPC Interface: Disabled")
+endif()
 
 # custom data
 if(XPLPC_ADD_CUSTOM_DATA)
@@ -124,7 +133,7 @@ else()
         target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC objc/lib/include)
 
         find_library(FWK_FOUNDATION Foundation)
-        target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${${FWK_FOUNDATION}})
+        target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${FWK_FOUNDATION})
 
         set_target_properties(${XPLPC_PROJECT_NAME} PROPERTIES
             FRAMEWORK TRUE
@@ -174,6 +183,12 @@ else()
     endif()
 endif()
 
+# xplpc interface include path
+if(XPLPC_ENABLE_INTERFACE)
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+endif()
+
+# cxx include path
 target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC cxx/lib/include)
 
 # custom data

@@ -1,7 +1,7 @@
-#pragma once
+#ifndef XPLPC_C_PLATFORM_H
+#define XPLPC_C_PLATFORM_H
 
-#include "xplpc/c/typedefs.hpp"
-#include <cstddef>
+#include "xplpc/c/typedefs.h"
 
 #ifdef WIN32
 #define XPLPC_EXPORT __declspec(dllexport)
@@ -23,3 +23,5 @@ void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataS
 
 XPLPC_EXPORT
 void xplpc_native_call_proxy_callback(char *key, size_t keySize, char *data, size_t dataSize);
+
+#endif
