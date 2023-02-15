@@ -1,4 +1,4 @@
-#include "xplpc/c/platform.hpp"
+#include "xplpc/c/platform.h"
 #include "gtest/gtest.h"
 
 class GeneralTest : public ::testing::Test
