@@ -6,5 +6,5 @@ abstract class Serializer {
   Message? decodeMessage(String data);
   String encodeFunctionReturnValue(dynamic data);
   T? decodeFunctionReturnValue<T>(String data);
-  String encodeRequest(String functionName, List<Param> params);
+  String encodeRequest(String functionName, [List<Param>? params]);
 }

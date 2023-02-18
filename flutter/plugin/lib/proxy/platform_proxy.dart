@@ -38,7 +38,7 @@ class PlatformProxy {
     );
 
     // function: xplpc_native_call_proxy
-    nativeCallProxyFunc = XPLPC.instance.library
+    nativeCallProxyCallbackFunc = XPLPC.instance.library
         .lookupFunction<NativeCallProxyCallbackFunc, CallProxyCallbackFunc>(
       'xplpc_native_call_proxy_callback',
     );

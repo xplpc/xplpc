@@ -10,7 +10,7 @@ class JsonSerializer implements Serializer {
   String decodeFunctionName(String data) {
     try {
       return json.decode(data)["f"];
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[JsonSerializer : decodeFunctionName] Error when parse json: $e");
     }
 
@@ -21,7 +21,7 @@ class JsonSerializer implements Serializer {
   T? decodeFunctionReturnValue<T>(String data) {
     try {
       return json.decode(data)["r"];
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e(
         "[JsonSerializer : decodeFunctionReturnValue] Error when parse json: $e",
       );
@@ -44,7 +44,7 @@ class JsonSerializer implements Serializer {
       }
 
       return message;
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[JsonSerializer : decodeMessage] Error when decode message: $e");
     }
 
@@ -55,7 +55,7 @@ class JsonSerializer implements Serializer {
   String encodeFunctionReturnValue(data) {
     try {
       return jsonEncode({"r": data});
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e(
         "[JsonSerializer : encodeFunctionReturnValue] Error when encode data: $e",
       );
@@ -65,13 +65,13 @@ class JsonSerializer implements Serializer {
   }
 
   @override
-  String encodeRequest(String functionName, List<Param> params) {
+  String encodeRequest(String functionName, [List<Param>? params]) {
     try {
       return json.encode({
         "f": functionName,
         "p": params,
       });
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[JsonSerializer : encodeRequest] Error when encode data: $e");
     }
 

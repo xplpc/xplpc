@@ -16,7 +16,7 @@ class LocalClient {
 
     if (functionName.isEmpty) {
       Log.e("[LocalClient : call] Function name is empty");
-      callback(null);
+      callback?.call(null);
       return;
     }
 
@@ -27,7 +27,7 @@ class LocalClient {
       Log.e(
         "[LocalClient : call] Mapping not found for function: $functionName",
       );
-      callback(null);
+      callback?.call(null);
       return;
     }
 
@@ -36,7 +36,7 @@ class LocalClient {
 
     try {
       message = XPLPC.instance.config.serializer.decodeMessage(data);
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[LocalClient : call] Error when decode message: $e");
     }
 
@@ -44,20 +44,20 @@ class LocalClient {
       Log.e(
         "[LocalClient : call] Error when decode message for function: $functionName",
       );
-      callback(null);
+      callback?.call(null);
       return;
     }
 
     try {
       mappingItem.target(message, (dynamic r) {
-        callback(r as T?);
+        callback?.call(r as T?);
       });
 
       return;
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[LocalClient : call] Error: $e");
     }
 
-    callback(null);
+    callback?.call(null);
   }
 }

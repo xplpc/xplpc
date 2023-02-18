@@ -55,6 +55,6 @@ typedef CallProxyCallbackFunc = void Function(
 );
 
 // dart client callbacks
-typedef LocalClientCallback<T> = void Function(T);
-typedef ProxyClientCallback = void Function(String);
-typedef RemoteClientCallback<T> = void Function(T?);
+typedef LocalClientCallback<T> = void Function(T)?;
+typedef ProxyClientCallback = void Function(String)?;
+typedef RemoteClientCallback<T> = void Function(T?)?;

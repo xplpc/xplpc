@@ -34,7 +34,7 @@ void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataS
     // clang-format off
     ProxyClient::call(data, [key, keySize](const auto &response) {
         auto platformProxy = std::static_pointer_cast<CPlatformProxy>(PlatformProxy::shared());
-        auto callback = platformProxy->getFuncPtrToOnNativeProxyCall();
+        auto callback = platformProxy->getFuncPtrToCallProxyCallback();
 
         if (callback)
         {

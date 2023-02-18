@@ -12,7 +12,7 @@ class RemoteClient {
     try {
       UniqueID.generate().then((key) {
         CallbackList.instance.add(key, (String response) {
-          callback(XPLPC.instance.config.serializer
+          callback?.call(XPLPC.instance.config.serializer
               .decodeFunctionReturnValue<T>(response));
         });
 
@@ -28,10 +28,10 @@ class RemoteClient {
       });
 
       return;
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[RemoteClient : call] Error: $e");
     }
 
-    callback(null);
+    callback?.call(null);
   }
 }

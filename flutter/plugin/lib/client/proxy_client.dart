@@ -13,7 +13,7 @@ class ProxyClient {
 
     if (functionName.isEmpty) {
       Log.e("[ProxyClient : call] Function name is empty");
-      callback("");
+      callback?.call("");
       return;
     }
 
@@ -24,7 +24,7 @@ class ProxyClient {
       Log.e(
         "[ProxyClient : call] Mapping not found for function: $functionName",
       );
-      callback("");
+      callback?.call("");
       return;
     }
 
@@ -33,7 +33,7 @@ class ProxyClient {
 
     try {
       message = XPLPC.instance.config.serializer.decodeMessage(data);
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[ProxyClient : call] Error when decode message: $e");
     }
 
@@ -41,22 +41,23 @@ class ProxyClient {
       Log.e(
         "[ProxyClient : call] Error when decode message for function: $functionName",
       );
-      callback("");
+      callback?.call("");
       return;
     }
 
     try {
       mappingItem.target(message, (dynamic r) {
-        callback(XPLPC.instance.config.serializer.encodeFunctionReturnValue(
+        callback
+            ?.call(XPLPC.instance.config.serializer.encodeFunctionReturnValue(
           r,
         ));
       });
 
       return;
-    } on Exception catch (e) {
+    } catch (e) {
       Log.e("[ProxyClient : call] Error: $e");
     }
 
-    callback("");
+    callback?.call("");
   }
 }

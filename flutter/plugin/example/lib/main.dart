@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:xplpc/client/local_client.dart';
+import 'package:xplpc/client/remote_client.dart';
 import 'package:xplpc/core/config.dart';
 import 'package:xplpc/core/xplpc.dart';
 import 'package:xplpc/message/param.dart';
@@ -48,6 +49,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void onLoginSubmitButtonClick() {
+    var request = Request("sample.login", [
+      Param("username", "paulo"),
+      Param("password", "123456"),
+      Param("remember", true),
+    ]);
+
+    RemoteClient.call<String>(request, (response) {
+      print(response);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -66,7 +79,8 @@ class _MyAppState extends State<MyApp> {
                         MaterialStateProperty.all<Color>(Colors.blue),
                   ),
                   onPressed: () {
-                    onBatteryLevelSubmitButtonClick();
+                    //onBatteryLevelSubmitButtonClick();
+                    onLoginSubmitButtonClick();
                   },
                   child: const Text('SUBMIT'),
                 ),
