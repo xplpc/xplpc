@@ -28,13 +28,29 @@ class XPLPC {
     this.config = config;
 
     loadLibrary();
+    PlatformProxy.initialize();
   }
 
   void loadLibrary() {
-    library = Platform.isAndroid
-        ? ffi.DynamicLibrary.open("libxplpc.so")
-        : ffi.DynamicLibrary.process();
+    var openDirect = false;
+    late String openPath;
 
-    PlatformProxy.initialize();
+    if (Platform.isAndroid) {
+      openPath = "libxplpc.so";
+    } else {
+      openDirect = true;
+    }
+
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      openDirect = false;
+      openPath =
+          "../../build/flutter-macos-xcframework/xplpc.xcframework/macos-arm64_x86_64/xplpc.framework/Versions/A/xplpc";
+    }
+
+    if (openDirect) {
+      library = ffi.DynamicLibrary.process();
+    } else {
+      library = ffi.DynamicLibrary.open(openPath);
+    }
   }
 }
