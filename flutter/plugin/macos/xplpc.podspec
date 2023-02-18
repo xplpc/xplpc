@@ -5,7 +5,7 @@
 # Run `pod lib lint xplpc.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'xplpc_plugin'
+  s.name             = 'xplpc'
   s.version          = '1.0.0'
   s.summary          = 'XPLPC Dart Plugin.'
   s.description      = 'XPLPC Dart Plugin Project.'
@@ -13,17 +13,18 @@ Pod::Spec.new do |s|
   s.license          = { file: '../LICENSE' }
   s.author           = { 'Paulo Coutinho' => 'paulocoutinhox@gmail.com' }
 
-  # Source is the path where the xcframework can be found.
+  # Dependencies
   s.source = { path: '.' }
-  s.dependency 'Flutter'
+  s.dependency 'FlutterMacOS'
+  s.frameworks = 'Foundation'
 
   # Flutter.framework does not contain a i386 slice.
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.swift_version = '5.0'
 
   # Versions.
-  s.ios.deployment_target = '11.0'
+  s.osx.deployment_target = '10.11'
 
   # Name of the xcframework.
-  s.ios.vendored_frameworks = 'xplpc.xcframework'
+  s.osx.vendored_frameworks = 'xplpc.xcframework'
 end

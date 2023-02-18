@@ -1,21 +1,21 @@
 PODS:
   - Flutter (1.0.0)
-  - xplpc_plugin (1.0.0):
+  - xplpc (1.0.0):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
-  - xplpc_plugin (from `.symlinks/plugins/xplpc_plugin/ios`)
+  - xplpc (from `.symlinks/plugins/xplpc/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
-  xplpc_plugin:
-    :path: ".symlinks/plugins/xplpc_plugin/ios"
+  xplpc:
+    :path: ".symlinks/plugins/xplpc/ios"
 
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  xplpc_plugin: 12a693ce01f3964c711090d7ed9b0ae1ffedaa88
+  xplpc: 6634712ee657dba43fa9efe9359e7c0015dfc197
 
 PODFILE CHECKSUM: 985e5b058f26709dc81f9ae74ea2b2775bdbcefe
 
