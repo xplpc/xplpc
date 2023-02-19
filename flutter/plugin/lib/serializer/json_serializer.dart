@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:xplpc/message/message.dart';
 import 'package:xplpc/message/param.dart';
 import 'package:xplpc/serializer/serializer.dart';
+import 'package:xplpc/type/dataview.dart';
 import 'package:xplpc/util/log.dart';
 
 class JsonSerializer implements Serializer {
@@ -20,7 +21,11 @@ class JsonSerializer implements Serializer {
   @override
   T? decodeFunctionReturnValue<T>(String data) {
     try {
-      return json.decode(data)["r"];
+      if (T == DataView) {
+        return DataView.fromJson(json.decode(data)["r"]) as T;
+      } else {
+        return json.decode(data)["r"];
+      }
     } catch (e) {
       Log.e(
         "[JsonSerializer : decodeFunctionReturnValue] Error when parse json: $e",
