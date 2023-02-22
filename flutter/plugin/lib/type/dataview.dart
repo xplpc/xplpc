@@ -2,7 +2,9 @@ import 'dart:ffi' as ffi;
 import 'dart:typed_data';
 
 import "package:ffi/ffi.dart";
+import 'package:xplpc/reflectable/reflector.dart';
 
+@reflector
 class DataView {
   late int ptr;
   late int size;

@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:reflectable/reflectable.dart';
+import 'package:xplpc/data/codable_type_list.dart';
 import 'package:xplpc/message/message.dart';
 import 'package:xplpc/message/param.dart';
+import 'package:xplpc/reflectable/reflector.dart';
 import 'package:xplpc/serializer/serializer.dart';
-import 'package:xplpc/type/dataview.dart';
 import 'package:xplpc/util/log.dart';
 
 class JsonSerializer implements Serializer {
@@ -20,11 +22,42 @@ class JsonSerializer implements Serializer {
 
   @override
   T? decodeFunctionReturnValue<T>(String data) {
+    // try find the class mirror for type T
+    ClassMirror? classMirror;
+
     try {
-      if (T == DataView) {
-        return DataView.fromJson(json.decode(data)["r"]) as T;
-      } else {
+      for (var codableType in CodableTypeList.instance.list) {
+        var typeMirror = reflector.reflectType(T);
+
+        if (typeMirror == codableType) {
+          classMirror = reflector.reflectType(
+            codableType.reflectedType,
+          ) as ClassMirror;
+
+          break;
+        }
+      }
+    } on NoSuchCapabilityError catch (e) {
+      Log.d(
+        "[JsonSerializer : decodeFunctionReturnValue] Class mirror not found for type: $e",
+      );
+    } catch (e) {
+      Log.e(
+        "[JsonSerializer : decodeFunctionReturnValue] Error when find class mirror: $e",
+      );
+    }
+
+    // use default dart types or class mirror
+    try {
+      if (classMirror == null) {
         return json.decode(data)["r"];
+      } else {
+        var instanceMirror = classMirror.newInstance(
+          "fromJson",
+          [json.decode(data)["r"]],
+        );
+
+        return instanceMirror as T?;
       }
     } catch (e) {
       Log.e(

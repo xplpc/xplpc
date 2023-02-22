@@ -12,8 +12,11 @@ class RemoteClient {
     try {
       UniqueID.generate().then((key) {
         CallbackList.instance.add(key, (String response) {
-          callback?.call(XPLPC.instance.config.serializer
-              .decodeFunctionReturnValue<T>(response));
+          callback?.call(
+            XPLPC.instance.config.serializer.decodeFunctionReturnValue<T>(
+              response,
+            ),
+          );
         });
 
         var nativeKey = key.toNativeUtf8();

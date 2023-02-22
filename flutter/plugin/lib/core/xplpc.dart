@@ -2,7 +2,9 @@ import 'dart:ffi' as ffi;
 import 'dart:io';
 
 import 'package:xplpc/core/config.dart';
+import 'package:xplpc/data/codable_type_list.dart';
 import 'package:xplpc/proxy/platform_proxy.dart';
+import 'package:xplpc/type/dataview.dart';
 
 class XPLPC {
   // singleton
@@ -27,11 +29,11 @@ class XPLPC {
 
     this.config = config;
 
-    loadLibrary();
-    PlatformProxy.initialize();
+    initializeLibrary();
+    initializePlatformProxy();
   }
 
-  void loadLibrary() {
+  void initializeLibrary() {
     var openDirect = false;
     late String openPath;
 
@@ -52,5 +54,13 @@ class XPLPC {
     } else {
       library = ffi.DynamicLibrary.open(openPath);
     }
+  }
+
+  void initializePlatformProxy() {
+    PlatformProxy.initialize();
+  }
+
+  void initializeReflectable() {
+    CodableTypeList.instance.add<DataView>();
   }
 }

@@ -14,11 +14,16 @@ import 'package:xplpc/message/response.dart';
 import 'package:xplpc/serializer/json_serializer.dart';
 import 'package:xplpc/type/dataview.dart';
 
+import 'remote_client_test.reflectable.dart';
+
 void reverse(Message m, Response r) {
   r("ok");
 }
 
 void main() {
+  initializeReflectable();
+  XPLPC.instance.initializeReflectable();
+
   group('Testing Remote Client', () {
     setUp(() {
       XPLPC.instance.initialize(
