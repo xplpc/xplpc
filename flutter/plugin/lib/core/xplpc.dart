@@ -2,9 +2,7 @@ import 'dart:ffi' as ffi;
 import 'dart:io';
 
 import 'package:xplpc/core/config.dart';
-import 'package:xplpc/data/codable_type_list.dart';
 import 'package:xplpc/proxy/platform_proxy.dart';
-import 'package:xplpc/type/dataview.dart';
 
 class XPLPC {
   // singleton
@@ -58,9 +56,5 @@ class XPLPC {
 
   void initializePlatformProxy() {
     PlatformProxy.initialize();
-  }
-
-  void initializeReflectable() {
-    CodableTypeList.instance.add<DataView>();
   }
 }

@@ -22,7 +22,6 @@ void reverse(Message m, Response r) {
 
 void main() {
   initializeReflectable();
-  XPLPC.instance.initializeReflectable();
 
   group('Testing Remote Client', () {
     setUp(() {
