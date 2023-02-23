@@ -1,3 +1,4 @@
+import 'package:battery_plus/battery_plus.dart';
 import 'package:xplpc/data/mapping_list.dart';
 import 'package:xplpc/map/mapping_item.dart';
 import 'package:xplpc/message/message.dart';
@@ -17,8 +18,11 @@ class Mapping {
     );
   }
 
-  void batteryLevel(Message m, Response r) {
+  void batteryLevel(Message m, Response r) async {
+    var battery = Battery();
+    var level = await battery.batteryLevel;
+
     var suffix = m.get("suffix");
-    r("100$suffix");
+    r("$level$suffix");
   }
 }

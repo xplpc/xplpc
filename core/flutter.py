@@ -5,8 +5,7 @@ from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
 from core import config as c
-from core import tool, util
-from core import swift
+from core import swift, tool, util
 
 
 # -----------------------------------------------------------------------------
@@ -65,5 +64,20 @@ def run_task_build_xcframework_macos():
         build_dir_prefix="flutter-macos",
         framework_list=c.swift_framework_list_for_macos,
     )
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_test():
+    # check
+    tool.check_tool_flutter()
+
+    # build
+    l.i("Testing...")
+    project_dir = os.path.join(c.proj_path, "flutter", "plugin")
+
+    r.run(["flutter", "pub", "get"], cwd=project_dir)
+    r.run(["flutter", "test"], cwd=project_dir)
 
     l.ok()

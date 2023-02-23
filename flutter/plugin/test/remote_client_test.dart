@@ -25,6 +25,7 @@ void main() {
 
   group('Testing Remote Client', () {
     setUp(() {
+      // initialize xplpc library
       XPLPC.instance.initialize(
         Config(
           JsonSerializer(),

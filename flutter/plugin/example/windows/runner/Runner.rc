@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "xplpc_example" "\0"
+            VALUE "CompanyName", "com.xplpc.runner.flutter" "\0"
+            VALUE "FileDescription", "xplpc-example" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "xplpc_example" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "xplpc_example.exe" "\0"
-            VALUE "ProductName", "xplpc_example" "\0"
+            VALUE "InternalName", "xplpc-example" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2022-2023 XPLPC. All rights reserved." "\0"
+            VALUE "OriginalFilename", "xplpc-example.exe" "\0"
+            VALUE "ProductName", "xplpc-example" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

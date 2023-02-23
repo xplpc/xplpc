@@ -65,6 +65,7 @@ Tasks:
 
   - flutter-build-xcframework
   - flutter-build-xcframework-macos
+  - flutter-test
 """
 
 import os
@@ -295,6 +296,10 @@ def main(options):
     # build xcframework for macos
     elif task == "flutter-build-xcframework-macos":
         flutter.run_task_build_xcframework_macos()
+
+    # test
+    elif task == "flutter-test":
+        flutter.run_task_test()
 
     #######################
     # INVALID

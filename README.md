@@ -13,6 +13,7 @@
     <a href="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/swift.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/swift.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml/badge.svg"></a>
+    <a href="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml/badge.svg"></a>
 </p>
 
 <p align="center">
@@ -94,6 +95,20 @@ const request = new XRequest(
 
 XRemoteClient.call<string>(request).then((response : string | undefined) => {
     console.log("Returned Value: " + response);
+});
+```
+
+Using Flutter with Dart:
+
+```dart
+var request = Request("sample.login", [
+    Param("username", "paulo"),
+    Param("password", "123456"),
+    Param("remember", true),
+]);
+
+RemoteClient.call<String>(request, (response) {
+    print(response);
 });
 ```
 

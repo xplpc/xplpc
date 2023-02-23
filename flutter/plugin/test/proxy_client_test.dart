@@ -18,6 +18,7 @@ void batteryLevel(Message m, Response r) {
 void main() {
   group('Testing Proxy Client', () {
     setUp(() {
+      // initialize xplpc library
       XPLPC.instance.initialize(
         Config(
           JsonSerializer(),
