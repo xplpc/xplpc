@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install Python ${{ matrix.python-version }}
+      - name: Install Python
         uses: actions/setup-python@v1
         with:
           python-version: 3.9
@@ -55,7 +55,7 @@ jobs:
           flutter --version
 
       - name: Build Native Library
-        run: python3 xplpc.py ${{ matrix.library-task }}
+        run: python3 xplpc.py ${{ matrix.config.library-task }}
 
       - name: Test
         run: python3 xplpc.py flutter-test
