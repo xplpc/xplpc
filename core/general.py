@@ -52,6 +52,8 @@ def run_task_clear():
     f.remove_dir(os.path.join(c.proj_path, "wasm", "sample", "node_modules"))
     f.remove_file(os.path.join(c.proj_path, "wasm", "sample", "package-lock.json"))
 
+    f.remove_file(os.path.join(c.proj_path, "flutter", "plugin", "example", "build"))
+
     l.ok()
 
 

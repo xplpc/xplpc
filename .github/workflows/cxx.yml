@@ -83,7 +83,7 @@ jobs:
         if: matrix.config.codacy == true
         uses: codacy/codacy-analysis-cli-action@master
 
-      - name: Install Python ${{ matrix.python-version }}
+      - name: Install Python
         uses: actions/setup-python@v1
         with:
           python-version: 3.9

@@ -1,11 +1,10 @@
-#include "xplpc/c/platform.hpp"
+#include "xplpc/c/platform.h"
 #include "xplpc/client/ProxyClient.hpp"
 #include "xplpc/core/XPLPC.hpp"
 #include "xplpc/proxy/CPlatformProxy.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
 #include <memory>
-#include <string>
 
 using namespace xplpc::client;
 using namespace xplpc::core;
@@ -35,7 +34,7 @@ void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataS
     // clang-format off
     ProxyClient::call(data, [key, keySize](const auto &response) {
         auto platformProxy = std::static_pointer_cast<CPlatformProxy>(PlatformProxy::shared());
-        auto callback = platformProxy->getFuncPtrToOnNativeProxyCall();
+        auto callback = platformProxy->getFuncPtrToCallProxyCallback();
 
         if (callback)
         {

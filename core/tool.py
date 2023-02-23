@@ -209,3 +209,15 @@ def check_tool_remark():
     except OSError:
         l.e("Remark is not installed, check: https://github.com/remarkjs/remark")
         return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_flutter():
+    try:
+        subprocess.check_output(["flutter", "--version"])
+        return True
+    except OSError:
+        l.e(
+            "Flutter is not installed, check: https://docs.flutter.dev/get-started/install"
+        )
+        return False

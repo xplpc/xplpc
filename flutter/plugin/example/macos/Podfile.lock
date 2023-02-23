@@ -1,0 +1,28 @@
+PODS:
+  - battery_plus (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+  - xplpc (1.0.0):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - battery_plus (from `Flutter/ephemeral/.symlinks/plugins/battery_plus/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - xplpc (from `Flutter/ephemeral/.symlinks/plugins/xplpc/macos`)
+
+EXTERNAL SOURCES:
+  battery_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/battery_plus/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  xplpc:
+    :path: Flutter/ephemeral/.symlinks/plugins/xplpc/macos
+
+SPEC CHECKSUMS:
+  battery_plus: 906cd081df7f2274f5235581515b59a628dcaec7
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  xplpc: 6b1fced480639717a7a1c5a051909435b50d5ce6
+
+PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
+
+COCOAPODS: 1.11.3

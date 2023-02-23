@@ -1,6 +1,6 @@
 #pragma once
 
-#include "xplpc/c/typedefs.hpp"
+#include "xplpc/c/typedefs.h"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
 #include <cstddef>

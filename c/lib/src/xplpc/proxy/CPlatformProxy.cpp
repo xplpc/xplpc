@@ -7,9 +7,9 @@ namespace proxy
 
 void CPlatformProxy::callProxy(const std::string &key, const std::string &data)
 {
-    if (funcPtrToCallProxyCallback)
+    if (funcPtrToOnNativeProxyCall)
     {
-        funcPtrToCallProxyCallback(const_cast<char *>(key.c_str()), key.size(), const_cast<char *>(data.c_str()), data.size());
+        funcPtrToOnNativeProxyCall(const_cast<char *>(key.c_str()), key.size(), const_cast<char *>(data.c_str()), data.size());
     }
 }
 

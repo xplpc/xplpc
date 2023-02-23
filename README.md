@@ -13,6 +13,7 @@
     <a href="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/swift.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/swift.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml/badge.svg"></a>
+    <a href="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml/badge.svg"></a>
 </p>
 
 <p align="center">
@@ -97,6 +98,20 @@ XRemoteClient.call<string>(request).then((response : string | undefined) => {
 });
 ```
 
+Using Flutter with Dart:
+
+```dart
+var request = Request("sample.login", [
+    Param("username", "paulo"),
+    Param("password", "123456"),
+    Param("remember", true),
+]);
+
+RemoteClient.call<String>(request, (response) {
+    print(response);
+});
+```
+
 You can use `LocalClient` instead of `RemoteClient` to call `local` mapped methods.
 
 And you can use `ProxyClient` to send manually the `serialized message` to simulate a call by a client.
@@ -108,6 +123,7 @@ And you can use `ProxyClient` to send manually the `serialized message` to simul
 *   Kotlin
 *   Swift
 *   WASM
+*   Flutter
 
 ## Documentation
 
@@ -118,6 +134,7 @@ And you can use `ProxyClient` to send manually the `serialized message` to simul
 *   [Python](docs/python.md)
 *   [Swift](docs/swift.md)
 *   [WASM](docs/wasm.md)
+*   [Flutter](docs/flutter.md)
 *   [Contribution](docs/contribution.md)
 *   [Purpose](docs/purpose.md)
 

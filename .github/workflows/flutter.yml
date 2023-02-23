@@ -1,0 +1,61 @@
+name: Flutter
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "macOS Latest Clang",
+            os: macos-12,
+            library-task: "flutter-build-xcframework-macos"
+          }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Python Requirements
+        run: python3 -m pip install -r requirements.txt --user
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.24.0"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: "1.10.0"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.7.4"
+          channel: "stable"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+          flutter --version
+
+      - name: Build Native Library
+        run: python3 xplpc.py ${{ matrix.config.library-task }}
+
+      - name: Test
+        run: python3 xplpc.py flutter-test

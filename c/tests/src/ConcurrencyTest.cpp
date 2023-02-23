@@ -1,5 +1,5 @@
 #include "fixtures/GeneralTest.hpp"
-#include "xplpc/c/platform.hpp"
+#include "xplpc/c/platform.h"
 #include "gtest/gtest.h"
 
 #include <string>

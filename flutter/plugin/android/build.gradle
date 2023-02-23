@@ -1,0 +1,76 @@
+// The Android Gradle Plugin builds the native code with the Android NDK.
+
+group 'com.xplpc.library'
+version '1.0.0'
+
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        // The Android Gradle Plugin knows how to build native code with the NDK.
+        classpath 'com.android.tools.build:gradle:7.2.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0"
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+
+android {
+    namespace 'com.xplpc.library'
+    compileSdk 33
+    buildToolsVersion '30.0.3'
+    ndkVersion '25.1.8937393'
+
+    defaultConfig {
+        minSdk 16
+        targetSdk 33
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++17'
+                arguments '-DXPLPC_TARGET=kotlin', '-DXPLPC_ADD_CUSTOM_DATA=ON', '-DXPLPC_ENABLE_INTERFACE=ON'
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            packagingOptions {
+                doNotStrip '**/*.so'
+            }
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            packagingOptions {
+                doNotStrip '**/*.so'
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    externalNativeBuild {
+        cmake {
+            path file(project.projectDir.absolutePath + '/../../../CMakeLists.txt')
+            version '3.24.0+'
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.10'
+}

@@ -30,6 +30,9 @@ package-lock.json
 # cxx
 .cxx
 
+# flutter
+*.reflectable.dart
+
 # custom
 build
 build-*
