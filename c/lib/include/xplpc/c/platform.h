@@ -3,8 +3,8 @@
 
 #include "xplpc/c/typedefs.h"
 
-#ifdef WIN32
-#define XPLPC_EXPORT __declspec(dllexport)
+#if _WIN32
+#define XPLPC_EXPORT extern "C" __declspec(dllexport)
 #else
 #define XPLPC_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
 #endif

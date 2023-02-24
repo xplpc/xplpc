@@ -77,3 +77,5 @@ You can see the sample project in directory `flutter/plugin/example`.
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-ios.png?raw=true">
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-macos.png?raw=true">
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-windows.png?raw=true">

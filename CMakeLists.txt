@@ -35,8 +35,16 @@ endif()
 
 # output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin") # .exe and .dll
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "bin") # .exe and .dll
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "bin") # .exe and .dll
+
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "lib") # .so and .dylib
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "lib") # .so and .dylib
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "lib") # .so and .dylib
+
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib") # .lib and .a
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "lib") # .lib and .a
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 
 # dependency manager
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
