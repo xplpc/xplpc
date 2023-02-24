@@ -37,6 +37,10 @@ class XPLPC {
 
     if (Platform.isAndroid) {
       openPath = "libxplpc.so";
+    } else if (Platform.isWindows) {
+      openPath = "xplpc.dll";
+    } else if (Platform.isLinux) {
+      openPath = "libxplpc.so";
     } else {
       openDirect = true;
     }
