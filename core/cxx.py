@@ -61,6 +61,7 @@ def run_task_build_shared():
             build_dir,
             "-DXPLPC_TARGET=cxx-shared",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
+            "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
             f"-DCMAKE_BUILD_TYPE={c.build_type}",
         ]
     )
