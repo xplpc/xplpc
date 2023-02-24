@@ -34,6 +34,18 @@ Execute on terminal:
 
     python3 xplpc.py flutter-build-xcframework-macos
 
+## How to build the native library for Linux
+
+Execute on terminal:
+
+    python3 xplpc.py c-build-shared
+
+## How to build the native library for Windows
+
+Execute on terminal:
+
+    python3 xplpc.py c-build-shared
+
 ## Setup your project
 
 To setup your project to use the XPLPC plugin for Flutter, keep in mind that you will need add reflectable (https://github.com/google/reflectable.dart) because of Flutter limitation about reflection.
@@ -71,6 +83,20 @@ void main() {
 Before using the sample, don't forget to build the native library for your platform first.
 
 You can see the sample project in directory `flutter/plugin/example`.
+
+To run the sample execute:
+
+```
+cd flutter/plugin/example
+flutter run
+```
+
+Or you can specify the device/platform:
+
+```
+cd flutter/plugin/example
+flutter run -d windows
+```
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-android.png?raw=true">
 
