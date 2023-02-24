@@ -8,7 +8,7 @@ set(PROJECT_NAME "xplpc")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 # Defined in ../src/CMakeLists.txt.
-set(xplpc_bundled_libraries    
+set(xplpc_bundled_libraries
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../../../../../build/c-shared/lib/libxplpc.so"
     PARENT_SCOPE
 )

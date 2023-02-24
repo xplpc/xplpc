@@ -237,7 +237,7 @@ def do_build_xcframework(build_dir_name, build_dir_prefix, framework_list):
             l.e(f"Base group framework was not found: {group}")
 
         # copy base framework
-        framework_dir = os.path.join(arch_dir, "lib", c.build_type, "xplpc.framework")
+        framework_dir = os.path.join(arch_dir, "lib", "xplpc.framework")
         group_framework_dir = os.path.join(build_dir, group, "xplpc.framework")
 
         f.copy_all(
@@ -255,9 +255,7 @@ def do_build_xcframework(build_dir_name, build_dir_prefix, framework_list):
                 )
 
                 lipo_archs_args.append(
-                    os.path.join(
-                        arch_dir, "lib", c.build_type, "xplpc.framework", "xplpc"
-                    )
+                    os.path.join(arch_dir, "lib", "xplpc.framework", "xplpc")
                 )
 
         lipo_args = [
