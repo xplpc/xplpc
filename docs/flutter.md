@@ -105,3 +105,5 @@ flutter run -d windows
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-macos.png?raw=true">
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-windows.png?raw=true">
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-linux.png?raw=true">
