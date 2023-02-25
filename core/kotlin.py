@@ -24,24 +24,32 @@ def run_task_build():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    interface = util.get_param_interface(target)
+    l.i(f"Interface: {interface}")
+
     build_dir = os.path.join(c.proj_path, "build", target)
     f.recreate_dir(build_dir)
 
     toolchain_file = os.path.join(ndk_root, "build", "cmake", "android.toolchain.cmake")
 
-    r.run(
-        [
-            "cmake",
-            "-S",
-            ".",
-            "-B",
-            build_dir,
-            f"-DXPLPC_TARGET={target}",
-            "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            f"-DCMAKE_BUILD_TYPE={build_type}",
-            f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
-        ]
-    )
+    run_args = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        build_dir,
+        f"-DXPLPC_TARGET={target}",
+        "-DXPLPC_ADD_CUSTOM_DATA=ON",
+        f"-DCMAKE_BUILD_TYPE={build_type}",
+        f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
+    ]
+
+    if interface:
+        run_args.append(
+            "-DXPLPC_ENABLE_INTERFACE=ON",
+        )
+
+    r.run(run_args)
 
     # build
     l.i(f"Building...")

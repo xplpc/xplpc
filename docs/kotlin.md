@@ -43,6 +43,10 @@ You can build this target using some parameters to change configuration:
 
     --build debug
 
+**Enable C interface:**
+
+    --interface
+
 ## Sample project
 
 You can see the sample project in directory `kotlin/sample`.

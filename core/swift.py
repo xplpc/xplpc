@@ -225,7 +225,9 @@ def do_build_xcframework(target, platform, framework_list):
         for item in framework_list:
             if item["group"] == group:
                 base_framework_arch = item["arch"]
-                arch_dir = os.path.join(c.proj_path, "build", build_dir_prefix, item["arch"])
+                arch_dir = os.path.join(
+                    c.proj_path, "build", build_dir_prefix, item["arch"]
+                )
 
         if not base_framework_arch:
             l.e(f"Base group framework was not found: {group}")
@@ -244,7 +246,9 @@ def do_build_xcframework(target, platform, framework_list):
 
         for item in framework_list:
             if item["group"] == group:
-                arch_dir = os.path.join(c.proj_path, "build", build_dir_prefix, item["arch"])
+                arch_dir = os.path.join(
+                    c.proj_path, "build", build_dir_prefix, item["arch"]
+                )
 
                 lipo_archs_args.append(
                     os.path.join(arch_dir, "lib", "xplpc.framework", "xplpc")

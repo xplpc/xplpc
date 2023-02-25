@@ -51,7 +51,7 @@ jobs:
         run: python3 xplpc.py swift-test
 
       - name: Build
-        run: python3 xplpc.py swift-build
+        run: python3 xplpc.py swift-build --platform ios
 
       - name: Generate XCFramework
-        run: python3 xplpc.py swift-build-xcframework
+        run: python3 xplpc.py swift-build-xcframework --platform ios
