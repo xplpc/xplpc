@@ -221,3 +221,13 @@ def check_tool_flutter():
             "Flutter is not installed, check: https://docs.flutter.dev/get-started/install"
         )
         return False
+
+
+# -----------------------------------------------------------------------------
+def check_and_get_env(name):
+    env = os.environ.get(name)
+
+    if env:
+        return env
+    else:
+        l.e(f"Environment variable is not set: {name}")

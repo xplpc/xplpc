@@ -18,7 +18,8 @@ jobs:
         - {
             name: "macOS Latest Clang",
             os: macos-12,
-            library-task: "flutter-build-xcframework-macos"
+            library-task: "swift-build --platform macos-flutter --interface",
+            xcframework-task: "swift-build-xcframework --platform macos-flutter"
           }
 
     steps:
@@ -55,7 +56,9 @@ jobs:
           flutter --version
 
       - name: Build Native Library
-        run: python3 xplpc.py ${{ matrix.config.library-task }}
+        run: |
+          python3 xplpc.py ${{ matrix.config.library-task }}
+          python3 xplpc.py ${{ matrix.config.xcframework-task }}
 
       - name: Test
         run: python3 xplpc.py flutter-test

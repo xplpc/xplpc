@@ -82,6 +82,14 @@ Execute on terminal:
 
     python3 xplpc.py wasm-format
 
+## Build parameters
+
+You can build this target using some parameters to change configuration:
+
+**Build type:**
+
+    --build debug
+
 ## Online demo
 
 You can see the online demo on URL:

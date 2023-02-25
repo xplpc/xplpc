@@ -5,24 +5,30 @@ from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
 from core import config as c
-from core import net, tool
+from core import net, tool, util
 
 
 # -----------------------------------------------------------------------------
 def run_task_build():
     # check
     tool.check_tool_emsdk()
+    emsdk_root = tool.check_and_get_env("EMSDK")
 
     # environment
+    target = "wasm"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
-    # build
-    l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "wasm")
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
+    build_dir = os.path.join(c.proj_path, "build", target)
     f.recreate_dir(build_dir)
 
     toolchain_file = os.path.join(
-        os.environ.get("EMSDK"),
+        emsdk_root,
         "upstream",
         "emscripten",
         "cmake",
@@ -38,9 +44,9 @@ def run_task_build():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=wasm",
+            f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            f"-DCMAKE_BUILD_TYPE={c.build_type}",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
         ]
     )

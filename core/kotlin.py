@@ -12,18 +12,22 @@ from core import tool, util
 def run_task_build():
     # check
     tool.check_tool_cmake()
+    ndk_root = tool.check_and_get_env("NDK_ROOT")
 
     # environment
+    target = "kotlin"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
-    # build
-    l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "kotlin")
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
+    build_dir = os.path.join(c.proj_path, "build", target)
     f.recreate_dir(build_dir)
 
-    toolchain_file = os.path.join(
-        os.environ["NDK_ROOT"], "build", "cmake", "android.toolchain.cmake"
-    )
+    toolchain_file = os.path.join(ndk_root, "build", "cmake", "android.toolchain.cmake")
 
     r.run(
         [
@@ -32,13 +36,15 @@ def run_task_build():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=kotlin",
+            f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            f"-DCMAKE_BUILD_TYPE={c.build_type_kotlin}",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
         ]
     )
 
+    # build
+    l.i(f"Building...")
     r.run(["cmake", "--build", build_dir])
 
     l.ok()

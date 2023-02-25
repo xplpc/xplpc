@@ -14,26 +14,33 @@ def run_task_build_static():
     tool.check_tool_cmake()
 
     # environment
+    target = "c-static"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
-    # build
-    l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "c-static")
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
+    build_dir = os.path.join(c.proj_path, "build", target)
     f.recreate_dir(build_dir)
 
-    r.run(
-        [
-            "cmake",
-            "-S",
-            ".",
-            "-B",
-            build_dir,
-            "-DXPLPC_TARGET=c-static",
-            "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            f"-DCMAKE_BUILD_TYPE={c.build_type}",
-        ]
-    )
+    run_args = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        build_dir,
+        f"-DXPLPC_TARGET={target}",
+        "-DXPLPC_ADD_CUSTOM_DATA=ON",
+        f"-DCMAKE_BUILD_TYPE={build_type}",
+    ]
 
+    r.run(run_args)
+
+    # build
+    l.i(f"Building...")
     r.run(["cmake", "--build", build_dir])
 
     l.ok()
@@ -45,27 +52,34 @@ def run_task_build_shared():
     tool.check_tool_cmake()
 
     # environment
+    target = "c-shared"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
-    # build
-    l.i("Building...")
-    build_dir = os.path.join(c.proj_path, "build", "c-shared")
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
+    build_dir = os.path.join(c.proj_path, "build", target)
     f.recreate_dir(build_dir)
 
-    r.run(
-        [
-            "cmake",
-            "-S",
-            ".",
-            "-B",
-            build_dir,
-            "-DXPLPC_TARGET=c-shared",
-            "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
-            f"-DCMAKE_BUILD_TYPE={c.build_type}",
-        ]
-    )
+    run_args = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        build_dir,
+        f"-DXPLPC_TARGET={target}",
+        "-DXPLPC_ADD_CUSTOM_DATA=ON",
+        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
+        f"-DCMAKE_BUILD_TYPE={build_type}",
+    ]
 
+    r.run(run_args)
+
+    # build
+    l.i(f"Building...")
     r.run(["cmake", "--build", build_dir])
 
     l.ok()
@@ -77,10 +91,15 @@ def run_task_build_sample():
     tool.check_tool_cmake()
 
     # environment
+    target = "c-static"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
-    # build
-    l.i("Building...")
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
     build_dir = os.path.join(c.proj_path, "build", "c-sample")
     f.recreate_dir(build_dir)
 
@@ -91,13 +110,16 @@ def run_task_build_sample():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=c-static",
+            f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ENABLE_SAMPLES=ON",
-            f"-DCMAKE_BUILD_TYPE={c.build_type}",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
         ]
     )
 
+    # build
+    l.i(f"Building...")
     r.run(["cmake", "--build", build_dir])
+
     l.ok()
 
 
@@ -116,11 +138,13 @@ def run_task_build_leaks():
     tool.check_tool_leaks()
 
     # environment
+    target = "c-static"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
     os.environ["MallocStackLogging"] = "1"
 
-    # build
-    l.i("Building...")
+    # configure
+    l.i(f"Configuring...")
+
     build_dir = os.path.join(c.proj_path, "build", "c-leaks")
     f.recreate_dir(build_dir)
 
@@ -131,14 +155,18 @@ def run_task_build_leaks():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=c-static",
+            f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ENABLE_SAMPLES=ON",
             "-DCMAKE_BUILD_TYPE=Debug",
         ]
     )
 
+    # build
+    l.i(f"Building...")
     r.run(["cmake", "--build", build_dir])
 
+    # check leaks
+    l.i(f"Checking for leaks...")
     r.run(
         [
             "leaks",
@@ -160,10 +188,15 @@ def run_task_test():
     tool.check_tool_cmake()
 
     # environment
+    target = "c-static"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
-    # build
-    l.i("Testing...")
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
     build_dir = os.path.join(c.proj_path, "build", "c-test")
     f.recreate_dir(build_dir)
 
@@ -174,16 +207,20 @@ def run_task_test():
             ".",
             "-B",
             build_dir,
-            "-DXPLPC_TARGET=c-static",
+            f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             "-DXPLPC_ENABLE_TESTS=ON",
         ]
     )
 
-    r.run(["cmake", "--build", build_dir, "--config", c.build_type])
+    # build
+    l.i(f"Building...")
+    r.run(["cmake", "--build", build_dir, "--config", build_type])
 
+    # test
+    l.i(f"Testing...")
     r.run(
-        ["ctest", "-C", c.build_type, "--output-on-failure"],
+        ["ctest", "-C", build_type, "--output-on-failure"],
         cwd=os.path.join(build_dir),
     )
 

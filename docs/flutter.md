@@ -26,13 +26,13 @@ We currently support these Flutter platforms:
 
 Execute on terminal:
 
-    python3 xplpc.py flutter-build-xcframework
+    python3 xplpc.py swift-build --platform ios-flutter --interface
 
 ## How to build the native library for macOS
 
 Execute on terminal:
 
-    python3 xplpc.py flutter-build-xcframework-macos
+    python3 xplpc.py swift-build --platform macos-flutter --interface
 
 ## How to build the native library for Linux
 
@@ -86,17 +86,13 @@ You can see the sample project in directory `flutter/plugin/example`.
 
 To run the sample execute:
 
-```
-cd flutter/plugin/example
-flutter run
-```
+    cd flutter/plugin/example
+    flutter run
 
 Or you can specify the device/platform:
 
-```
-cd flutter/plugin/example
-flutter run -d windows
-```
+    cd flutter/plugin/example
+    flutter run -d windows
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-flutter-android.png?raw=true">
 
