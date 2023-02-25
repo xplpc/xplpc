@@ -14,35 +14,56 @@ def run_task_build():
     tool.check_tool_cmake()
 
     # environment
+    target = "swift"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
+    interface = util.get_param_interface(target)
+    l.i(f"Interface: {interface}")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+    framework_list = get_framework_list(platform)
 
     # build
     l.i("Building...")
 
     do_build(
-        build_dir_name="swift",
-        framework_list=c.swift_framework_list,
-        has_interface=False,
+        target=target,
+        build_type=build_type,
+        platform=platform,
+        framework_list=framework_list,
+        has_interface=interface,
     )
 
     l.ok()
 
 
 # -----------------------------------------------------------------------------
-def run_task_build_macos():
+def run_task_build_xcframework():
     # check
-    tool.check_tool_cmake()
+    tool.check_tool_xcodebuild()
 
-    # environment
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+    # configure
+    target = "swift"
+    l.i(f"Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+    framework_list = get_framework_list(platform)
 
     # build
     l.i("Building...")
 
-    do_build(
-        build_dir_name="swift",
-        framework_list=c.swift_framework_list_for_macos,
-        has_interface=False,
+    do_build_xcframework(
+        target=target,
+        platform=platform,
+        framework_list=framework_list,
     )
 
     l.ok()
@@ -54,11 +75,18 @@ def run_task_test():
     tool.check_tool_cmake()
 
     # environment
+    target = "swift"
     os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
-    # build
+    # configure
+    l.i(f"Configuring...")
+
+    build_type = util.get_param_build_type(target, "cmake")
+    l.i(f"Build type: {build_type}")
+
+    # test
     l.i("Testing...")
-    build_dir = os.path.join(c.proj_path, "build", "swift-test")
+    build_dir = os.path.join(c.proj_path, "build", f"{target}-test")
     f.recreate_dir(build_dir)
 
     for item in c.swift_test_list:
@@ -74,54 +102,20 @@ def run_task_test():
                 "-B",
                 arch_dir,
                 "-GXcode",
-                f"-DCMAKE_BUILD_TYPE={c.build_type}",
-                "-DXPLPC_TARGET=swift",
+                f"-DCMAKE_BUILD_TYPE={build_type}",
+                f"-DXPLPC_TARGET={target}",
                 "-DXPLPC_ADD_CUSTOM_DATA=ON",
                 "-DXPLPC_ENABLE_TESTS=ON",
             ]
         )
 
-        r.run(["cmake", "--build", arch_dir, "--config", c.build_type])
+        r.run(["cmake", "--build", arch_dir, "--config", build_type])
 
-        r.run(["ctest", "-C", c.build_type, "--output-on-failure"], cwd=arch_dir)
+        r.run(["ctest", "-C", build_type, "--output-on-failure"], cwd=arch_dir)
 
         util.show_file_contents(
             os.path.join(arch_dir, "Testing", "Temporary", "LastTest.log")
         )
-
-    l.ok()
-
-
-# -----------------------------------------------------------------------------
-def run_task_build_xcframework():
-    # check
-    tool.check_tool_xcodebuild()
-
-    # build
-    l.i("Building...")
-
-    do_build_xcframework(
-        build_dir_name="swift",
-        build_dir_prefix="swift",
-        framework_list=c.swift_framework_list,
-    )
-
-    l.ok()
-
-
-# -----------------------------------------------------------------------------
-def run_task_build_xcframework_macos():
-    # check
-    tool.check_tool_xcodebuild()
-
-    # build
-    l.i("Building...")
-
-    do_build_xcframework(
-        build_dir_name="swift",
-        build_dir_prefix="swift",
-        framework_list=c.swift_framework_list_for_macos,
-    )
 
     l.ok()
 
@@ -168,8 +162,8 @@ def run_task_format():
 
 
 # -----------------------------------------------------------------------------
-def do_build(build_dir_name, framework_list, has_interface):
-    build_dir = os.path.join(c.proj_path, "build", build_dir_name)
+def do_build(target, build_type, platform, framework_list, has_interface):
+    build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
     f.recreate_dir(build_dir)
 
     for item in framework_list:
@@ -186,9 +180,9 @@ def do_build(build_dir_name, framework_list, has_interface):
             "-B",
             arch_dir,
             "-GXcode",
-            f"-DCMAKE_BUILD_TYPE={c.build_type}",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
-            "-DXPLPC_TARGET=swift",
+            f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DPLATFORM={item['platform']}",
             f"-DDEPLOYMENT_TARGET={item['deployment_target']}",
@@ -202,11 +196,13 @@ def do_build(build_dir_name, framework_list, has_interface):
         r.run(configure_args)
 
         # build
-        r.run(["cmake", "--build", arch_dir, "--config", c.build_type])
+        r.run(["cmake", "--build", arch_dir, "--config", build_type])
 
 
 # -----------------------------------------------------------------------------
-def do_build_xcframework(build_dir_name, build_dir_prefix, framework_list):
+def do_build_xcframework(target, platform, framework_list):
+    build_dir_prefix = f"{target}-{platform}"
+
     groups = []
 
     for item in framework_list:
@@ -230,7 +226,7 @@ def do_build_xcframework(build_dir_name, build_dir_prefix, framework_list):
             if item["group"] == group:
                 base_framework_arch = item["arch"]
                 arch_dir = os.path.join(
-                    c.proj_path, "build", build_dir_name, item["arch"]
+                    c.proj_path, "build", build_dir_prefix, item["arch"]
                 )
 
         if not base_framework_arch:
@@ -251,7 +247,7 @@ def do_build_xcframework(build_dir_name, build_dir_prefix, framework_list):
         for item in framework_list:
             if item["group"] == group:
                 arch_dir = os.path.join(
-                    c.proj_path, "build", build_dir_name, item["arch"]
+                    c.proj_path, "build", build_dir_prefix, item["arch"]
                 )
 
                 lipo_archs_args.append(
@@ -303,3 +299,20 @@ def do_build_xcframework(build_dir_name, build_dir_prefix, framework_list):
     r.run(xcodebuild_command, cwd=c.proj_path, silent=True)
 
     l.i(f"The xcframework was generated here: {xcframework_dir}")
+
+
+# -----------------------------------------------------------------------------
+def get_framework_list(platform):
+    if platform == "ios":
+        return c.swift_framework_list_for_ios
+    elif platform == "macos":
+        return c.swift_framework_list_for_macos
+    elif platform == "ios-flutter":
+        return c.swift_framework_list_for_ios_flutter
+    elif platform == "macos-flutter":
+        return c.swift_framework_list_for_macos_flutter
+
+    if platform:
+        l.e(f"Invalid platform: {platform}")
+    else:
+        l.e(f"Define a valid platform")

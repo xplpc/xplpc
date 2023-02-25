@@ -5,7 +5,7 @@
 XPLPC MANAGER TOOL
 
 Usage:
-  xplpc.py <task-name>
+  xplpc.py <task-name> [options]
   xplpc.py [options]
   xplpc.py -h | --help
 
@@ -13,6 +13,9 @@ Options:
   -h --help                         Show this screen.
   -d --debug                        Enable debug mode.
   --version                         Show version.
+  --build=<build-type>              Build type.
+  --interface                       Enable C interface.
+  --platform=<platform>             Define custom platform.
 
 Examples:
   python3 xplpc.py -h
@@ -43,10 +46,8 @@ Tasks:
 
   - swift-format
   - swift-build
-  - swift-build-macos
   - swift-test
   - swift-build-xcframework
-  - swift-build-xcframework-macos
 
   - wasm-format
   - wasm-build
@@ -63,8 +64,6 @@ Tasks:
   - c-run-sample
   - c-build-leaks
 
-  - flutter-build-xcframework
-  - flutter-build-xcframework-macos
   - flutter-test
 """
 
@@ -102,8 +101,11 @@ def main(options):
         l.nl()
 
     # bind options
+    cfg.options = options
+
     if "<task-name>" in options:
         task = options["<task-name>"]
+        cfg.task = task
 
     # validate task
     if not task:

@@ -64,3 +64,15 @@ or
 Execute on terminal:
 
     python3 xplpc.py cxx-format
+
+## Build parameters
+
+You can build this target using some parameters to change configuration:
+
+**Build type:**
+
+    --build debug
+
+**Enable C interface:**
+
+    --interface

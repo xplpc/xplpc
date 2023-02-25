@@ -48,7 +48,7 @@ class XPLPC {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       openDirect = false;
       openPath =
-          "../../build/flutter-macos-xcframework/xplpc.xcframework/macos-arm64_x86_64/xplpc.framework/Versions/A/xplpc";
+          "../../build/swift-macos-flutter-xcframework/xplpc.xcframework/macos-arm64_x86_64/xplpc.framework/Versions/A/xplpc";
     }
 
     if (openDirect) {

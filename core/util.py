@@ -1,10 +1,14 @@
 import os
+import sys
 
 from pygemstones.io import file as f
 from pygemstones.system import env as e
 from pygemstones.system import platform as p
 from pygemstones.system import runner as r
+from pygemstones.type import list as ls
 from pygemstones.util import log as l
+
+from core import config as cfg
 
 
 # -----------------------------------------------------------------------------
@@ -107,3 +111,62 @@ def run_format(path_list, formatter, ignore_path_list):
 
                         formatter(file_item)
     # pylint: enable=too-many-nested-blocks
+
+
+# -----------------------------------------------------------------------------
+def get_param_arch(target):
+    args = sys.argv
+    param_archs = ls.get_arg_list_values(args, "--arch")
+
+    if not param_archs:
+        return None
+
+    return param_archs[len(param_archs) - 1]
+
+
+# -----------------------------------------------------------------------------
+def get_param_build_type(target, format=None):
+    param_build_type = cfg.options["--build"]
+
+    if not param_build_type:
+        if target == "kotlin":
+            param_build_type = cfg.build_type_kotlin
+        else:
+            param_build_type = cfg.build_type
+
+    if format:
+        if format == "cmake":
+            param_build_type = get_cmake_build_type(param_build_type)
+
+    return param_build_type
+
+
+# -----------------------------------------------------------------------------
+def get_param_interface(target):
+    return cfg.options["--interface"]
+
+
+# -----------------------------------------------------------------------------
+def get_param_platform(target):
+    param_platform = cfg.options["--platform"]
+
+    if not param_platform:
+        l.e(f"Define a valid platform")
+
+    return param_platform.lower()
+
+
+# -----------------------------------------------------------------------------
+def get_cmake_build_type(build_type):
+    build_type = build_type.lower()
+
+    if build_type == "debug":
+        return "Debug"
+    elif build_type == "release":
+        return "Release"
+    elif build_type == "relwithdebinfo":
+        return "RelWithDebInfo"
+    elif build_type == "profile":
+        return "Profile"
+
+    l.e(f"Invalid build type: {build_type}")

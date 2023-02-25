@@ -35,6 +35,18 @@ Execute on terminal:
 
     python3 xplpc.py kotlin-format
 
+## Build parameters
+
+You can build this target using some parameters to change configuration:
+
+**Build type:**
+
+    --build debug
+
+**Enable C interface:**
+
+    --interface
+
 ## Sample project
 
 You can see the sample project in directory `kotlin/sample`.

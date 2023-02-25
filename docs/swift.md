@@ -35,6 +35,24 @@ Execute on terminal:
 
     python3 xplpc.py swift-format
 
+## Build parameters
+
+You can build this target using some parameters to change configuration:
+
+**Platform:**
+
+    --platform ios
+
+Platforms available: `ios`, `macos`, `ios-flutter`, `macos-flutter`
+
+**Build type:**
+
+    --build debug
+
+**Enable C interface:**
+
+    --interface
+
 ## Sample project
 
 You can see the sample project in directory `swift/sample`.
