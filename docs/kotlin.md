@@ -29,6 +29,10 @@ or
     cd kotlin/lib
     ./gradlew clean :library:build
 
+To enable C interface you can use:
+
+    python3 xplpc.py kotlin-build-aar --interface
+
 ## How to format the Kotlin code
 
 Execute on terminal:

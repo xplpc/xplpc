@@ -77,9 +77,27 @@ def run_task_build_aar():
     lib_dir = os.path.join("kotlin", "lib")
     tool.check_tool_gradlew(lib_dir)
 
+    # configure
+    target = "kotlin"
+    l.i(f"Configuring...")
+
+    interface = util.get_param_interface(target)
+    l.i(f"Interface: {interface}")
+
     # build
     l.i("Building...")
-    util.run_gradle(["clean", ":library:build"], lib_dir)
+
+    interface_str = "ON" if interface else "OFF"
+
+    util.run_gradle(
+        [
+            "clean",
+            ":library:build",
+            "-P",
+            f"xplpc_interface={interface_str}",
+        ],
+        lib_dir,
+    )
 
     # copy aar
     aar_dir = os.path.join(c.proj_path, "build", "kotlin-aar")

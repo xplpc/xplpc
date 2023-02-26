@@ -17,7 +17,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags '-std=c++17'
-                arguments '-DXPLPC_TARGET=kotlin', '-DXPLPC_ADD_CUSTOM_DATA=ON'
+                arguments '-DXPLPC_TARGET=kotlin', '-DXPLPC_ADD_CUSTOM_DATA=ON', '-DXPLPC_ENABLE_INTERFACE=' + xplpc_interface
             }
         }
     }
