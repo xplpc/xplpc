@@ -28,6 +28,12 @@ Execute on terminal:
 
     python3 xplpc.py swift-build --platform ios-flutter --interface
 
+## How to build the native library for Android
+
+Execute on terminal:
+
+    python3 xplpc.py kotlin-build-aar --interface
+
 ## How to build the native library for macOS
 
 Execute on terminal:
