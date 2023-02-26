@@ -16,6 +16,7 @@ CMakeSettings.json
 .vs
 __pycache__
 Brewfile.lock.json
+.metals
 
 # node
 node_modules

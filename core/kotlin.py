@@ -87,17 +87,12 @@ def run_task_build_aar():
     # build
     l.i("Building...")
 
-    interface_str = "ON" if interface else "OFF"
+    run_args = ["clean", ":library:build"]
 
-    util.run_gradle(
-        [
-            "clean",
-            ":library:build",
-            "-P",
-            f"xplpc_interface={interface_str}",
-        ],
-        lib_dir,
-    )
+    if interface:
+        run_args.extend(["-P", "xplpc_interface"])
+
+    util.run_gradle(run_args, lib_dir)
 
     # copy aar
     aar_dir = os.path.join(c.proj_path, "build", "kotlin-aar")
