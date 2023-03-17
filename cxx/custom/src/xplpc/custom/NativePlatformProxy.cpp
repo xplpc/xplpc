@@ -5,7 +5,7 @@ namespace xplpc
 namespace proxy
 {
 
-void PlatformProxy::initializePlatform()
+void NativePlatformProxy::initializePlatform()
 {
     xplpc::custom::Mapping::initialize();
 }

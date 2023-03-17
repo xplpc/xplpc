@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { XLocalClient } from "@/xplpc/client/local-client";
-import { XRemoteClient } from "@/xplpc/client/remote-client";
+import { XClient } from "@/xplpc/client/client";
 import { XParam } from "@/xplpc/message/param";
 import { XRequest } from "@/xplpc/message/request";
 import { ref } from "vue";
@@ -31,7 +30,7 @@ async function onSubmitForm(e: Event) {
         new XParam("remember", fieldRemember.value),
     );
 
-    let response = await XRemoteClient.call<string>(request);
+    const response = await XClient.call<string>(request);
 
     if (response) {
         showResponseForForm("Response: " + response);
@@ -50,7 +49,7 @@ async function onSubmitBatteryLevel(e: Event) {
         new XParam("suffix", "%"),
     );
 
-    let response = await XLocalClient.call<string>(request);
+    const response = await XClient.call<string>(request);
 
     if (response) {
         showResponseForBattery("Response: " + response);
@@ -86,7 +85,6 @@ function onReset(): void {
     fieldRemember.value = false;
 
     responseMessageForForm.value = defaultResponseMessageForForm;
-    responseMessageForBattery.value = defaultResponseMessageForBattery;
 }
 </script>
 

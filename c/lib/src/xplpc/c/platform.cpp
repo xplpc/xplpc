@@ -1,27 +1,29 @@
 #include "xplpc/c/platform.h"
-#include "xplpc/client/ProxyClient.hpp"
+#include "xplpc/client/Client.hpp"
 #include "xplpc/core/XPLPC.hpp"
-#include "xplpc/proxy/CPlatformProxy.hpp"
+#include "xplpc/data/PlatformProxyList.hpp"
+#include "xplpc/proxy/CNativePlatformProxy.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
 #include <memory>
 
 using namespace xplpc::client;
 using namespace xplpc::core;
+using namespace xplpc::data;
 using namespace xplpc::proxy;
 
 void xplpc_core_initialize(FuncPtrToCallProxyCallback funcPtrToCallProxyCallback, FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall)
 {
-    auto proxy = std::make_shared<CPlatformProxy>();
+    auto proxy = CNativePlatformProxy::shared();
+    proxy->initialize();
     proxy->initializeNativePlatform(funcPtrToCallProxyCallback, funcPtrToOnNativeProxyCall);
 
-    PlatformProxy::create(proxy);
-    PlatformProxy::shared()->initialize();
+    PlatformProxyList::shared()->append(proxy);
 }
 
 void xplpc_core_finalize()
 {
-    PlatformProxy::shared()->finalize();
+    CNativePlatformProxy::shared()->finalize();
 }
 
 bool xplpc_core_is_initialized()
@@ -32,9 +34,8 @@ bool xplpc_core_is_initialized()
 void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataSize)
 {
     // clang-format off
-    ProxyClient::call(data, [key, keySize](const auto &response) {
-        auto platformProxy = std::static_pointer_cast<CPlatformProxy>(PlatformProxy::shared());
-        auto callback = platformProxy->getFuncPtrToCallProxyCallback();
+    Client::call(data, [key, keySize](const auto &response) {
+        auto callback = CNativePlatformProxy::shared()->getFuncPtrToCallProxyCallback();
 
         if (callback)
         {
@@ -46,5 +47,6 @@ void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataS
 
 void xplpc_native_call_proxy_callback(char *key, size_t keySize, char *data, size_t dataSize)
 {
-    PlatformProxy::shared()->callProxyCallback(key, data);
+    auto proxy = CNativePlatformProxy::shared();
+    proxy->callProxyCallback(key, data);
 }

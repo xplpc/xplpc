@@ -6,6 +6,6 @@ object UniqueID {
     private val uid = AtomicLong()
 
     fun generate(): String {
-        return uid.addAndGet(1).toString()
+        return "KT-" + uid.addAndGet(1).toString()
     }
 }

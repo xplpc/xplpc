@@ -19,7 +19,7 @@ export class UniqueID {
 
     static async generate(): Promise<string> {
         await UniqueID.shared().lock.acquire();
-        const value = (++UniqueID.shared().uid).toString();
+        const value = "JS-" + (++UniqueID.shared().uid).toString();
         UniqueID.shared().lock.release();
         return value;
     }

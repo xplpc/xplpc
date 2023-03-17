@@ -22,6 +22,7 @@ public:
     void add(const std::string &name, const MappingItem &item);
     std::optional<MappingItem> find(const std::string &name);
     size_t count() const noexcept;
+    void clear() noexcept;
     static std::shared_ptr<MappingList> shared();
 
 private:

@@ -23,6 +23,10 @@ public:
     size_t count() const noexcept;
     static std::shared_ptr<CallbackList> shared();
 
+#if defined(__EMSCRIPTEN__)
+    static void executeFromJavascript(const std::string &key, const std::string &data);
+#endif
+
 private:
     static std::shared_ptr<CallbackList> instance;
     TSMap<std::string, std::function<void(const std::string &)>> list;

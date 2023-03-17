@@ -1,4 +1,4 @@
-import { XRemoteClient } from "@/xplpc/client/remote-client";
+import { XClient } from "@/xplpc/client/client";
 import { XConfig } from "@/xplpc/core/config";
 import { XPLPC } from "@/xplpc/core/xplpc";
 import { XMappingList } from "@/xplpc/data/mapping-list";
@@ -12,6 +12,13 @@ import { XDataView } from "@/xplpc/type/data-view";
 
 import Module from "@xplpc/build/wasm/bin/xplpc";
 
+function batteryLevel(message: XMessage): Promise<string> {
+    return new Promise<string>((resolve) => {
+        const suffix = message.get("suffix");
+        return resolve("100" + suffix);
+    });
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function reverseResponse(message: XMessage): Promise<string> {
     return new Promise<string>((resolve) => {
@@ -19,18 +26,41 @@ function reverseResponse(message: XMessage): Promise<string> {
     });
 }
 
-describe("RemoteClient", () => {
+describe("Client", () => {
     beforeAll(async () => {
         // initialize module
         const module: IXWasmModule = await Module();
         XPLPC.shared().initialize(module, new XConfig(new JsonSerializer()));
 
         // initialize local mappings
+        XMappingList.shared().add("platform.battery.level", new XMappingItem(batteryLevel));
         XMappingList.shared().add("platform.reverse.response", new XMappingItem(reverseResponse));
     });
 
     it("check if is initialized", () => {
         expect(XPLPC.shared().initialized).toBeTruthy();
+    });
+
+    test("battery level", () => {
+        const request = new XRequest("platform.battery.level", new XParam("suffix", "%"))
+
+        XClient.call<string>(request).then((response: string | undefined) => {
+            expect(response).toBe("100%");
+        });
+    });
+
+    test("battery level from string", () => {
+        const request = new XRequest("platform.battery.level", new XParam("suffix", "%"))
+
+        XClient.call(request.data()).then((response: string) => {
+            expect(response).toBe("{\"r\":\"100%\"}");
+        });
+    });
+
+    test("battery level from string with await", async () => {
+        const request = new XRequest("platform.battery.level", new XParam("suffix", "%"))
+        const response = await XClient.call(request.data());
+        expect(response).toBe("{\"r\":\"100%\"}");
     });
 
     it("get logged value", () => {
@@ -40,7 +70,7 @@ describe("RemoteClient", () => {
             new XParam("remember", true),
         );
 
-        XRemoteClient.call<string>(request).then((response: string | undefined) => {
+        XClient.call<string>(request).then((response: string | undefined) => {
             expect(response).toBe("LOGGED-WITH-REMEMBER");
         });
     });
@@ -52,14 +82,14 @@ describe("RemoteClient", () => {
             new XParam("remember", true),
         );
 
-        const response = await XRemoteClient.call<string>(request);
+        const response = await XClient.call<string>(request);
         expect(response).toBe("LOGGED-WITH-REMEMBER");
     });
 
     it("get reverse value", () => {
         const request = new XRequest("sample.reverse");
 
-        XRemoteClient.call<string>(request).then((response: string | undefined) => {
+        XClient.call<string>(request).then((response: string | undefined) => {
             expect(response).toBe("response-is-ok");
         });
     });
@@ -67,7 +97,7 @@ describe("RemoteClient", () => {
     it("get reverse value with await", async () => {
         const request = new XRequest("sample.reverse");
 
-        const response = await XRemoteClient.call<string>(request);
+        const response = await XClient.call<string>(request);
         expect(response).toBe("response-is-ok");
     });
 
@@ -83,7 +113,7 @@ describe("RemoteClient", () => {
             new XParam("dataView", dataView)
         );
 
-        XRemoteClient.call<string>(request).then((response: string | undefined) => {
+        XClient.call<string>(request).then((response: string | undefined) => {
             const processedData = XDataView.createUint8ClampedArrayFromPtr(dataView.ptr, dataView.size);
 
             expect("OK").toBe(response);
@@ -110,7 +140,7 @@ describe("RemoteClient", () => {
             new XParam("dataView", dataView)
         );
 
-        const response = await XRemoteClient.call<string>(request);
+        const response = await XClient.call<string>(request);
         const processedData = XDataView.createUint8ArrayFromPtr(dataView.ptr, dataView.size);
 
         expect("OK").toBe(response);
@@ -128,7 +158,7 @@ describe("RemoteClient", () => {
         // get data view
         const request = new XRequest("sample.dataview");
 
-        XRemoteClient.call<XDataView>(request).then((response: XDataView | undefined) => {
+        XClient.call<XDataView>(request).then((response: XDataView | undefined) => {
             // check response
             const dataView = response;
 
@@ -152,7 +182,7 @@ describe("RemoteClient", () => {
                 new XParam("dataView", dataView)
             );
 
-            XRemoteClient.call<string>(request).then((response: string | undefined) => {
+            XClient.call<string>(request).then((response: string | undefined) => {
                 const processedData = XDataView.createUint8ArrayFromPtr(dataView.ptr, dataView.size);
 
                 expect("OK").toBe(response);
@@ -179,7 +209,7 @@ describe("RemoteClient", () => {
     test("receive data view with await", async () => {
         // get data view
         const request = new XRequest("sample.dataview");
-        const response = await XRemoteClient.call<XDataView>(request);
+        const response = await XClient.call<XDataView>(request);
 
         // check response
         const dataView = response;
@@ -204,7 +234,7 @@ describe("RemoteClient", () => {
             new XParam("dataView", dataView)
         );
 
-        const response2 = await XRemoteClient.call<string>(request2);
+        const response2 = await XClient.call<string>(request2);
         const processedData = XDataView.createUint8ArrayFromPtr(dataView.ptr, dataView.size);
 
         expect("OK").toBe(response2);

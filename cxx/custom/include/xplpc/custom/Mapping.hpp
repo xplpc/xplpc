@@ -167,7 +167,7 @@ public:
         auto request = Request{"platform.reverse.response"};
 
         // clang-format off
-        RemoteClient::call<std::string>(request, [=](const auto &response) {
+        Client::call<std::string>(request, [=](const auto &response) {
             if (response) {
                 r(std::string{"response-is-"} + response.value());
             } else {

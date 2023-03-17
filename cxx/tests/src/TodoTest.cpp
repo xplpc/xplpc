@@ -17,7 +17,7 @@ TEST_F(GeneralTest, TodoTestSingle)
     auto request = Request{"sample.todo.single", Param<Todo>{"item", item}};
 
     // clang-format off
-    LocalClient::call<Todo>(request, [](const auto &response) {
+    Client::call<Todo>(request, [](const auto &response) {
         EXPECT_NE(response, std::nullopt);
 
         if (response)
@@ -40,7 +40,7 @@ TEST_F(GeneralTest, TodoTestSingleAsync)
 
     // clang-format off
     std::thread([=] {
-        LocalClient::call<Todo>(request, [](const auto &response) {
+        Client::call<Todo>(request, [](const auto &response) {
             EXPECT_NE(response, std::nullopt);
 
             if (response)
@@ -65,7 +65,7 @@ TEST_F(GeneralTest, TodoMultipleTest)
     auto request = Request{"sample.todo.list", Param<std::vector<Todo>>{"items", items}};
 
     // clang-format off
-    LocalClient::call<std::vector<Todo>>(request, [](const auto &response) {
+    Client::call<std::vector<Todo>>(request, [](const auto &response) {
         auto total = 0;
 
         if (response)
@@ -89,7 +89,7 @@ TEST_F(GeneralTest, TodoMultipleTestAsync)
 
     // clang-format off
     std::thread([=] {
-        LocalClient::call<std::vector<Todo>>(request, [](const auto &response) {
+        Client::call<std::vector<Todo>>(request, [](const auto &response) {
             auto total = 0;
 
             if (response)

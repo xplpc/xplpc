@@ -6,7 +6,7 @@ set(XPLPC_TESTS_INC_FILES ${XPLPC_TESTS_INC_FILES}
 
 set(XPLPC_TESTS_SRC_FILES ${XPLPC_TESTS_SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/src/CoreTest.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ClientTest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/ConcurrencyTest.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/ProxyTest.cpp"
     PARENT_SCOPE
 )

@@ -21,6 +21,6 @@ public class UniqueID {
 
         shared.counter += 1
 
-        return String(shared.counter)
+        return "SW-" + String(shared.counter)
     }
 }

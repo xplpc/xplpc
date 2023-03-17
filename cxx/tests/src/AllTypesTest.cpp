@@ -66,7 +66,7 @@ TEST_F(GeneralTest, AllTypesTestSingle)
     auto request = Request{"sample.alltypes.single", Param<AllTypes>{"item", item}};
 
     // clang-format off
-    LocalClient::call<AllTypes>(request, [](const auto &response) {
+    Client::call<AllTypes>(request, [](const auto &response) {
         EXPECT_NE(response, std::nullopt);
 
         if (response)
@@ -88,7 +88,7 @@ TEST_F(GeneralTest, AllTypesTestSingleAsync)
 
     // clang-format off
     std::thread([=] {
-        LocalClient::call<AllTypes>(request, [](const auto &response) {
+        Client::call<AllTypes>(request, [](const auto &response) {
             EXPECT_NE(response, std::nullopt);
 
             if (response)
@@ -114,7 +114,7 @@ TEST_F(GeneralTest, AllTypesMultipleTest)
     auto request = Request{"sample.alltypes.list", Param<std::vector<AllTypes>>{"items", items}};
 
     // clang-format off
-    LocalClient::call<std::vector<AllTypes>>(request, [](const auto &response) {
+    Client::call<std::vector<AllTypes>>(request, [](const auto &response) {
         EXPECT_NE(response, std::nullopt);
 
         auto total = 0;
@@ -144,7 +144,7 @@ TEST_F(GeneralTest, AllTypesMultipleTestAsync)
 
     // clang-format off
     std::thread([=] {
-        LocalClient::call<std::vector<AllTypes>>(request, [](const auto &response) {
+        Client::call<std::vector<AllTypes>>(request, [](const auto &response) {
             EXPECT_NE(response, std::nullopt);
 
             auto total = 0;

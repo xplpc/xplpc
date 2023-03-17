@@ -6,6 +6,8 @@ using namespace xplpc::core;
 
 TEST(CoreTest, CoreTestInitialize)
 {
-    XPLPC::initialize();
+    auto proxy = std::make_shared<NativePlatformProxy>();
+    proxy->initialize();
+
     EXPECT_EQ(true, XPLPC::isInitialized());
 }

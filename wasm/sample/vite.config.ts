@@ -6,8 +6,8 @@ import { resolve } from 'path'
 import { fileURLToPath, URL } from "url"
 import EnvironmentPlugin from "vite-plugin-environment"
 import eslintPLugin from "vite-plugin-eslint"
-import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
+import topLevelAwait from "vite-plugin-top-level-await"
+import wasm from "vite-plugin-wasm"
 
 const BASE_URL = (process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$|$/, '/') : '/');
 
@@ -44,6 +44,7 @@ export default defineConfig({
     server: {
         https: false,
         host: true,
+        port: 3000,
         fs: {
             strict: false,
             allow: [".."],
