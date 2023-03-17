@@ -1,7 +1,10 @@
 package com.xplpc.library
 
+import android.content.Context
+import android.os.BatteryManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.xplpc.client.RemoteClient
+import androidx.test.platform.app.InstrumentationRegistry
+import com.xplpc.client.Client
 import com.xplpc.core.Config
 import com.xplpc.core.XPLPC
 import com.xplpc.data.MappingList
@@ -23,11 +26,25 @@ import org.junit.runner.RunWith
 import java.nio.ByteBuffer
 
 @RunWith(AndroidJUnit4::class)
-class RemoteClientTest {
+class ClientTest {
     companion object {
         @Suppress("UNUSED_PARAMETER")
         fun reverseResponse(data: Message, r: Response) {
             r("ok")
+        }
+
+        fun batteryLevel(data: Message, r: Response) {
+            val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+            val bm = appContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+            val level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+
+            val suffix = data.value<String>("suffix")
+
+            if (suffix != null) {
+                r("$level$suffix")
+            } else {
+                r("$level")
+            }
         }
     }
 
@@ -39,6 +56,56 @@ class RemoteClientTest {
     }
 
     @Test
+    fun batteryLevel() {
+        MappingList.add(
+            "platform.battery.level",
+            MappingItem(
+                ClientTest::batteryLevel
+            )
+        )
+
+        val request = Request("platform.battery.level", Param("suffix", "%"))
+
+        Client.call<String>(request) { response ->
+            assertEquals("100%", response)
+        }
+    }
+
+    @Test
+    fun batteryLevelAsync() {
+        MappingList.add(
+            "platform.battery.level",
+            MappingItem(
+                ClientTest::batteryLevel
+            )
+        )
+
+        val request = Request("platform.battery.level", Param("suffix", "%"))
+
+        runBlocking {
+            Client.call<String>(request) { response ->
+                assertEquals("100%", response)
+            }
+        }
+    }
+
+    @Test
+    fun batteryLevelInvalidCast() {
+        MappingList.add(
+            "platform.battery.level",
+            MappingItem(
+                ClientTest::batteryLevel
+            )
+        )
+
+        val request = Request("platform.battery.level", Param("suffix", "%"))
+
+        Client.call<Boolean>(request) { response ->
+            assertEquals(false, response)
+        }
+    }
+
+    @Test
     fun login() {
         val request = Request(
             "sample.login",
@@ -47,7 +114,7 @@ class RemoteClientTest {
             Param("remember", true)
         )
 
-        RemoteClient.call<String>(request) { response ->
+        Client.call<String>(request) { response ->
             assertEquals("LOGGED-WITH-REMEMBER", response)
         }
     }
@@ -62,7 +129,7 @@ class RemoteClientTest {
         )
 
         runBlocking {
-            RemoteClient.call<String>(request) { response ->
+            Client.call<String>(request) { response ->
                 assertEquals("LOGGED-WITH-REMEMBER", response)
             }
         }
@@ -77,7 +144,7 @@ class RemoteClientTest {
             Param("remember", true)
         )
 
-        RemoteClient.call<Boolean>(request) { response ->
+        Client.call<Boolean>(request) { response ->
             assertEquals(false, response)
         }
     }
@@ -87,13 +154,13 @@ class RemoteClientTest {
         MappingList.add(
             "platform.reverse.response",
             MappingItem(
-                RemoteClientTest::reverseResponse
+                ClientTest::reverseResponse
             )
         )
 
         val request = Request("sample.reverse")
 
-        RemoteClient.call<String>(request) { response ->
+        Client.call<String>(request) { response ->
             assertEquals("response-is-ok", response)
         }
     }
@@ -103,14 +170,14 @@ class RemoteClientTest {
         MappingList.add(
             "platform.reverse.response",
             MappingItem(
-                RemoteClientTest::reverseResponse
+                ClientTest::reverseResponse
             )
         )
 
         val request = Request("sample.reverse")
 
         runBlocking {
-            RemoteClient.call<String>(request) { response ->
+            Client.call<String>(request) { response ->
                 assertEquals("response-is-ok", response)
             }
         }
@@ -137,7 +204,7 @@ class RemoteClientTest {
         val dataView = DataView(ptr, data.size)
         val request = Request("sample.image.grayscale.dataview", Param("dataView", dataView))
 
-        RemoteClient.call<String>(request) { response ->
+        Client.call<String>(request) { response ->
             assertEquals("OK", response)
 
             assertEquals(16, buffer.capacity())
@@ -170,7 +237,7 @@ class RemoteClientTest {
         val request = Request("sample.image.grayscale.dataview", Param("dataView", dataView))
 
         runBlocking {
-            RemoteClient.call<String>(request) { response ->
+            Client.call<String>(request) { response ->
                 assertEquals("OK", response)
 
                 assertEquals(16, buffer.capacity())
@@ -187,7 +254,7 @@ class RemoteClientTest {
         // get data view
         val request = Request("sample.dataview")
 
-        RemoteClient.call<DataView>(request) { response ->
+        Client.call<DataView>(request) { response ->
             // check response
             assertNotNull(response)
 
@@ -205,7 +272,7 @@ class RemoteClientTest {
             val dataView2 = DataView.createFromByteArray(originalData)
             val request2 = Request("sample.image.grayscale.dataview", Param("dataView", dataView2))
 
-            RemoteClient.call<String>(request2) { response2 ->
+            Client.call<String>(request2) { response2 ->
                 assertEquals("OK", response2)
 
                 val processedData = ByteArrayHelper.createFromDataView(dataView2)
@@ -233,7 +300,7 @@ class RemoteClientTest {
         val request = Request("sample.dataview")
 
         runBlocking {
-            RemoteClient.call<DataView>(request) { response ->
+            Client.call<DataView>(request) { response ->
                 // check response
                 assertNotNull(response)
 
@@ -252,7 +319,7 @@ class RemoteClientTest {
                 val request2 =
                     Request("sample.image.grayscale.dataview", Param("dataView", dataView2))
 
-                RemoteClient.call<String>(request2) { response2 ->
+                Client.call<String>(request2) { response2 ->
                     assertEquals("OK", response2)
 
                     val processedData = ByteArrayHelper.createFromDataView(dataView2)
@@ -271,6 +338,35 @@ class RemoteClientTest {
                     assertEquals(originalData[10].toUByte().toInt(), 85)
                     assertEquals(originalData[12].toUByte().toInt(), 0)
                 }
+            }
+        }
+    }
+
+    @Test
+    fun batteryLevelFromString() {
+        MappingList.add(
+            "platform.battery.level",
+            MappingItem(
+                ClientTest::batteryLevel
+            )
+        )
+
+        val request = Request("platform.battery.level", Param("suffix", "%"))
+
+        Client.call(request.data) { response ->
+            assertEquals("{\"r\":\"100%\"}", response)
+        }
+    }
+
+    @Test
+    fun batteryLevelAsyncFromString() {
+        MappingList.add("platform.battery.level", MappingItem(ClientTest::batteryLevel))
+
+        val request = Request("platform.battery.level", Param("suffix", "%"))
+
+        runBlocking {
+            Client.call(request.data) { response ->
+                assertEquals("{\"r\":\"100%\"}", response)
             }
         }
     }

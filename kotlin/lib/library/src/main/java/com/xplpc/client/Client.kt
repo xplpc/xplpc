@@ -8,7 +8,7 @@ import com.xplpc.proxy.PlatformProxy
 import com.xplpc.util.Log
 import com.xplpc.util.UniqueID
 
-object RemoteClient {
+object Client {
     inline fun <reified T> call(request: Request, noinline callback: ((T?) -> Unit)?) {
         val key = UniqueID.generate()
 
@@ -18,7 +18,7 @@ object RemoteClient {
             val data: T? = try {
                 XPLPC.config.serializer.decodeFunctionReturnValue(response, type)
             } catch (e: Exception) {
-                Log.e("[RemoteClient : call] Error when decode data: ${e.message}")
+                Log.e("[Client : call] Error when decode data: ${e.message}")
                 null
             }
 
@@ -30,5 +30,19 @@ object RemoteClient {
 
     inline fun <reified T> call(request: Request) {
         call<T>(request, null)
+    }
+
+    fun call(requestData: String, callback: ((String) -> Unit)?) {
+        val key = UniqueID.generate()
+
+        CallbackList.add(key) { response ->
+            callback?.invoke(response)
+        }
+
+        PlatformProxy.nativeProxyCall(key, requestData)
+    }
+
+    fun call(data: String) {
+        call(data, null)
     }
 }

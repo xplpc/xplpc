@@ -1,7 +1,7 @@
 package com.xplpc.library
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.xplpc.client.RemoteClient
+import com.xplpc.client.Client
 import com.xplpc.core.Config
 import com.xplpc.core.XPLPC
 import com.xplpc.message.Param
@@ -72,7 +72,7 @@ class AllTypesTest {
 
         val request = Request("sample.alltypes.single", Param("item", item))
 
-        RemoteClient.call<AllTypes>(request) { response ->
+        Client.call<AllTypes>(request) { response ->
             assertNotNull(response)
 
             response?.let { allTypes ->
@@ -107,7 +107,7 @@ class AllTypesTest {
         val request = Request("sample.alltypes.single", Param("item", item))
 
         runBlocking {
-            RemoteClient.call<AllTypes>(request) { response ->
+            Client.call<AllTypes>(request) { response ->
                 assertNotNull(response)
 
                 response?.let { allTypes ->
@@ -144,7 +144,7 @@ class AllTypesTest {
 
         val request = Request("sample.alltypes.list", Param("items", listOf(item1, item2)))
 
-        RemoteClient.call<List<AllTypes>>(request) { response ->
+        Client.call<List<AllTypes>>(request) { response ->
             assertEquals(2, response?.size)
         }
     }
@@ -160,7 +160,7 @@ class AllTypesTest {
         val request = Request("sample.alltypes.list", Param("items", listOf(item1, item2)))
 
         runBlocking {
-            RemoteClient.call<List<AllTypes>>(request) { response ->
+            Client.call<List<AllTypes>>(request) { response ->
                 assertEquals(2, response?.size)
             }
         }

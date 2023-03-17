@@ -13,7 +13,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.google.common.util.concurrent.ListenableFuture
-import com.xplpc.client.RemoteClient
+import com.xplpc.client.Client
 import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.runner.R
@@ -112,7 +112,7 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
             Param("dataView", dataView)
         )
 
-        RemoteClient.call<String>(request) { response ->
+        Client.call<String>(request) { response ->
             if (response == null) {
                 return@call
             }

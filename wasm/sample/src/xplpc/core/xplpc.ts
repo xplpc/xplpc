@@ -50,7 +50,7 @@ export class XPLPC {
                 }
             }
 
-            // native platform proxy
+            // javascript platform proxy
             if (this.module.PlatformProxy) {
                 // eslint-disable-next-line
                 // @ts-ignore:next-line

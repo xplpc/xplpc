@@ -37,7 +37,7 @@ void NativePlatformProxy::callProxy(const std::string &key, const std::string &d
     if (functionName.empty())
     {
         spdlog::error("[NativePlatformProxy : callProxy] Function name is empty");
-        callProxyCallback(key, "");
+        CallbackList::shared()->execute(key, "");
         return;
     }
 
@@ -50,13 +50,8 @@ void NativePlatformProxy::callProxy(const std::string &key, const std::string &d
     else
     {
         spdlog::error("[NativePlatformProxy : call] Mapping not found for function: {}", functionName);
-        callProxyCallback(key, "");
+        CallbackList::shared()->execute(key, "");
     }
-}
-
-void NativePlatformProxy::callProxyCallback(const std::string &key, const std::string &data)
-{
-    CallbackList::shared()->execute(key, data);
 }
 
 bool NativePlatformProxy::hasMapping(const std::string &name)

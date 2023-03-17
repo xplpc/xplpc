@@ -17,7 +17,6 @@ public:
     virtual void finalize() override;
     virtual void finalizePlatform() override;
     virtual void callProxy(const std::string &key, const std::string &data) override;
-    virtual void callProxyCallback(const std::string &key, const std::string &data) override;
     virtual bool hasMapping(const std::string &name) override;
 };
 

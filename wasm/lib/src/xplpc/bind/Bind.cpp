@@ -68,11 +68,6 @@ struct PlatformProxyWrapper : public em::wrapper<xplpc::proxy::PlatformProxy>
         return call<void>("callProxy", key, data);
     }
 
-    void callProxyCallback(const std::string &key, const std::string &data)
-    {
-        return call<void>("callProxyCallback", key, data);
-    }
-
     bool hasMapping(const std::string &name)
     {
         return call<bool>("hasMapping", name);
@@ -88,7 +83,6 @@ EMSCRIPTEN_BINDINGS(xplpc_proxy_platform_proxy)
         .function("finalize", &xplpc::proxy::PlatformProxy::finalize, em::pure_virtual())
         .function("finalizePlatform", &xplpc::proxy::PlatformProxy::finalizePlatform, em::pure_virtual())
         .function("callProxy", &xplpc::proxy::PlatformProxy::callProxy, em::pure_virtual())
-        .function("callProxyCallback", &xplpc::proxy::PlatformProxy::callProxyCallback, em::pure_virtual())
         .function("hasMapping", &xplpc::proxy::PlatformProxy::hasMapping, em::pure_virtual());
 }
 

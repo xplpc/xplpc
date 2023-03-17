@@ -11,7 +11,6 @@ interface IXWebPlatformProxy {
     finalize(): void;
     finalizePlatform(): void;
     callProxy(key: string, data: string): void;
-    callProxyCallback(key: string, data: string): void;
     hasMapping(name: string): boolean;
 }
 
@@ -76,9 +75,6 @@ const XWebPlatformProxy: IXWebPlatformProxy = {
                 Log.e("[XWebPlatformProxy : call] Error when encode message: " + ExceptionMessage.get(e))
                 XPLPC.shared().module.CallbackList.executeFromJavascript(key, "");
             });
-    },
-    callProxyCallback(key: string, data: string) {
-        XCallbackList.shared().execute(key, data);
     },
     hasMapping(name: string): boolean {
         const mappingItem = XMappingList.shared().find(name);

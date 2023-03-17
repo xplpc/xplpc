@@ -25,22 +25,17 @@ void CNativePlatformProxy::callProxy(const std::string &key, const std::string &
     }
 }
 
-void CNativePlatformProxy::finalize()
+void CNativePlatformProxy::finalizePlatform()
 {
-    NativePlatformProxy::finalize();
-    finalizeNativePlatform();
-}
+    NativePlatformProxy::finalizePlatform();
 
-void CNativePlatformProxy::initializeNativePlatform(FuncPtrToCallProxyCallback funcPtrToCallProxyCallback, FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall)
-{
-    this->funcPtrToCallProxyCallback = funcPtrToCallProxyCallback;
-    this->funcPtrToOnNativeProxyCall = funcPtrToOnNativeProxyCall;
-}
-
-void CNativePlatformProxy::finalizeNativePlatform()
-{
     this->funcPtrToCallProxyCallback = nullptr;
     this->funcPtrToOnNativeProxyCall = nullptr;
+}
+
+void CNativePlatformProxy::setFuncPtrToOnNativeProxyCall(FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall)
+{
+    this->funcPtrToOnNativeProxyCall = funcPtrToOnNativeProxyCall;
 }
 
 FuncPtrToCallProxyCallback CNativePlatformProxy::getFuncPtrToCallProxyCallback()

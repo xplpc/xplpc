@@ -1,7 +1,7 @@
 package com.xplpc.library
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.xplpc.client.RemoteClient
+import com.xplpc.client.Client
 import com.xplpc.core.Config
 import com.xplpc.core.XPLPC
 import com.xplpc.message.Param
@@ -42,7 +42,7 @@ class TodoTest {
 
         val request = Request("sample.todo.single", Param("item", todo))
 
-        RemoteClient.call<Todo>(request) { response ->
+        Client.call<Todo>(request) { response ->
             assertEquals("Title 1", response?.title)
         }
     }
@@ -60,7 +60,7 @@ class TodoTest {
         val request = Request("sample.todo.single", Param("item", todo))
 
         runBlocking {
-            RemoteClient.call<Todo>(request) { response ->
+            Client.call<Todo>(request) { response ->
                 assertEquals("Title 1", response?.title)
             }
         }
@@ -86,7 +86,7 @@ class TodoTest {
 
         val request = Request("sample.todo.list", Param("items", listOf(todo1, todo2)))
 
-        RemoteClient.call<List<Todo>>(request) { response ->
+        Client.call<List<Todo>>(request) { response ->
             assertEquals(2, response?.size)
             assertEquals("Title 1", response?.get(0)?.title)
             assertEquals("Title 2", response?.get(1)?.title)
@@ -114,7 +114,7 @@ class TodoTest {
         val request = Request("sample.todo.list", Param("items", listOf(todo1, todo2)))
 
         runBlocking {
-            RemoteClient.call<List<Todo>>(request) { response ->
+            Client.call<List<Todo>>(request) { response ->
                 assertEquals(2, response?.size)
                 assertEquals("Title 1", response?.get(0)?.title)
                 assertEquals("Title 2", response?.get(1)?.title)

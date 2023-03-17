@@ -18,11 +18,9 @@ public:
     static std::shared_ptr<CNativePlatformProxy> shared();
 
     virtual void callProxy(const std::string &key, const std::string &data) override;
-    virtual void finalize() override;
+    virtual void finalizePlatform() override;
 
-    void initializeNativePlatform(FuncPtrToCallProxyCallback funcPtrToCallProxyCallback, FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall);
-    void finalizeNativePlatform();
-
+    void setFuncPtrToOnNativeProxyCall(FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall);
     FuncPtrToCallProxyCallback getFuncPtrToCallProxyCallback();
     FuncPtrToOnNativeProxyCall getFuncPtrToOnNativeProxyCall();
 

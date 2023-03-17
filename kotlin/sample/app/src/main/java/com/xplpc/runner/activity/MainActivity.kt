@@ -5,8 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.xplpc.client.LocalClient
-import com.xplpc.client.RemoteClient
+import com.xplpc.client.Client
 import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.runner.R
@@ -54,7 +53,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             Param("suffix", "%")
         )
 
-        LocalClient.call<String>(request) { response ->
+        Client.call<String>(request) { response ->
             launch {
                 val text = getString(R.string.battery_level_result, response)
                 binding.tvBatteryLevelMessage.text = text
@@ -70,7 +69,7 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
             Param("remember", binding.ckRemember.isChecked),
         )
 
-        RemoteClient.call<String>(request) { response ->
+        Client.call<String>(request) { response ->
             launch {
                 binding.tvFormMessage.text = getString(R.string.login_result, response)
             }
