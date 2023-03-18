@@ -52,7 +52,20 @@ def run_task_clear():
     f.remove_dir(os.path.join(c.proj_path, "wasm", "sample", "node_modules"))
     f.remove_file(os.path.join(c.proj_path, "wasm", "sample", "package-lock.json"))
 
-    f.remove_file(os.path.join(c.proj_path, "flutter", "plugin", "example", "build"))
+    f.remove_dir(os.path.join(c.proj_path, "flutter", "plugin", ".dart_tool"))
+    f.remove_dir(os.path.join(c.proj_path, "flutter", "plugin", "build"))
+    f.remove_dir(os.path.join(c.proj_path, "flutter", "plugin", "android", "build"))
+    f.remove_dir(os.path.join(c.proj_path, "flutter", "plugin", "example", "build"))
+    f.remove_dir(
+        os.path.join(c.proj_path, "flutter", "plugin", "example", ".dart_tool")
+    )
+    f.remove_dir(os.path.join(c.proj_path, "flutter", "plugin", "android", ".cxx"))
+    f.remove_dir(
+        os.path.join(c.proj_path, "flutter", "plugin", "example", "ios", "Pods")
+    )
+    f.remove_dir(
+        os.path.join(c.proj_path, "flutter", "plugin", "example", "macos", "Pods")
+    )
 
     l.ok()
 
