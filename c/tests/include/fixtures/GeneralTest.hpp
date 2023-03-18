@@ -17,7 +17,7 @@ protected:
     void SetUp() override
     {
         // code here will be called immediately after the constructor (right before each test)
-        xplpc_core_initialize(nullptr, nullptr);
+        xplpc_core_initialize(nullptr, nullptr, nullptr, nullptr, nullptr);
     }
 
     void TearDown() override

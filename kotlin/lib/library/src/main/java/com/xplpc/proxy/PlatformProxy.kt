@@ -76,6 +76,11 @@ class PlatformProxy {
         }
 
         @JvmStatic
+        fun onInitializePlatform() {
+            // ignore
+        }
+
+        @JvmStatic
         fun onFinalizePlatform() {
             MappingList.clear()
         }

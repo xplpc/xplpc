@@ -18,12 +18,12 @@ extern "C"
     JNIEXPORT jint JNICALL
     JNI_OnLoad(JavaVM *jvm, void * /*reserved*/)
     {
-        // initialize native platform proxy
+        // initialize cxx platform proxy
         auto nativePlatformProxy = std::make_shared<NativePlatformProxy>();
         nativePlatformProxy->initialize();
         PlatformProxyList::shared()->insert(0, nativePlatformProxy);
 
-        // jni platform proxy
+        // initialize jni platform proxy
         auto jniPlatformProxy = JNIPlatformProxy::shared();
         jniPlatformProxy->setJavaVM(jvm);
         jniPlatformProxy->initialize();

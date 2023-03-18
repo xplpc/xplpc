@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
-import 'package:xplpc/client/remote_client.dart';
+import 'package:xplpc/client/client.dart';
 import 'package:xplpc/core/config.dart';
 import 'package:xplpc/core/xplpc.dart';
 import 'package:xplpc/data/mapping_list.dart';
@@ -14,7 +14,12 @@ import 'package:xplpc/message/response.dart';
 import 'package:xplpc/serializer/json_serializer.dart';
 import 'package:xplpc/type/dataview.dart';
 
-import 'remote_client_test.reflectable.dart';
+import 'client_test.reflectable.dart';
+
+void batteryLevel(Message m, Response r) {
+  var suffix = m.get("suffix");
+  r("100$suffix");
+}
 
 void reverse(Message m, Response r) {
   r("ok");
@@ -23,7 +28,7 @@ void reverse(Message m, Response r) {
 void main() {
   initializeReflectable();
 
-  group('Testing Remote Client', () {
+  group('Testing Client', () {
     setUp(() {
       // initialize xplpc library
       XPLPC.instance.initialize(
@@ -33,6 +38,42 @@ void main() {
       );
     });
 
+    test('Battery Level', () {
+      MappingList.instance.add(
+        "platform.battery.level",
+        MappingItem(batteryLevel),
+      );
+
+      var request = Request(
+        "platform.battery.level",
+        [
+          Param("suffix", "%"),
+        ],
+      );
+
+      Client.call<String>(request, (response) {
+        expect("100%", response);
+      });
+    });
+
+    test('Battery Level Async', () async {
+      MappingList.instance.add(
+        "platform.battery.level",
+        MappingItem(batteryLevel),
+      );
+
+      var request = Request(
+        "platform.battery.level",
+        [
+          Param("suffix", "%"),
+        ],
+      );
+
+      Client.call<String>(request, (response) {
+        expect("100%", response);
+      });
+    });
+
     test('Login', () {
       var request = Request("sample.login", [
         Param("username", "paulo"),
@@ -40,7 +81,7 @@ void main() {
         Param("remember", true),
       ]);
 
-      RemoteClient.call<String>(request, (response) {
+      Client.call<String>(request, (response) {
         expect("LOGGED-WITH-REMEMBER", response);
       });
     });
@@ -52,7 +93,7 @@ void main() {
         Param("remember", true),
       ]);
 
-      RemoteClient.call<String>(request, (response) {
+      Client.call<String>(request, (response) {
         expect("LOGGED-WITH-REMEMBER", response);
       });
     });
@@ -64,7 +105,7 @@ void main() {
         Param("remember", true),
       ]);
 
-      RemoteClient.call<bool>(request, (response) {
+      Client.call<bool>(request, (response) {
         expect(null, response);
       });
     });
@@ -77,7 +118,7 @@ void main() {
 
       var request = Request("sample.reverse");
 
-      RemoteClient.call<String>(request, (response) {
+      Client.call<String>(request, (response) {
         expect("response-is-ok", response);
       });
     });
@@ -90,7 +131,7 @@ void main() {
 
       var request = Request("sample.reverse");
 
-      RemoteClient.call<String>(request, (response) {
+      Client.call<String>(request, (response) {
         expect("response-is-ok", response);
       });
     });
@@ -113,7 +154,7 @@ void main() {
         Param("dataView", dataView),
       ]);
 
-      RemoteClient.call<String>(request, (response) {
+      Client.call<String>(request, (response) {
         expect("OK", response);
 
         var data = ByteArrayHelper.createFromDataView(dataView);
@@ -144,7 +185,7 @@ void main() {
         Param("dataView", dataView),
       ]);
 
-      RemoteClient.call<String>(request, (response) {
+      Client.call<String>(request, (response) {
         expect("OK", response);
 
         var data = ByteArrayHelper.createFromDataView(dataView);
@@ -161,7 +202,7 @@ void main() {
       // get data view
       var request = Request("sample.dataview");
 
-      RemoteClient.call<DataView>(request, (response) {
+      Client.call<DataView>(request, (response) {
         // check response
         expect(false, response == null);
 
@@ -181,7 +222,7 @@ void main() {
           Param("dataView", dataView2),
         ]);
 
-        RemoteClient.call<String>(request2, (response2) {
+        Client.call<String>(request2, (response2) {
           expect("OK", response2);
 
           var processedData = ByteArrayHelper.createFromDataView(dataView2);
@@ -207,7 +248,7 @@ void main() {
       // get data view
       var request = Request("sample.dataview");
 
-      RemoteClient.call<DataView>(request, (response) {
+      Client.call<DataView>(request, (response) {
         // check response
         expect(false, response == null);
 
@@ -227,7 +268,7 @@ void main() {
           Param("dataView", dataView2),
         ]);
 
-        RemoteClient.call<String>(request2, (response2) {
+        Client.call<String>(request2, (response2) {
           expect("OK", response2);
 
           var processedData = ByteArrayHelper.createFromDataView(dataView2);
@@ -246,6 +287,42 @@ void main() {
           expect(originalData[7].toInt(), 255);
           expect(originalData[12].toInt(), 0);
         });
+      });
+    });
+
+    test('Battery Level From String', () {
+      MappingList.instance.add(
+        "platform.battery.level",
+        MappingItem(batteryLevel),
+      );
+
+      var request = Request(
+        "platform.battery.level",
+        [
+          Param("suffix", "%"),
+        ],
+      );
+
+      Client.callFromString(request.data(), (response) {
+        expect("{\"r\":\"100%\"}", response);
+      });
+    });
+
+    test('Battery Level Async From String', () async {
+      MappingList.instance.add(
+        "platform.battery.level",
+        MappingItem(batteryLevel),
+      );
+
+      var request = Request(
+        "platform.battery.level",
+        [
+          Param("suffix", "%"),
+        ],
+      );
+
+      Client.callFromString(request.data(), (response) {
+        expect("{\"r\":\"100%\"}", response);
       });
     });
   });

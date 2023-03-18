@@ -27,6 +27,7 @@ We currently support these Flutter platforms:
 Execute on terminal:
 
     python3 xplpc.py swift-build --platform ios-flutter --interface
+    python3 xplpc.py swift-build-xcframework --platform ios-flutter
 
 ## How to build the native library for Android
 
@@ -39,6 +40,7 @@ Execute on terminal:
 Execute on terminal:
 
     python3 xplpc.py swift-build --platform macos-flutter --interface
+    python3 xplpc.py swift-build-xcframework --platform macos-flutter
 
 ## How to build the native library for Linux
 

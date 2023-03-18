@@ -10,7 +10,12 @@
 #endif
 
 XPLPC_EXPORT
-void xplpc_core_initialize(FuncPtrToCallProxyCallback funcPtrToCallProxyCallback, FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall);
+void xplpc_core_initialize(
+    FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform,
+    FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform,
+    FuncPtrToOnHasMapping funcPtrToOnHasMapping,
+    FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall,
+    FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback);
 
 XPLPC_EXPORT
 void xplpc_core_finalize();
@@ -20,5 +25,8 @@ bool xplpc_core_is_initialized();
 
 XPLPC_EXPORT
 void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataSize);
+
+XPLPC_EXPORT
+void xplpc_native_call_proxy_callback(char *key, size_t keySize, char *data, size_t dataSize);
 
 #endif

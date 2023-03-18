@@ -1,7 +1,7 @@
 #pragma once
 
 #include "xplpc/c/typedefs.h"
-#include "xplpc/proxy/NativePlatformProxy.hpp"
+#include "xplpc/proxy/PlatformProxy.hpp"
 
 #include <cstddef>
 #include <memory>
@@ -12,23 +12,38 @@ namespace xplpc
 namespace proxy
 {
 
-class CNativePlatformProxy : public NativePlatformProxy
+class CNativePlatformProxy : public PlatformProxy
 {
 public:
     static std::shared_ptr<CNativePlatformProxy> shared();
 
-    virtual void callProxy(const std::string &key, const std::string &data) override;
+    virtual void initialize() override;
+    virtual void initializePlatform() override;
+    virtual void finalize() override;
     virtual void finalizePlatform() override;
+    virtual void callProxy(const std::string &key, const std::string &data) override;
+    virtual bool hasMapping(const std::string &name) override;
 
+    void setFuncPtrToOnInitializePlatform(FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform);
+    void setFuncPtrToOnFinalizePlatform(FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform);
+    void setFuncPtrToOnHasMapping(FuncPtrToOnHasMapping funcPtrToOnHasMapping);
     void setFuncPtrToOnNativeProxyCall(FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall);
-    FuncPtrToCallProxyCallback getFuncPtrToCallProxyCallback();
+    void setFuncPtrToOnNativeProxyCallback(FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback);
+
+    FuncPtrToOnInitializePlatform getFuncPtrToOnInitializePlatform();
+    FuncPtrToOnFinalizePlatform getFuncPtrToOnFinalizePlatform();
+    FuncPtrToOnHasMapping getFuncPtrToOnHasMapping();
     FuncPtrToOnNativeProxyCall getFuncPtrToOnNativeProxyCall();
+    FuncPtrToOnNativeProxyCallback getFuncPtrToOnNativeProxyCallback();
 
 private:
     static std::shared_ptr<CNativePlatformProxy> instance;
 
-    FuncPtrToCallProxyCallback funcPtrToCallProxyCallback;
+    FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform;
+    FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform;
+    FuncPtrToOnHasMapping funcPtrToOnHasMapping;
     FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall;
+    FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback;
 };
 
 } // namespace proxy

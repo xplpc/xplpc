@@ -1,16 +1,16 @@
 # C++
 
-When use `RemoteClient` it will use any `PlatformProxy` implemented for the `target platform` (JNI, ObjC and others).
+When use `Client` it will use any `PlatformProxy` implemented for the `target platform` (JNI, ObjC and others) inside `PlatformProxyList`.
 
 It transfer serialized data between platforms using memory.
 
 Because this you need implement method `xplpc::proxy::initializePlatform` to initialize custom things on C++ side.
 
-See the custom data implementation for samples: `cxx/custom/src/xplpc/custom/PlatformProxy.cpp`.
+See the custom data implementation for samples: `cxx/custom/src/xplpc/custom/NativePlatformProxy.cpp`.
 
 If you don't implement this method, you will get this error when compile:
 
-    ld: error: undefined symbol: xplpc::proxy::PlatformProxy::initializePlatform()
+    ld: error: undefined symbol: xplpc::proxy::NativePlatformProxy::initializePlatform()
 
 ## How to build the library for C++
 

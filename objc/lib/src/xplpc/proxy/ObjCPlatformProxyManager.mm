@@ -10,12 +10,12 @@ using namespace xplpc::proxy;
 // methods
 + (void)initialize:(ObjCPlatformProxyImpl *)proxyImpl
 {
-    // initialize native platform proxy
+    // initialize cxx platform proxy
     auto nativePlatformProxy = std::make_shared<xplpc::proxy::NativePlatformProxy>();
     nativePlatformProxy->initialize();
     xplpc::data::PlatformProxyList::shared()->insert(0, nativePlatformProxy);
 
-    // objc platform proxy
+    // initialize objc platform proxy
     auto objcPlatformProxy = ObjCPlatformProxy::shared();
     objcPlatformProxy->setProxyImpl(proxyImpl);
     objcPlatformProxy->initialize();

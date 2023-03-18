@@ -36,6 +36,11 @@ void JNIPlatformProxy::initializePlatform()
 
     jclass classLoaderClass = env->FindClass("java/lang/ClassLoader");
     classLoaderMethodID = env->GetMethodID(classLoaderClass, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+
+    // call initialize platform method
+    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
+    jmethodID methodID = env->GetStaticMethodID(clazz, "onInitializePlatform", "()V");
+    env->CallStaticVoidMethod(clazz, methodID);
 }
 
 void JNIPlatformProxy::finalize()
@@ -49,7 +54,7 @@ void JNIPlatformProxy::finalizePlatform()
     this->classLoader = nullptr;
     this->classLoaderMethodID = nullptr;
 
-    // call clear method
+    // call finalize platform method
     auto env = jniGetThreadEnv();
     jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
     jmethodID methodID = env->GetStaticMethodID(clazz, "onFinalizePlatform", "()V");

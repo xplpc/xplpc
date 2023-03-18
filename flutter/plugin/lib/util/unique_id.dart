@@ -13,8 +13,8 @@ class UniqueID {
   // methods
   static Future<String> generate() async {
     return await instance.lock.synchronized(() async {
-      instance.counter = instance.counter + BigInt.from(1);
-      return instance.counter.toString();
+      instance.counter = (instance.counter + BigInt.from(1));
+      return "FL-${instance.counter}";
     });
   }
 }

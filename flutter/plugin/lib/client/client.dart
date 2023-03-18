@@ -8,7 +8,10 @@ import 'package:xplpc/util/log.dart';
 import 'package:xplpc/util/unique_id.dart';
 
 class Client {
-  static void call<T>(Request request, ClientCallback callback) {
+  static void call<T>(
+    Request request,
+    ClientCallback callback,
+  ) {
     try {
       UniqueID.generate().then((key) {
         CallbackList.instance.add(key, (String response) {
@@ -19,8 +22,8 @@ class Client {
           );
         });
 
-        var nativeKey = key.toNativeUtf8();
-        var nativeData = request.data().toNativeUtf8();
+        final nativeKey = key.toNativeUtf8();
+        final nativeData = request.data().toNativeUtf8();
 
         PlatformProxy.nativeCallProxyFunc(
           nativeKey,
@@ -35,15 +38,18 @@ class Client {
     }
   }
 
-  static void call(String data, ClientCallbackFromString callback) {
+  static void callFromString(
+    String requestData,
+    ClientCallbackFromString callback,
+  ) {
     try {
       UniqueID.generate().then((key) {
         CallbackList.instance.add(key, (String response) {
           callback?.call(response);
         });
 
-        var nativeKey = key.toNativeUtf8();
-        var nativeData = request.data().toNativeUtf8();
+        final nativeKey = key.toNativeUtf8();
+        final nativeData = requestData.toNativeUtf8();
 
         PlatformProxy.nativeCallProxyFunc(
           nativeKey,
