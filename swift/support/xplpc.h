@@ -7,5 +7,5 @@ FOUNDATION_EXPORT double xplpcVersionNumber;
 FOUNDATION_EXPORT const unsigned char xplpcVersionString[];
 
 // in this header, you should import all the public headers of your framework using statements like #import <Framework/PublicHeader.h>
-#import <xplpc/XPLPCNativePlatformProxyImpl.h>
-#import <xplpc/XPLPCNativePlatformProxyManager.h>
+#import <xplpc/ObjCPlatformProxyImpl.h>
+#import <xplpc/ObjCPlatformProxyManager.h>

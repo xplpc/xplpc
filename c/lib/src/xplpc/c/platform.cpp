@@ -44,10 +44,3 @@ void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataS
     });
     // clang-format on
 }
-
-// REMOVE METHOD
-void xplpc_native_call_proxy_callback(char *key, size_t keySize, char *data, size_t dataSize)
-{
-//     auto proxy = CNativePlatformProxy::shared();
-//     proxy->callProxyCallback(key, data);
-}

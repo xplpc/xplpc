@@ -9,13 +9,13 @@ import com.xplpc.util.Log
 class PlatformProxy {
     companion object {
         @JvmStatic
-        external fun nativeProxyCall(key: String, data: String)
+        external fun callNativeProxy(key: String, data: String)
 
         @JvmStatic
-        external fun nativeCallProxyCallback(key: String, data: String)
+        external fun callNativeProxyCallback(key: String, data: String)
 
         @JvmStatic
-        fun onCallProxyCallback(key: String, data: String) {
+        fun onNativeProxyCallback(key: String, data: String) {
             CallbackList.execute(key, data)
         }
 
@@ -26,7 +26,7 @@ class PlatformProxy {
 
             if (functionName.isEmpty()) {
                 Log.e("[PlatformProxy : call] Function name is empty")
-                nativeCallProxyCallback(key, data)
+                callNativeProxyCallback(key, data)
                 return
             }
 
@@ -35,7 +35,7 @@ class PlatformProxy {
 
             if (mappingItem == null) {
                 Log.e("[PlatformProxy : call] Mapping not found for function: $functionName")
-                nativeCallProxyCallback(key, data)
+                callNativeProxyCallback(key, data)
                 return
             }
 
@@ -50,7 +50,7 @@ class PlatformProxy {
 
             if (message == null) {
                 Log.e("[PlatformProxy : call] Error when decode message for function: $functionName")
-                nativeCallProxyCallback(key, data)
+                callNativeProxyCallback(key, data)
                 return
             }
 
@@ -62,12 +62,22 @@ class PlatformProxy {
                     encodedData = XPLPC.config.serializer.encodeFunctionReturnValue(response)
                 } catch (e: Exception) {
                     Log.e("[PlatformProxy : call] Error when encode data: ${e.message}")
-                    nativeCallProxyCallback(key, data)
+                    callNativeProxyCallback(key, data)
                     return@target
                 }
 
-                nativeCallProxyCallback(key, encodedData)
+                callNativeProxyCallback(key, encodedData)
             }
+        }
+
+        @JvmStatic
+        fun onHasMapping(name: String): Boolean {
+            return MappingList.has(name)
+        }
+
+        @JvmStatic
+        fun onFinalizePlatform() {
+            MappingList.clear()
         }
     }
 }

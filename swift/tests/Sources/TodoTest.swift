@@ -27,7 +27,7 @@ final class TodoTest: XCTestCase {
 
         let request = Request("sample.todo.single", Param("item", todo))
 
-        RemoteClient.call(request) { (r: Todo?) in
+        Client.call(request) { (r: Todo?) in
             XCTAssertEqual("Title 1", r?.title)
         }
     }
@@ -39,7 +39,7 @@ final class TodoTest: XCTestCase {
 
         let request = Request("sample.todo.list", Param("items", list))
 
-        RemoteClient.call(request) { (r: [Todo]?) in
+        Client.call(request) { (r: [Todo]?) in
             XCTAssertEqual(2, r?.count)
             XCTAssertEqual("Title 1", r?[0].title)
             XCTAssertEqual("Title 2", r?[1].title)
@@ -51,7 +51,7 @@ final class TodoTest: XCTestCase {
         let request = Request("sample.todo.single", Param("item", todo))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: Todo?) in
+            Client.call(request) { (r: Todo?) in
                 XCTAssertEqual("Title 1", r?.title)
             }
         }
@@ -65,7 +65,7 @@ final class TodoTest: XCTestCase {
         let request = Request("sample.todo.list", Param("items", list))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: [Todo]?) in
+            Client.call(request) { (r: [Todo]?) in
                 XCTAssertEqual(2, r?.count)
                 XCTAssertEqual("Title 1", r?[0].title)
                 XCTAssertEqual("Title 2", r?[1].title)

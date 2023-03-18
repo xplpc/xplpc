@@ -51,8 +51,8 @@ void JNIPlatformProxy::finalizePlatform()
 
     // call clear method
     auto env = jniGetThreadEnv();
-    jclass clazz = jniFindClass("com/xplpc/data/MappingList");
-    jmethodID methodID = env->GetStaticMethodID(clazz, "clear", "()V");
+    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
+    jmethodID methodID = env->GetStaticMethodID(clazz, "onFinalizePlatform", "()V");
     env->CallStaticVoidMethod(clazz, methodID);
 }
 
@@ -68,8 +68,8 @@ void JNIPlatformProxy::callProxy(const std::string &key, const std::string &data
 bool JNIPlatformProxy::hasMapping(const std::string &name)
 {
     auto env = jniGetThreadEnv();
-    jclass clazz = jniFindClass("com/xplpc/data/MappingList");
-    jmethodID methodID = env->GetStaticMethodID(clazz, "has", "(Ljava/lang/String;)Z");
+    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
+    jmethodID methodID = env->GetStaticMethodID(clazz, "onHasMapping", "(Ljava/lang/String;)Z");
     return env->CallStaticBooleanMethod(clazz, methodID, xplpc::jni::jniStringFromUTF8(env, name));
 }
 

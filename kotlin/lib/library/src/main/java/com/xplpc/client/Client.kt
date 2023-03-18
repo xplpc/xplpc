@@ -25,7 +25,7 @@ object Client {
             callback?.invoke(data)
         }
 
-        PlatformProxy.nativeProxyCall(key, request.data)
+        PlatformProxy.callNativeProxy(key, request.data)
     }
 
     inline fun <reified T> call(request: Request) {
@@ -39,7 +39,7 @@ object Client {
             callback?.invoke(response)
         }
 
-        PlatformProxy.nativeProxyCall(key, requestData)
+        PlatformProxy.callNativeProxy(key, requestData)
     }
 
     fun call(data: String) {

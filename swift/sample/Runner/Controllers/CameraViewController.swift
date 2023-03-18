@@ -79,7 +79,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             Param("dataView", dataView)
         )
 
-        RemoteClient.call(request) { (response: String?) in
+        Client.call(request) { (response: String?) in
             guard response != nil else {
                 debugPrint("[CameraViewController : captureOutput] Unable to get response data")
                 return

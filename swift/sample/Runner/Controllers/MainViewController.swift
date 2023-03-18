@@ -252,7 +252,7 @@ class MainViewController: UIViewController, UITextFieldDelegate {
     @objc func btSubmitForBatteryLevelClicked() {
         let request = Request("platform.battery.level", Param("suffix", "%"))
 
-        LocalClient.call(request) { (response: String?) in
+        Client.call(request) { (response: String?) in
             DispatchQueue.main.async {
                 self.lbBatteryLevelMessage.text = "Response: " + (response ?? "ERROR")
             }
@@ -267,7 +267,7 @@ class MainViewController: UIViewController, UITextFieldDelegate {
             Param("remember", swRemember.isOn)
         )
 
-        RemoteClient.call(request) { (response: String?) in
+        Client.call(request) { (response: String?) in
             DispatchQueue.main.async {
                 self.lbFormMessage.text = "Response: " + (response ?? "ERROR")
             }

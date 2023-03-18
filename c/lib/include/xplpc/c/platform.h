@@ -21,8 +21,4 @@ bool xplpc_core_is_initialized();
 XPLPC_EXPORT
 void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataSize);
 
-// REMOVE METHOD
-XPLPC_EXPORT
-void xplpc_native_call_proxy_callback(char *key, size_t keySize, char *data, size_t dataSize);
-
 #endif

@@ -60,7 +60,7 @@ final class AllTypesTest: XCTestCase {
 
         let request = Request("sample.alltypes.single", Param("item", item))
 
-        RemoteClient.call(request) { (r: AllTypes?) in
+        Client.call(request) { (r: AllTypes?) in
             XCTAssertNotNil(r)
 
             if let allTypes = r {
@@ -97,7 +97,7 @@ final class AllTypesTest: XCTestCase {
 
         let request = Request("sample.alltypes.list", Param("items", list))
 
-        RemoteClient.call(request) { (r: [AllTypes]?) in
+        Client.call(request) { (r: [AllTypes]?) in
             XCTAssertEqual(2, r?.count)
         }
     }
@@ -109,7 +109,7 @@ final class AllTypesTest: XCTestCase {
         let request = Request("sample.alltypes.single", Param("item", item))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: AllTypes?) in
+            Client.call(request) { (r: AllTypes?) in
                 XCTAssertNotNil(r)
 
                 if let allTypes = r {
@@ -148,7 +148,7 @@ final class AllTypesTest: XCTestCase {
         let request = Request("sample.alltypes.list", Param("items", list))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: [AllTypes]?) in
+            Client.call(request) { (r: [AllTypes]?) in
                 XCTAssertEqual(2, r?.count)
             }
         }

@@ -40,7 +40,7 @@ extern "C"
     }
 
     JNIEXPORT void JNICALL
-    Java_com_xplpc_proxy_PlatformProxy_nativeProxyCall(JNIEnv *env, jclass /*clazz*/, jstring key, jstring data)
+    Java_com_xplpc_proxy_PlatformProxy_callNativeProxy(JNIEnv *env, jclass /*clazz*/, jstring key, jstring data)
     {
         // clang-format off
         Client::call(jniUTF8FromString(env, data), [key](const auto &response) {
@@ -48,7 +48,7 @@ extern "C"
             auto env = proxy->jniGetThreadEnv();
 
             jclass clazz = proxy->jniFindClass("com/xplpc/proxy/PlatformProxy");
-            jmethodID methodID = env->GetStaticMethodID(clazz, "onCallProxyCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
+            jmethodID methodID = env->GetStaticMethodID(clazz, "onNativeProxyCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
 
             env->CallStaticVoidMethod(clazz, methodID, key, jniStringFromUTF8(env, response));
         });
@@ -56,7 +56,7 @@ extern "C"
     }
 
     JNIEXPORT void JNICALL
-    Java_com_xplpc_proxy_PlatformProxy_nativeCallProxyCallback(JNIEnv *env, jclass /*clazz*/, jstring key, jstring data)
+    Java_com_xplpc_proxy_PlatformProxy_callNativeProxyCallback(JNIEnv *env, jclass /*clazz*/, jstring key, jstring data)
     {
         CallbackList::shared()->execute(jniUTF8FromString(env, key), jniUTF8FromString(env, data));
     }

@@ -2,7 +2,7 @@ import XCTest
 
 @testable import xplpc
 
-final class RemoteClientTest: XCTestCase {
+final class ClientTest: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         XPLPC.shared.initialize(
@@ -14,8 +14,52 @@ final class RemoteClientTest: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
+    func batteryLevel(message: Message, r: Response) {
+        let level = 100
+
+        let suffix: String = message.get("suffix") ?? ""
+
+        if suffix.isEmpty {
+            r("\(level)")
+        } else {
+            r("\(level)\(suffix)")
+        }
+    }
+
     func reverseResponse(message _: Message, r: Response) {
         r("ok")
+    }
+
+    func testBatteryLevel() throws {
+        MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
+
+        let request = Request("platform.battery.level", Param("suffix", "%"))
+
+        Client.call(request) { response in
+            XCTAssertEqual("100%", response)
+        }
+    }
+
+    func testBatteryLevelAsync() throws {
+        MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
+
+        let request = Request("platform.battery.level", Param("suffix", "%"))
+
+        DispatchQueue.global(qos: .background).async {
+            Client.call(request) { response in
+                XCTAssertEqual("100%", response)
+            }
+        }
+    }
+
+    func testBatteryLevelInvalidCast() throws {
+        MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
+
+        let request = Request("platform.battery.level", Param("suffix", "%"))
+
+        Client.call(request) { (response: Bool?) in
+            XCTAssertEqual(nil, response)
+        }
     }
 
     func testLogin() throws {
@@ -26,7 +70,7 @@ final class RemoteClientTest: XCTestCase {
             Param("remember", true)
         )
 
-        RemoteClient.call(request) { response in
+        Client.call(request) { response in
             XCTAssertEqual("LOGGED-WITH-REMEMBER", response)
         }
     }
@@ -40,7 +84,7 @@ final class RemoteClientTest: XCTestCase {
         )
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { response in
+            Client.call(request) { response in
                 XCTAssertEqual("LOGGED-WITH-REMEMBER", response)
             }
         }
@@ -54,7 +98,7 @@ final class RemoteClientTest: XCTestCase {
             Param("remember", true)
         )
 
-        RemoteClient.call(request) { (response: Bool?) in
+        Client.call(request) { (response: Bool?) in
             XCTAssertEqual(nil, response)
         }
     }
@@ -64,7 +108,7 @@ final class RemoteClientTest: XCTestCase {
 
         let request = Request("sample.reverse")
 
-        RemoteClient.call(request) { response in
+        Client.call(request) { response in
             XCTAssertEqual("response-is-ok", response)
         }
     }
@@ -88,7 +132,7 @@ final class RemoteClientTest: XCTestCase {
             Param("dataView", dataView)
         )
 
-        RemoteClient.call(request) { response in
+        Client.call(request) { response in
             XCTAssertEqual("OK", response)
 
             XCTAssertEqual(16, data.count)
@@ -103,7 +147,7 @@ final class RemoteClientTest: XCTestCase {
         // get data view
         let request = Request("sample.dataview")
 
-        RemoteClient.call(request) { (r: DataView?) in
+        Client.call(request) { (r: DataView?) in
             // check response
             XCTAssertNotNil(r)
 
@@ -112,7 +156,7 @@ final class RemoteClientTest: XCTestCase {
             }
 
             // check current values
-            var originalData = ByteArrayHelper.createFromDataView(dataView)
+            let originalData = ByteArrayHelper.createFromDataView(dataView)
 
             XCTAssertEqual(16, dataView.size)
             XCTAssertEqual(originalData[0], 255)
@@ -126,7 +170,7 @@ final class RemoteClientTest: XCTestCase {
                 Param("dataView", dataView)
             )
 
-            RemoteClient.call(request2) { response in
+            Client.call(request2) { response in
                 XCTAssertEqual("OK", response)
 
                 let processedData = ByteArrayHelper.createFromDataView(dataView)
@@ -144,6 +188,28 @@ final class RemoteClientTest: XCTestCase {
                 XCTAssertEqual(originalData[5], 255)
                 XCTAssertEqual(originalData[10], 255)
                 XCTAssertEqual(originalData[12], 0)
+            }
+        }
+    }
+
+    func testBatteryLevelFromString() throws {
+        MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
+
+        let request = Request("platform.battery.level", Param("suffix", "%"))
+
+        Client.call(request.data) { response in
+            XCTAssertEqual("{\"r\":\"100%\"}", response)
+        }
+    }
+
+    func testBatteryLevelAsyncFromString() async throws {
+        MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
+
+        let request = Request("platform.battery.level", Param("suffix", "%"))
+
+        DispatchQueue.global(qos: .background).async {
+            Client.call(request.data) { response in
+                XCTAssertEqual("{\"r\":\"100%\"}", response)
             }
         }
     }
