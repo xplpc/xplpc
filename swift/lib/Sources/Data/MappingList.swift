@@ -15,4 +15,8 @@ public class MappingList {
     public func clear() {
         list.removeAll()
     }
+
+    func has(_ name: String) -> Bool {
+        return list.keys.contains(name)
+    }
 }

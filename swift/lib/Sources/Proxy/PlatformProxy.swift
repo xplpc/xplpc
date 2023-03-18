@@ -41,11 +41,7 @@ class PlatformProxy: ObjCPlatformProxyImpl {
     }
 
     override func onHasMapping(_ name: String) -> Bool {
-        if let _ = MappingList.shared.find(name) {
-            return true
-        }
-
-        return false
+        return MappingList.shared.has(name)
     }
 
     override func onInitializePlatform() {
