@@ -16,6 +16,7 @@ using namespace xplpc::data;
 using namespace xplpc::proxy;
 
 void xplpc_core_initialize(
+    bool initializeCxxNativePlatformProxy,
     FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform,
     FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform,
     FuncPtrToOnHasMapping funcPtrToOnHasMapping,
@@ -23,9 +24,12 @@ void xplpc_core_initialize(
     FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback)
 {
     // initialize cxx platform proxy
-    auto nativePlatformProxy = std::make_shared<NativePlatformProxy>();
-    nativePlatformProxy->initialize();
-    PlatformProxyList::shared()->insert(0, nativePlatformProxy);
+    if (initializeCxxNativePlatformProxy)
+    {
+        auto nativePlatformProxy = std::make_shared<NativePlatformProxy>();
+        nativePlatformProxy->initialize();
+        PlatformProxyList::shared()->insert(0, nativePlatformProxy);
+    }
 
     // initialize c platform proxy
     auto cPlatformProxy = CNativePlatformProxy::shared();

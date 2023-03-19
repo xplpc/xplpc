@@ -9,6 +9,7 @@ set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
 
 set(XPLPC_SRC_FILES ${XPLPC_SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/objc/support.mm"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/platform/ObjCPlatformInitializer.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/proxy/ObjCPlatformProxy.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/proxy/ObjCPlatformProxyImpl.mm"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/proxy/ObjCPlatformProxyManager.mm"

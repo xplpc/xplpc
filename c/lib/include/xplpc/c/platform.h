@@ -11,6 +11,7 @@
 
 XPLPC_EXPORT
 void xplpc_core_initialize(
+    bool initializeCxxNativePlatformProxy,
     FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform,
     FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform,
     FuncPtrToOnHasMapping funcPtrToOnHasMapping,

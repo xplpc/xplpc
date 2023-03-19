@@ -21,6 +21,7 @@ typedef CallProxyCallback = ffi.Void Function(
 
 // ffi signature of the C functions
 typedef NativeInitializeFunc = ffi.Void Function(
+  ffi.Bool,
   ffi.Pointer<ffi.NativeFunction<OnInitializePlatform>>,
   ffi.Pointer<ffi.NativeFunction<OnFinalizePlatform>>,
   ffi.Pointer<ffi.NativeFunction<OnHasMapping>>,
@@ -46,6 +47,7 @@ typedef NativeCallProxyCallbackFunc = ffi.Void Function(
 
 // dart type definitions
 typedef InitializeFunc = void Function(
+  bool,
   ffi.Pointer<ffi.NativeFunction<OnInitializePlatform>>,
   ffi.Pointer<ffi.NativeFunction<OnFinalizePlatform>>,
   ffi.Pointer<ffi.NativeFunction<OnHasMapping>>,

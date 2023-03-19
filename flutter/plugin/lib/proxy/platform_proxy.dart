@@ -1,4 +1,5 @@
 import 'dart:ffi' as ffi;
+import 'dart:io';
 
 import "package:ffi/ffi.dart";
 import 'package:xplpc/core/xplpc.dart';
@@ -54,8 +55,20 @@ class PlatformProxy {
       'xplpc_native_call_proxy_callback',
     );
 
+    // initialize cxx platform proxy
+    var initializeCxxPlatformProxy = true;
+
+    if (Platform.isAndroid) {
+      initializeCxxPlatformProxy = false;
+    } else if (Platform.isMacOS) {
+      initializeCxxPlatformProxy = false;
+    } else if (Platform.isIOS) {
+      initializeCxxPlatformProxy = false;
+    }
+
     // callbacks
     initializeFunc(
+      initializeCxxPlatformProxy,
       onInitializePlatformFunc,
       onFinalizePlatformFunc,
       onHasMappingFunc,

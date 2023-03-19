@@ -24,10 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     private func initializeXPLPC() {
-        XPLPC.shared.initialize(
-            config: Config(serializer: JsonSerializer())
-        )
-
         Mapping.initialize()
     }
 }

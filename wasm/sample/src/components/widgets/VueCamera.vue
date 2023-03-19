@@ -314,7 +314,7 @@ export default {
         },
         // get canvas
         getCanvas() {
-            // rmeove comment below for debug only
+            // remove comment below for debug only
             // Log.d("[Camera : getCanvas]");
 
             const video = this.$refs.video;
