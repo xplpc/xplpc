@@ -12,4 +12,12 @@ object MappingList {
     fun find(name: String): MappingItem? {
         return list[name]
     }
+
+    fun clear() {
+        list.clear()
+    }
+
+    fun has(name: String): Boolean {
+        return find(name) != null
+    }
 }

@@ -88,7 +88,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3A6EE5EE290CC5A9006F4EA8 /* xplpc.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = xplpc.xcframework; path = "../../build/swift-xcframework/xplpc.xcframework"; sourceTree = "<group>"; };
+		3A6EE5EE290CC5A9006F4EA8 /* xplpc.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = xplpc.xcframework; path = "../../build/swift-ios-xcframework/xplpc.xcframework"; sourceTree = "<group>"; };
 		3A6EE5F8290CD82D006F4EA8 /* ColorFromHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorFromHex.swift; sourceTree = "<group>"; };
 		3A6EE5FC290CD8BE006F4EA8 /* NavigationBarColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarColor.swift; sourceTree = "<group>"; };
 		3A7395DF2910869D00E25ED5 /* NavigationBarShadow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarShadow.swift; sourceTree = "<group>"; };

@@ -16,6 +16,6 @@ public class XPLPC {
         initialized = true
         self.config = config
 
-        XPLPCNativePlatformProxyManager.initialize(PlatformProxy.shared)
+        ObjCPlatformProxyManager.initialize(PlatformProxy.shared)
     }
 }

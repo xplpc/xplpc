@@ -7,24 +7,25 @@ namespace xplpc
 namespace proxy
 {
 
-void JNIPlatformProxy::callProxy(const std::string &key, const std::string &data)
-{
-    auto env = jniGetThreadEnv();
-    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
-    jmethodID methodID = env->GetStaticMethodID(clazz, "onNativeProxyCall", "(Ljava/lang/String;Ljava/lang/String;)V");
+std::shared_ptr<JNIPlatformProxy> JNIPlatformProxy::instance = nullptr;
 
-    env->CallStaticVoidMethod(clazz, methodID, xplpc::jni::jniStringFromUTF8(env, key), xplpc::jni::jniStringFromUTF8(env, data));
+std::shared_ptr<JNIPlatformProxy> JNIPlatformProxy::shared()
+{
+    if (instance == nullptr)
+    {
+        instance = std::make_shared<JNIPlatformProxy>();
+    }
+
+    return instance;
 }
 
-void JNIPlatformProxy::finalize()
+void JNIPlatformProxy::initialize()
 {
-    PlatformProxy::finalize();
-    finalizeNativePlatform();
+    initializePlatform();
 }
 
-void JNIPlatformProxy::initializeNativePlatform(JavaVM *jvm)
+void JNIPlatformProxy::initializePlatform()
 {
-    this->javaVM = jvm;
     auto env = jniGetThreadEnv();
 
     jclass ourClass = env->FindClass("com/xplpc/core/XPLPC");
@@ -35,11 +36,51 @@ void JNIPlatformProxy::initializeNativePlatform(JavaVM *jvm)
 
     jclass classLoaderClass = env->FindClass("java/lang/ClassLoader");
     classLoaderMethodID = env->GetMethodID(classLoaderClass, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+
+    // call initialize platform method
+    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
+    jmethodID methodID = env->GetStaticMethodID(clazz, "onInitializePlatform", "()V");
+    env->CallStaticVoidMethod(clazz, methodID);
 }
 
-void JNIPlatformProxy::finalizeNativePlatform()
+void JNIPlatformProxy::finalize()
+{
+    finalizePlatform();
+}
+
+void JNIPlatformProxy::finalizePlatform()
 {
     this->javaVM = nullptr;
+    this->classLoader = nullptr;
+    this->classLoaderMethodID = nullptr;
+
+    // call finalize platform method
+    auto env = jniGetThreadEnv();
+    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
+    jmethodID methodID = env->GetStaticMethodID(clazz, "onFinalizePlatform", "()V");
+    env->CallStaticVoidMethod(clazz, methodID);
+}
+
+void JNIPlatformProxy::callProxy(const std::string &key, const std::string &data)
+{
+    auto env = jniGetThreadEnv();
+    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
+    jmethodID methodID = env->GetStaticMethodID(clazz, "onNativeProxyCall", "(Ljava/lang/String;Ljava/lang/String;)V");
+
+    env->CallStaticVoidMethod(clazz, methodID, xplpc::jni::jniStringFromUTF8(env, key), xplpc::jni::jniStringFromUTF8(env, data));
+}
+
+bool JNIPlatformProxy::hasMapping(const std::string &name)
+{
+    auto env = jniGetThreadEnv();
+    jclass clazz = jniFindClass("com/xplpc/proxy/PlatformProxy");
+    jmethodID methodID = env->GetStaticMethodID(clazz, "onHasMapping", "(Ljava/lang/String;)Z");
+    return env->CallStaticBooleanMethod(clazz, methodID, xplpc::jni::jniStringFromUTF8(env, name));
+}
+
+void JNIPlatformProxy::setJavaVM(JavaVM *jvm)
+{
+    this->javaVM = jvm;
 }
 
 JNIEnv *JNIPlatformProxy::jniGetThreadEnv()

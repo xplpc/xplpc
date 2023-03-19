@@ -33,18 +33,35 @@ export class XPLPC {
         this.module = module;
 
         if (this.module) {
+            // initialize xplpc
             if (this.module.XPLPC) {
                 this.module.XPLPC.initialize();
             }
 
+            // initialize native platform proxy
+            if (this.module.NativePlatformProxy) {
+                // eslint-disable-next-line
+                // @ts-ignore:next-line
+                const nativePlatformProxy = new this.module.NativePlatformProxy();
+                nativePlatformProxy.initialize();
+
+                if (this.module.PlatformProxyList) {
+                    this.module.PlatformProxyList.insertFromJavascript(0, nativePlatformProxy);
+                }
+            }
+
+            // javascript platform proxy
             if (this.module.PlatformProxy) {
                 // eslint-disable-next-line
                 // @ts-ignore:next-line
                 const ProxyClass = new this.module.PlatformProxy.extend("PlatformProxy", XWebPlatformProxy);
                 const proxyInstance = new ProxyClass();
 
-                this.module.PlatformProxy.createFromPtr(proxyInstance);
-                this.module.PlatformProxy.shared().initialize();
+                proxyInstance.initialize();
+
+                if (this.module.PlatformProxyList) {
+                    this.module.PlatformProxyList.insertFromJavascript(0, proxyInstance);
+                }
             }
         }
     }

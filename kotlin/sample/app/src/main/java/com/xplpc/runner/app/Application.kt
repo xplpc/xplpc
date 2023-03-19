@@ -4,11 +4,8 @@ import android.os.StrictMode
 import androidx.camera.camera2.Camera2Config
 import androidx.camera.core.CameraXConfig
 import androidx.multidex.MultiDexApplication
-import com.xplpc.core.Config
-import com.xplpc.core.XPLPC
 import com.xplpc.runner.BuildConfig
 import com.xplpc.runner.custom.Mapping
-import com.xplpc.serializer.JsonSerializer
 import com.xplpc.util.Log
 
 class Application : MultiDexApplication(), CameraXConfig.Provider {
@@ -25,11 +22,6 @@ class Application : MultiDexApplication(), CameraXConfig.Provider {
 
     private fun initializeXPLPC() {
         Log.d("[Application : initializeXPLPC]")
-
-        // initialize xplpc
-        XPLPC.initialize(
-            Config(JsonSerializer()),
-        )
 
         // initialize local mappings
         Mapping.initialize()

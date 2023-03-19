@@ -11,10 +11,6 @@ final class CoreTest: XCTestCase {
     }
 
     func testSetup() throws {
-        XPLPC.shared.initialize(
-            config: Config(serializer: JsonSerializer())
-        )
-
         XCTAssertEqual(XPLPC.shared.initialized, true)
     }
 }

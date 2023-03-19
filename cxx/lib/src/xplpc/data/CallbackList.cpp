@@ -38,5 +38,12 @@ std::shared_ptr<CallbackList> CallbackList::shared()
     return instance;
 }
 
+#if defined(__EMSCRIPTEN__)
+void CallbackList::executeFromJavascript(const std::string &key, const std::string &data)
+{
+    shared()->execute(key, data);
+}
+#endif
+
 } // namespace data
 } // namespace xplpc

@@ -24,9 +24,6 @@ struct AllTypes: Codable {
 final class AllTypesTest: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        XPLPC.shared.initialize(
-            config: Config(serializer: JsonSerializer())
-        )
     }
 
     override func tearDownWithError() throws {
@@ -60,7 +57,7 @@ final class AllTypesTest: XCTestCase {
 
         let request = Request("sample.alltypes.single", Param("item", item))
 
-        RemoteClient.call(request) { (r: AllTypes?) in
+        Client.call(request) { (r: AllTypes?) in
             XCTAssertNotNil(r)
 
             if let allTypes = r {
@@ -97,7 +94,7 @@ final class AllTypesTest: XCTestCase {
 
         let request = Request("sample.alltypes.list", Param("items", list))
 
-        RemoteClient.call(request) { (r: [AllTypes]?) in
+        Client.call(request) { (r: [AllTypes]?) in
             XCTAssertEqual(2, r?.count)
         }
     }
@@ -109,7 +106,7 @@ final class AllTypesTest: XCTestCase {
         let request = Request("sample.alltypes.single", Param("item", item))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: AllTypes?) in
+            Client.call(request) { (r: AllTypes?) in
                 XCTAssertNotNil(r)
 
                 if let allTypes = r {
@@ -148,7 +145,7 @@ final class AllTypesTest: XCTestCase {
         let request = Request("sample.alltypes.list", Param("items", list))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: [AllTypes]?) in
+            Client.call(request) { (r: [AllTypes]?) in
                 XCTAssertEqual(2, r?.count)
             }
         }

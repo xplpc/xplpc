@@ -55,9 +55,11 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         }
 
         // image size
+        let size = CVPixelBufferGetDataSize(frame)
+
         #if DEBUG
-            let size = CVPixelBufferGetDataSize(frame)
-            print("[CameraViewController : captureOutput] Original image size is: " + String(size / 1024) + " kb")
+            // remove comment below for debug only
+            // print("[CameraViewController : captureOutput] Original image size is: " + String(size / 1024) + " kb")
         #endif
 
         // original image
@@ -79,7 +81,7 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             Param("dataView", dataView)
         )
 
-        RemoteClient.call(request) { (response: String?) in
+        Client.call(request) { (response: String?) in
             guard response != nil else {
                 debugPrint("[CameraViewController : captureOutput] Unable to get response data")
                 return
@@ -99,7 +101,11 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     }
 
     private func addCameraInput() {
-        let device = AVCaptureDevice.default(for: .video)!
+        guard let device = AVCaptureDevice.default(for: .video) else {
+            debugPrint("[CameraViewController : addCameraInput] No video device found")
+            return
+        }
+
         let cameraInput = try! AVCaptureDeviceInput(device: device)
 
         captureSession.sessionPreset = AVCaptureSession.Preset.medium

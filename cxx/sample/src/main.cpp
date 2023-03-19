@@ -43,7 +43,7 @@ namespace xplpc
 namespace proxy
 {
 
-void PlatformProxy::initializePlatform()
+void NativePlatformProxy::initializePlatform()
 {
     // mapping data (function name, map<return value, params types>(params names), function ref)
     MappingList::shared()->add("sample.login", Map::create<std::string, std::string, std::string, bool>({"username", "password", "remember"}, &callbackLogin));
@@ -56,10 +56,12 @@ void PlatformProxy::initializePlatform()
 int main()
 {
     // initialize
-    PlatformProxy::createDefault();
-    PlatformProxy::shared()->initialize();
+    auto proxy = std::make_shared<NativePlatformProxy>();
+    proxy->initialize();
 
-    // call local method
+    PlatformProxyList::shared()->append(proxy);
+
+    // call function
     {
         auto request = Request{
             "sample.login",
@@ -69,21 +71,7 @@ int main()
         };
 
         // clang-format off
-        LocalClient::call<std::string>(request, [](const auto &response) {
-            std::cout << "Returned Value: " << (response ? response.value() : "Empty") << std::endl;
-        });
-        // clang-format on
-    }
-
-    // call remote method
-    {
-        auto request = Request{
-            "platform.battery.level",
-            Param<std::string>{"suffix", "%"},
-        };
-
-        // clang-format off
-        RemoteClient::call<std::string>(request, [](const auto &response) {
+        Client::call<std::string>(request, [](const auto &response) {
             std::cout << "Returned Value: " << (response ? response.value() : "Empty") << std::endl;
         });
         // clang-format on

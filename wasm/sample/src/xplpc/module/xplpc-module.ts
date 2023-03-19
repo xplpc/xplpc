@@ -1,19 +1,20 @@
-interface IXNativePlatformProxyShared {
-    shared: () => IXNativePlatformProxy;
-}
-
-interface IXNativeProxyClient {
+interface IXNativeClient {
     call(data: string, callback: (response: string) => void): string;
-    callFromJavascript(data: string, callback: (response: string) => void): string;
 }
 
-interface IXNativePlatformProxy extends IXNativePlatformProxyShared {
-    createFromPtr(proxy: IXNativePlatformProxy): void;
-    createDefault(): void;
-    initialize(): void;
-    hasProxy(): boolean;
+interface IXNativePlatformProxy {
     extend(name: string, obj: unknown): unknown;
-    callProxyCallback(key: string, data: string): void;
+    initialize(): void;
+}
+
+interface IXNativePlatformProxyList {
+    shared: () => IXNativePlatformProxyList;
+    appendFromJavascript: (item: IXNativePlatformProxy) => void;
+    insertFromJavascript: (index: number, item: IXNativePlatformProxy) => void;
+}
+
+interface IXNativeCallbackList {
+    executeFromJavascript: (key: string, data: string) => void;
 }
 
 interface IXNativeLib {
@@ -23,6 +24,9 @@ interface IXNativeLib {
 
 export interface IXWasmModule {
     XPLPC: IXNativeLib,
-    ProxyClient: IXNativeProxyClient,
-    PlatformProxy: IXNativePlatformProxy
+    Client: IXNativeClient,
+    PlatformProxy: IXNativePlatformProxy,
+    NativePlatformProxy: IXNativePlatformProxy,
+    PlatformProxyList: IXNativePlatformProxyList,
+    CallbackList: IXNativeCallbackList
 }

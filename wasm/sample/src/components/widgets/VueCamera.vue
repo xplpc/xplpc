@@ -17,7 +17,7 @@ ref="video" :src="source" :autoplay="autoplay" :playsinline="playsinline" style=
 </template>
 
 <script lang="js">
-import { XRemoteClient } from '@/xplpc/client/remote-client';
+import { XClient } from '@/xplpc/client/client';
 import { XParam } from '@/xplpc/message/param';
 import { XRequest } from '@/xplpc/message/request';
 import { XDataView } from '@/xplpc/type/data-view';
@@ -90,7 +90,7 @@ export default {
 
             return constraints => {
                 // first get ahold of the legacy getUserMedia if present
-                let getUserMedia =
+                const getUserMedia =
                     navigator.getUserMedia ||
                     navigator.webkitGetUserMedia ||
                     navigator.mozGetUserMedia ||
@@ -134,7 +134,7 @@ export default {
                 .enumerateDevices()
                 .then(deviceInfos => {
                     for (let i = 0; i !== deviceInfos.length; ++i) {
-                        let deviceInfo = deviceInfos[i];
+                        const deviceInfo = deviceInfos[i];
 
                         if (deviceInfo.kind === "videoinput") {
                             this.cameraList.push(deviceInfo);
@@ -184,8 +184,8 @@ export default {
         stopStreamedVideo(videoElem) {
             Log.d("[Camera : stopStreamedVideo]");
 
-            let stream = videoElem.srcObject;
-            let tracks = stream.getTracks();
+            const stream = videoElem.srcObject;
+            const tracks = stream.getTracks();
 
             tracks.forEach(track => {
                 // stops the video track
@@ -243,19 +243,19 @@ export default {
                 const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
                 const dataView = XDataView.createFromArrayBuffer(imgData.data);
 
-                var startTime = performance.now();
+                const startTime = performance.now();
 
                 const request = new XRequest(
                     "sample.image.grayscale.dataview",
                     new XParam("dataView", dataView),
                 );
 
-                await XRemoteClient.call(request);
+                await XClient.call(request);
 
-                var elapsedTime = performance.now();
-                var duration = elapsedTime - startTime;
+                const elapsedTime = performance.now();
+                const duration = elapsedTime - startTime;
 
-                var processedData = XDataView.createUint8ClampedArrayFromPtr(dataView.ptr, dataView.size);
+                const processedData = XDataView.createUint8ClampedArrayFromPtr(dataView.ptr, dataView.size);
                 this.ctx.putImageData(new ImageData(processedData, this.canvas.width, this.canvas.height), 0, 0);
 
                 const preview = this.$refs.preview;
@@ -270,7 +270,7 @@ export default {
         testMediaAccess() {
             Log.d("[Camera : testMediaAccess]");
 
-            let constraints = { video: true };
+            const constraints = { video: true };
 
             if (this.resolution) {
                 constraints.video = {};
@@ -282,7 +282,7 @@ export default {
                 .getUserMedia(constraints)
                 .then(stream => {
                     // make sure to stop this media-stream
-                    let tracks = stream.getTracks();
+                    const tracks = stream.getTracks();
 
                     tracks.forEach(track => {
                         track.stop();
@@ -295,7 +295,7 @@ export default {
         // load the camera passed as index
         loadCamera(device) {
             Log.d("[Camera : loadCamera]");
-            let constraints = { video: { deviceId: { exact: device } } };
+            const constraints = { video: { deviceId: { exact: device } } };
 
             if (this.resolution) {
                 constraints.video.width = this.resolution.width;
@@ -314,10 +314,10 @@ export default {
         },
         // get canvas
         getCanvas() {
-            // rmeove comment below for debug only
+            // remove comment below for debug only
             // Log.d("[Camera : getCanvas]");
 
-            let video = this.$refs.video;
+            const video = this.$refs.video;
 
             if (!this.ctx) {
                 // calculate proportion
@@ -330,7 +330,7 @@ export default {
                 }
 
                 // create canvas
-                let canvas = this.$refs.canvas;
+                const canvas = this.$refs.canvas;
                 canvas.width = this.destWidth;
                 canvas.height = this.destHeight;
                 this.canvas = canvas;

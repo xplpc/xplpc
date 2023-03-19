@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:xplpc/client/local_client.dart';
-import 'package:xplpc/client/remote_client.dart';
+import 'package:xplpc/client/client.dart';
 import 'package:xplpc/core/config.dart';
 import 'package:xplpc/core/xplpc.dart';
 import 'package:xplpc/message/param.dart';
@@ -49,14 +48,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onBatteryLevelSubmitButtonClick() {
-    var request = Request(
+    final request = Request(
       "platform.battery.level",
       [
         Param("suffix", "%"),
       ],
     );
 
-    LocalClient.call<String>(request, (response) {
+    Client.call<String>(request, (response) {
       setState(() {
         batteryLevelResponse = "Response: $response";
       });
@@ -64,13 +63,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onLoginSubmitButtonClick() {
-    var request = Request("sample.login", [
+    final request = Request("sample.login", [
       Param("username", usernameTextController.text),
       Param("password", passwordTextController.text),
       Param("remember", rememberMe),
     ]);
 
-    RemoteClient.call<String>(request, (response) {
+    Client.call<String>(request, (response) {
       setState(() {
         loginResponse = "Response: $response";
       });

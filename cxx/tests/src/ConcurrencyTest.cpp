@@ -23,7 +23,7 @@ void testLogin()
     };
 
     // clang-format off
-    LocalClient::call<std::string>(request, [](const auto &response) {
+    Client::call<std::string>(request, [](const auto &response) {
         spdlog::debug("[testLogin] Returned Value: {}", response.value());
     });
     // clang-format on
@@ -35,7 +35,7 @@ void testTodoSingle()
     auto request = Request{"sample.todo.single", Param<Todo>{"item", item}};
 
     // clang-format off
-    LocalClient::call<Todo>(request, [](const auto &response) {
+    Client::call<Todo>(request, [](const auto &response) {
         spdlog::debug("[testTodoSingle] Returned Value: {}, {}", response.value().id, response.value().title);
     });
     // clang-format on
@@ -50,7 +50,7 @@ void testTodoList()
     auto request = Request{"sample.todo.list", Param<std::vector<Todo>>{"items", items}};
 
     // clang-format off
-    LocalClient::call<std::vector<Todo>>(request, [](const auto &response) {
+    Client::call<std::vector<Todo>>(request, [](const auto &response) {
         if (response)
         {
             auto list = response.value();
@@ -67,7 +67,7 @@ void testEcho()
     auto request = Request{"sample.echo", Param<std::string>{"value", "test echo value"}};
 
     // clang-format off
-    LocalClient::call<std::string>(request, [](const auto &response) {
+    Client::call<std::string>(request, [](const auto &response) {
         if (response)
         {
             spdlog::debug("[testEcho] Returned Value: {}", response.value());
@@ -100,7 +100,7 @@ void testImageToGrayscale()
     };
 
     // clang-format off
-    LocalClient::call<std::vector<uint8_t>>(request, [](const auto &response) {
+    Client::call<std::vector<uint8_t>>(request, [](const auto &response) {
         EXPECT_EQ(16, response.value().size());
     });
     // clang-format on
@@ -123,7 +123,7 @@ void testImageToGrayscaleFromDataView()
     };
 
     // clang-format off
-    LocalClient::call<std::string>(request, [&dataView](const auto &response) {
+    Client::call<std::string>(request, [&dataView](const auto &response) {
         EXPECT_EQ("OK", response.value());
 
         std::vector<uint8_t> originalVector(dataView.size());
@@ -144,7 +144,7 @@ void testDataView()
     auto request = Request{"sample.dataview"};
 
     // clang-format off
-    LocalClient::call<DataView>(request, [](const auto &response) {
+    Client::call<DataView>(request, [](const auto &response) {
         auto dataView = response.value();
 
         // check current values
@@ -159,7 +159,7 @@ void testDataView()
             Param{"dataView", dataView},
         };
 
-        LocalClient::call<std::string>(request, [&dataView](const auto &response) {
+        Client::call<std::string>(request, [&dataView](const auto &response) {
             EXPECT_EQ("OK", response.value());
 
             std::vector<uint8_t> originalVector(dataView.size());
@@ -183,45 +183,24 @@ void testDataView()
     // clang-format on
 }
 
-void testLoginWithProxyClient()
+void testLoginFromString()
 {
     auto request = R"({"f":"sample.login","p":[{"n":"username","v":"paulo"},{"n":"password","v":"123456"},{"n":"remember","v":true}]})";
 
     // clang-format off
-    ProxyClient::call(request, [](auto const &response) {
-        spdlog::debug("[testLoginWithProxyClient] Returned Value: {}", response);
+    Client::call(request, [](auto const &response) {
+        spdlog::debug("[testLoginFromString] Returned Value: {}", response);
     });
     // clang-format on
 }
 
-void testTodoSingleWithProxyClient()
+void testTodoSingleFromString()
 {
     auto request = R"({"f":"sample.todo.single","p":[{"n":"item","v":{"body":"Body 1","data":{"data1":"value1","data2":"value2"},"done":true,"id":1,"title":"Title 1"}}]})";
 
     // clang-format off
-    ProxyClient::call(request, [](auto const &response) {
-        spdlog::debug("[testTodoSingleWithProxyClient] Returned Value: {}", response);
-    });
-    // clang-format on
-}
-
-void testRemoteClient()
-{
-    auto request = Request{
-        "platform.battery.level",
-        Param<std::string>{"suffix", "%"},
-    };
-
-    // clang-format off
-    RemoteClient::call<std::string>(request, [](const auto &response) {
-        if (response)
-        {
-            spdlog::debug("[testRemoteClient] Returned Value: {}", response.value());
-        }
-        else
-        {
-            spdlog::debug("[testRemoteClient] Returned Value: Empty");
-        }
+    Client::call(request, [](auto const &response) {
+        spdlog::debug("[testTodoSingleFromString] Returned Value: {}", response);
     });
     // clang-format on
 }
@@ -239,9 +218,8 @@ TEST_F(GeneralTest, ConcurrencyAll)
         threads.push_back(std::thread(testImageToGrayscale));
         threads.push_back(std::thread(testImageToGrayscaleFromDataView));
         threads.push_back(std::thread(testDataView));
-        threads.push_back(std::thread(testLoginWithProxyClient));
-        threads.push_back(std::thread(testTodoSingleWithProxyClient));
-        threads.push_back(std::thread(testRemoteClient));
+        threads.push_back(std::thread(testLoginFromString));
+        threads.push_back(std::thread(testTodoSingleFromString));
     }
 
     for (auto &thread : threads)

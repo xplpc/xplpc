@@ -27,6 +27,12 @@ size_t MappingList::count() const noexcept
     return list.size();
 }
 
+void MappingList::clear() noexcept
+{
+    list.clear();
+    instance = nullptr;
+}
+
 std::shared_ptr<MappingList> MappingList::shared()
 {
     if (instance == nullptr)

@@ -241,6 +241,32 @@ def do_build_xcframework(target, platform, framework_list):
             group_framework_dir,
         )
 
+        # copy swift modules
+        group_framework_module_dir = os.path.join(
+            group_framework_dir, "Modules", "xplpc.swiftmodule"
+        )
+
+        if f.dir_exists(group_framework_module_dir):
+            for item in framework_list:
+                if item["group"] == group:
+                    arch_dir = os.path.join(
+                        c.proj_path, "build", build_dir_prefix, item["arch"]
+                    )
+
+                    framework_module_dir = os.path.join(
+                        arch_dir,
+                        "lib",
+                        "xplpc.framework",
+                        "Modules",
+                        "xplpc.swiftmodule",
+                    )
+
+                    if f.dir_exists(framework_module_dir):
+                        f.copy_all(
+                            framework_module_dir,
+                            group_framework_module_dir,
+                        )
+
         # generate single framework for group
         lipo_archs_args = []
 
@@ -280,6 +306,47 @@ def do_build_xcframework(target, platform, framework_list):
 
         lipo_args.extend(lipo_archs_args)
         r.run(lipo_args, cwd=c.proj_path)
+
+        # generate single swift module header
+        swift_module_headers_dir = os.path.join(group_framework_dir, "Headers")
+        swift_module_header_file = os.path.join(
+            swift_module_headers_dir, "xplpc-Swift.h"
+        )
+        has_swift_module_header_file = f.file_exists(swift_module_header_file)
+
+        if has_swift_module_header_file:
+            swift_module_header_content = ""
+
+            for item in framework_list:
+                if item["group"] == group:
+                    arch_dir = os.path.join(
+                        c.proj_path, "build", build_dir_prefix, item["arch"]
+                    )
+                    framework_dir = os.path.join(arch_dir, "lib", "xplpc.framework")
+                    header_file = os.path.join(
+                        framework_dir, "Headers", "xplpc-Swift.h"
+                    )
+
+                    if f.file_exists(header_file):
+                        file_content = f.get_file_contents(header_file)
+
+                        start_content = file_content.find("#if 0")
+                        end_content = file_content.find(
+                            "#else\n#error unsupported Swift architecture\n#endif"
+                        )
+
+                        if start_content > -1 and end_content > -1:
+                            extracted_content = file_content[
+                                start_content + 5 : end_content
+                            ]
+                            swift_module_header_content += extracted_content
+
+            if swift_module_header_content:
+                swift_module_header_content = f"#if 0\n{swift_module_header_content}#else\n#error unsupported Swift architecture\n#endif"
+
+                f.set_file_content(
+                    swift_module_header_file, swift_module_header_content
+                )
 
         # add final framework to group
         groups_command.append("-framework")

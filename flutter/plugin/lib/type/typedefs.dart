@@ -1,8 +1,16 @@
 import 'dart:ffi' as ffi;
-
 import "package:ffi/ffi.dart";
 
 // ffi callback signature of the C functions
+typedef OnInitializePlatform = ffi.Void Function();
+
+typedef OnFinalizePlatform = ffi.Void Function();
+
+typedef OnHasMapping = ffi.Bool Function(
+  ffi.Pointer<Utf8>,
+  ffi.Int32,
+);
+
 typedef CallProxyCallback = ffi.Void Function(
   ffi.Pointer<Utf8>,
   ffi.Int32,
@@ -12,6 +20,10 @@ typedef CallProxyCallback = ffi.Void Function(
 
 // ffi signature of the C functions
 typedef NativeInitializeFunc = ffi.Void Function(
+  ffi.Bool,
+  ffi.Pointer<ffi.NativeFunction<OnInitializePlatform>>,
+  ffi.Pointer<ffi.NativeFunction<OnFinalizePlatform>>,
+  ffi.Pointer<ffi.NativeFunction<OnHasMapping>>,
   ffi.Pointer<ffi.NativeFunction<CallProxyCallback>>,
   ffi.Pointer<ffi.NativeFunction<CallProxyCallback>>,
 );
@@ -32,8 +44,12 @@ typedef NativeCallProxyCallbackFunc = ffi.Void Function(
   ffi.Size,
 );
 
-// dart type definition for calling the C functions
+// dart type definitions
 typedef InitializeFunc = void Function(
+  bool,
+  ffi.Pointer<ffi.NativeFunction<OnInitializePlatform>>,
+  ffi.Pointer<ffi.NativeFunction<OnFinalizePlatform>>,
+  ffi.Pointer<ffi.NativeFunction<OnHasMapping>>,
   ffi.Pointer<ffi.NativeFunction<CallProxyCallback>>,
   ffi.Pointer<ffi.NativeFunction<CallProxyCallback>>,
 );
@@ -54,7 +70,6 @@ typedef CallProxyCallbackFunc = void Function(
   int,
 );
 
-// dart client callbacks
-typedef LocalClientCallback<T> = void Function(T)?;
-typedef ProxyClientCallback = void Function(String)?;
-typedef RemoteClientCallback<T> = void Function(T?)?;
+// dart client callback
+typedef ClientCallback<T> = void Function(T)?;
+typedef ClientCallbackFromString = void Function(String)?;

@@ -3,6 +3,6 @@ targets:
     builders:
       reflectable:
         generate_for:
-          - test/remote_client_test.dart
+          - test/client_test.dart
         options:
           formatted: true

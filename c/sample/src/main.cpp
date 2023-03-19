@@ -44,7 +44,7 @@ namespace xplpc
 namespace proxy
 {
 
-void PlatformProxy::initializePlatform()
+void NativePlatformProxy::initializePlatform()
 {
     // mapping data (function name, map<return value, params types>(params names), function ref)
     MappingList::shared()->add("sample.login", Map::create<std::string, std::string, std::string, bool>({"username", "password", "remember"}, &callbackLogin));
@@ -56,7 +56,7 @@ void PlatformProxy::initializePlatform()
 // sample
 int main()
 {
-    xplpc_core_initialize(nullptr, nullptr);
+    xplpc_core_initialize(true, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     std::string key = "1";
     std::string data = R"({"f":"sample.login","p":[{"n":"username","v":"paulo"},{"n":"password","v":"123456"},{"n":"remember","v":true}]})";

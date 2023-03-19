@@ -19,10 +19,10 @@ class Mapping {
   }
 
   void batteryLevel(Message m, Response r) async {
-    var battery = Battery();
-    var level = await battery.batteryLevel;
+    final battery = Battery();
+    final level = await battery.batteryLevel;
 
-    var suffix = m.get("suffix");
+    final suffix = m.get("suffix");
     r("$level$suffix");
   }
 }

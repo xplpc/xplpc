@@ -50,7 +50,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
 
 # logger
-CPMAddPackage("gh:gabime/spdlog@1.10.0")
+CPMAddPackage("gh:gabime/spdlog@1.11.0")
 
 if(XPLPC_ENABLE_LOG)
     add_compile_definitions(XPLPC_ENABLE_LOG)

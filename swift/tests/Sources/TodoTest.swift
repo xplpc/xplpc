@@ -13,9 +13,6 @@ struct Todo: Codable {
 final class TodoTest: XCTestCase {
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        XPLPC.shared.initialize(
-            config: Config(serializer: JsonSerializer())
-        )
     }
 
     override func tearDownWithError() throws {
@@ -27,7 +24,7 @@ final class TodoTest: XCTestCase {
 
         let request = Request("sample.todo.single", Param("item", todo))
 
-        RemoteClient.call(request) { (r: Todo?) in
+        Client.call(request) { (r: Todo?) in
             XCTAssertEqual("Title 1", r?.title)
         }
     }
@@ -39,7 +36,7 @@ final class TodoTest: XCTestCase {
 
         let request = Request("sample.todo.list", Param("items", list))
 
-        RemoteClient.call(request) { (r: [Todo]?) in
+        Client.call(request) { (r: [Todo]?) in
             XCTAssertEqual(2, r?.count)
             XCTAssertEqual("Title 1", r?[0].title)
             XCTAssertEqual("Title 2", r?[1].title)
@@ -51,7 +48,7 @@ final class TodoTest: XCTestCase {
         let request = Request("sample.todo.single", Param("item", todo))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: Todo?) in
+            Client.call(request) { (r: Todo?) in
                 XCTAssertEqual("Title 1", r?.title)
             }
         }
@@ -65,7 +62,7 @@ final class TodoTest: XCTestCase {
         let request = Request("sample.todo.list", Param("items", list))
 
         DispatchQueue.global(qos: .background).async {
-            RemoteClient.call(request) { (r: [Todo]?) in
+            Client.call(request) { (r: [Todo]?) in
                 XCTAssertEqual(2, r?.count)
                 XCTAssertEqual("Title 1", r?[0].title)
                 XCTAssertEqual("Title 2", r?[1].title)

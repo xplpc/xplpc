@@ -1,27 +1,51 @@
 #include "xplpc/c/platform.h"
-#include "xplpc/client/ProxyClient.hpp"
+#include "xplpc/client/Client.hpp"
 #include "xplpc/core/XPLPC.hpp"
-#include "xplpc/proxy/CPlatformProxy.hpp"
+#include "xplpc/data/CallbackList.hpp"
+#include "xplpc/data/PlatformProxyList.hpp"
+#include "xplpc/proxy/CNativePlatformProxy.hpp"
+#include "xplpc/proxy/NativePlatformProxy.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
 #include <memory>
+#include <string>
 
 using namespace xplpc::client;
 using namespace xplpc::core;
+using namespace xplpc::data;
 using namespace xplpc::proxy;
 
-void xplpc_core_initialize(FuncPtrToCallProxyCallback funcPtrToCallProxyCallback, FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall)
+void xplpc_core_initialize(
+    bool initializeCxxNativePlatformProxy,
+    FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform,
+    FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform,
+    FuncPtrToOnHasMapping funcPtrToOnHasMapping,
+    FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall,
+    FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback)
 {
-    auto proxy = std::make_shared<CPlatformProxy>();
-    proxy->initializeNativePlatform(funcPtrToCallProxyCallback, funcPtrToOnNativeProxyCall);
+    // initialize cxx platform proxy
+    if (initializeCxxNativePlatformProxy)
+    {
+        auto nativePlatformProxy = std::make_shared<NativePlatformProxy>();
+        nativePlatformProxy->initialize();
+        PlatformProxyList::shared()->insert(0, nativePlatformProxy);
+    }
 
-    PlatformProxy::create(proxy);
-    PlatformProxy::shared()->initialize();
+    // initialize c platform proxy
+    auto cPlatformProxy = CNativePlatformProxy::shared();
+    cPlatformProxy->setFuncPtrToOnInitializePlatform(funcPtrToOnInitializePlatform);
+    cPlatformProxy->setFuncPtrToOnFinalizePlatform(funcPtrToOnFinalizePlatform);
+    cPlatformProxy->setFuncPtrToOnHasMapping(funcPtrToOnHasMapping);
+    cPlatformProxy->setFuncPtrToOnNativeProxyCall(funcPtrToOnNativeProxyCall);
+    cPlatformProxy->setFuncPtrToOnNativeProxyCallback(funcPtrToOnNativeProxyCallback);
+    cPlatformProxy->initialize();
+
+    PlatformProxyList::shared()->insert(0, cPlatformProxy);
 }
 
 void xplpc_core_finalize()
 {
-    PlatformProxy::shared()->finalize();
+    CNativePlatformProxy::shared()->finalize();
 }
 
 bool xplpc_core_is_initialized()
@@ -32,9 +56,8 @@ bool xplpc_core_is_initialized()
 void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataSize)
 {
     // clang-format off
-    ProxyClient::call(data, [key, keySize](const auto &response) {
-        auto platformProxy = std::static_pointer_cast<CPlatformProxy>(PlatformProxy::shared());
-        auto callback = platformProxy->getFuncPtrToCallProxyCallback();
+    Client::call(data, [key, keySize](const auto &response) {
+        auto callback = CNativePlatformProxy::shared()->getFuncPtrToOnNativeProxyCallback();
 
         if (callback)
         {
@@ -46,5 +69,5 @@ void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataS
 
 void xplpc_native_call_proxy_callback(char *key, size_t keySize, char *data, size_t dataSize)
 {
-    PlatformProxy::shared()->callProxyCallback(key, data);
+    CallbackList::shared()->execute(std::string(key, keySize), std::string(data, dataSize));
 }

@@ -18,14 +18,16 @@ class CallbackList {
   }
 
   void execute(String key, String data) async {
+    void Function(String)? callback;
+
     await lock.synchronized(() async {
       if (list.containsKey(key)) {
-        var callback = list[key];
+        callback = list[key];
         list.remove(key);
-
-        callback?.call(data);
       }
     });
+
+    callback?.call(data);
   }
 
   Future<int> count() async {

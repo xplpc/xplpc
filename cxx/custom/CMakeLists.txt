@@ -7,7 +7,7 @@ set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
 )
 
 set(XPLPC_SRC_FILES ${XPLPC_SRC_FILES}
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/custom/PlatformProxy.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/custom/NativePlatformProxy.cpp"
     PARENT_SCOPE
 )
 

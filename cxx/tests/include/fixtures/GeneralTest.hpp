@@ -2,7 +2,10 @@
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
+#include <memory>
+
 using namespace xplpc::core;
+using namespace xplpc::data;
 using namespace xplpc::proxy;
 
 class GeneralTest : public ::testing::Test
@@ -21,11 +24,11 @@ protected:
     void SetUp() override
     {
         // code here will be called immediately after the constructor (right before each test)
-        XPLPC::initialize();
 
-        // initialize
-        PlatformProxy::createDefault();
-        PlatformProxy::shared()->initialize();
+        auto proxy = std::make_shared<NativePlatformProxy>();
+        proxy->initialize();
+
+        PlatformProxyList::shared()->append(proxy);
     }
 
     void TearDown() override

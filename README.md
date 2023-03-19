@@ -48,7 +48,7 @@ auto request = Request{
     Param<std::string>{"suffix", "%"},
 };
 
-RemoteClient::call<std::string>(request, [](const auto &response) {
+Client::call<std::string>(request, [](const auto &response) {
     std::cout << "Returned Value: " << (response ? response.value() : "Empty") << std::endl;
 });
 ```
@@ -63,7 +63,7 @@ val request = Request(
     Param("remember", true)
 )
 
-RemoteClient.call<String>(request) { response ->
+Client.call<String>(request) { response ->
     println("Returned Value: $response")    
 }
 ```
@@ -78,7 +78,7 @@ let request = Request(
     Param("remember", true)
 )
 
-RemoteClient.call(request) { (response: String?) in
+Client.call(request) { (response: String?) in
     print("Returned Value: \(response)")
 }
 ```
@@ -93,7 +93,7 @@ const request = new XRequest(
     new XParam("remember", true),
 );
 
-XRemoteClient.call<string>(request).then((response : string | undefined) => {
+XClient.call<string>(request).then((response : string | undefined) => {
     console.log("Returned Value: " + response);
 });
 ```
@@ -107,14 +107,10 @@ var request = Request("sample.login", [
     Param("remember", true),
 ]);
 
-RemoteClient.call<String>(request, (response) {
+Client.call<String>(request, (response) {
     print(response);
 });
 ```
-
-You can use `LocalClient` instead of `RemoteClient` to call `local` mapped methods.
-
-And you can use `ProxyClient` to send manually the `serialized message` to simulate a call by a client.
 
 ## Supported platforms
 

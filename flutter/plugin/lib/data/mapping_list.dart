@@ -21,4 +21,12 @@ class MappingList {
 
     return null;
   }
+
+  bool has(String name) {
+    return list.containsKey(name);
+  }
+
+  void clear() {
+    return list.clear();
+  }
 }
