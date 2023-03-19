@@ -5,8 +5,6 @@ import android.os.BatteryManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.xplpc.client.Client
-import com.xplpc.core.Config
-import com.xplpc.core.XPLPC
 import com.xplpc.data.MappingList
 import com.xplpc.helper.ByteArrayHelper
 import com.xplpc.helper.ByteBufferHelper
@@ -15,12 +13,10 @@ import com.xplpc.message.Message
 import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.message.Response
-import com.xplpc.serializer.JsonSerializer
 import com.xplpc.type.DataView
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.nio.ByteBuffer
@@ -46,13 +42,6 @@ class ClientTest {
                 r("$level")
             }
         }
-    }
-
-    @Before
-    fun setUp() {
-        XPLPC.initialize(
-            Config(JsonSerializer()),
-        )
     }
 
     @Test

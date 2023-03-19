@@ -56,7 +56,7 @@ void NativePlatformProxy::initializePlatform()
 // sample
 int main()
 {
-    xplpc_core_initialize(nullptr, nullptr, nullptr, nullptr, nullptr);
+    xplpc_core_initialize(true, nullptr, nullptr, nullptr, nullptr, nullptr);
 
     std::string key = "1";
     std::string data = R"({"f":"sample.login","p":[{"n":"username","v":"paulo"},{"n":"password","v":"123456"},{"n":"remember","v":true}]})";

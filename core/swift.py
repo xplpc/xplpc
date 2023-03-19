@@ -262,8 +262,6 @@ def do_build_xcframework(target, platform, framework_list):
                     )
 
                     if f.dir_exists(framework_module_dir):
-                        print(group_framework_module_dir)
-                        print(framework_module_dir)
                         f.copy_all(
                             framework_module_dir,
                             group_framework_module_dir,

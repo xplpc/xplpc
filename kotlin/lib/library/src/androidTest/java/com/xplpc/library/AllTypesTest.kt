@@ -2,15 +2,11 @@ package com.xplpc.library
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.xplpc.client.Client
-import com.xplpc.core.Config
-import com.xplpc.core.XPLPC
 import com.xplpc.message.Param
 import com.xplpc.message.Request
-import com.xplpc.serializer.JsonSerializer
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.Date
@@ -54,13 +50,6 @@ class AllTypesTest {
             '®',
             '®',
             "ok",
-        )
-    }
-
-    @Before
-    fun setUp() {
-        XPLPC.initialize(
-            Config(JsonSerializer()),
         )
     }
 
