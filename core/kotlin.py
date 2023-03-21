@@ -24,11 +24,15 @@ def run_task_build():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     interface = util.get_param_interface(target)
     l.i(f"Interface: {interface}")
 
     build_dir = os.path.join(c.proj_path, "build", target)
-    f.recreate_dir(build_dir)
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     toolchain_file = os.path.join(ndk_root, "build", "cmake", "android.toolchain.cmake")
 

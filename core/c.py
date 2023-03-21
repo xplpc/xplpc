@@ -23,8 +23,12 @@ def run_task_build_static():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     build_dir = os.path.join(c.proj_path, "build", target)
-    f.recreate_dir(build_dir)
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     run_args = [
         "cmake",
@@ -61,8 +65,12 @@ def run_task_build_shared():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     build_dir = os.path.join(c.proj_path, "build", target)
-    f.recreate_dir(build_dir)
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     run_args = [
         "cmake",
@@ -100,8 +108,12 @@ def run_task_build_sample():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     build_dir = os.path.join(c.proj_path, "build", "c-sample")
-    f.recreate_dir(build_dir)
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     r.run(
         [
@@ -145,8 +157,12 @@ def run_task_build_leaks():
     # configure
     l.i(f"Configuring...")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     build_dir = os.path.join(c.proj_path, "build", "c-leaks")
-    f.recreate_dir(build_dir)
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     r.run(
         [
@@ -197,8 +213,12 @@ def run_task_test():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     build_dir = os.path.join(c.proj_path, "build", "c-test")
-    f.recreate_dir(build_dir)
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     r.run(
         [

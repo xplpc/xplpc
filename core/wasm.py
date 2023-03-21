@@ -24,8 +24,12 @@ def run_task_build():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     build_dir = os.path.join(c.proj_path, "build", target)
-    f.recreate_dir(build_dir)
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     toolchain_file = os.path.join(
         emsdk_root,
@@ -69,8 +73,12 @@ def run_task_build_sample():
     sample_dir = os.path.join(c.proj_path, "wasm", "sample")
 
     # dependencies
-    l.i("Installing dependencies...")
-    r.run(["npm", "install"], cwd=sample_dir)
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
+    if not dry_run:
+        l.i("Installing dependencies...")
+        r.run(["npm", "install"], cwd=sample_dir)
 
     # build
     l.i("Building...")
@@ -89,8 +97,12 @@ def run_task_run_sample():
     sample_dir = os.path.join(c.proj_path, "wasm", "sample")
 
     # dependencies
-    l.i("Installing dependencies...")
-    r.run(["npm", "install"], cwd=sample_dir)
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
+    if not dry_run:
+        l.i("Installing dependencies...")
+        r.run(["npm", "install"], cwd=sample_dir)
 
     # build
     l.i("Building...")
@@ -115,8 +127,12 @@ def run_task_test():
     sample_dir = os.path.join(c.proj_path, "wasm", "sample")
 
     # dependencies
-    l.i("Installing dependencies...")
-    r.run(["npm", "install"], cwd=sample_dir)
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
+    if not dry_run:
+        l.i("Installing dependencies...")
+        r.run(["npm", "install"], cwd=sample_dir)
 
     # test
     l.i("Testing...")

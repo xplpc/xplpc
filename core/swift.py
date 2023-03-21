@@ -23,6 +23,9 @@ def run_task_build():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
+
     interface = util.get_param_interface(target)
     l.i(f"Interface: {interface}")
 
@@ -52,6 +55,9 @@ def run_task_build_xcframework():
     # configure
     target = "swift"
     l.i(f"Configuring...")
+
+    dry_run = util.get_param_dry()
+    l.i(f"Dry run: {dry_run}")
 
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
@@ -164,7 +170,10 @@ def run_task_format():
 # -----------------------------------------------------------------------------
 def do_build(target, build_type, platform, framework_list, has_interface):
     build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
-    f.recreate_dir(build_dir)
+
+    dry_run = util.get_param_dry()
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     for item in framework_list:
         l.i(f"Building for arch {item['arch']}...")
@@ -213,7 +222,10 @@ def do_build_xcframework(target, platform, framework_list):
     # generate framework for each group
     groups_command = []
     build_dir = os.path.join(c.proj_path, "build", f"{build_dir_prefix}-group")
-    f.recreate_dir(build_dir)
+
+    dry_run = util.get_param_dry()
+    if not dry_run:
+        f.recreate_dir(build_dir)
 
     for group in groups:
         l.i(f"Building for group {group}...")
