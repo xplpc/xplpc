@@ -13,6 +13,7 @@ Options:
   -h --help                         Show this screen.
   -d --debug                        Enable debug mode.
   --version                         Show version.
+  --dry                             Run in dry mode.
   --build=<build-type>              Build type.
   --interface                       Enable C interface.
   --platform=<platform>             Define custom platform.

@@ -157,6 +157,11 @@ def get_param_platform(target):
 
 
 # -----------------------------------------------------------------------------
+def get_param_dry():
+    return cfg.options["--dry"]
+
+
+# -----------------------------------------------------------------------------
 def get_cmake_build_type(build_type):
     build_type = build_type.lower()
 

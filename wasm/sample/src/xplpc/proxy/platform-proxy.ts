@@ -1,5 +1,4 @@
 import { XPLPC } from "../core/xplpc";
-import { XCallbackList } from "../data/callback-list";
 import { XMappingList } from "../data/mapping-list";
 import { XMessage } from "../message/message";
 import { ExceptionMessage } from "../util/exception-message";
