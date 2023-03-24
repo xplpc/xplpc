@@ -265,6 +265,7 @@ def run_task_test():
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             "-DXPLPC_ENABLE_TESTS=ON",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
     )

@@ -96,6 +96,7 @@ def run_task_build_aar():
     l.i("Building...")
 
     run_args = ["clean", ":library:build"]
+    run_args.extend(["-P", f"xplpc_dependency_tool={c.dependency_tool}"])
 
     if interface:
         run_args.extend(["-P", "xplpc_interface"])
