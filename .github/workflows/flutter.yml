@@ -33,9 +33,6 @@ jobs:
       - name: Python Requirements
         run: python3 -m pip install -r requirements.txt --user
 
-      - name: Conan Setup
-        run: conan profile new default --detect --force
-
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v1.8
         with:
@@ -57,6 +54,9 @@ jobs:
           cmake --version
           ninja --version
           flutter --version
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
 
       - name: Build Native Library
         run: |
