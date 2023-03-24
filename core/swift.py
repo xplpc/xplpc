@@ -15,7 +15,10 @@ def run_task_build():
 
     # environment
     target = "swift"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -82,7 +85,10 @@ def run_task_test():
 
     # environment
     target = "swift"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -112,6 +118,7 @@ def run_task_test():
                 f"-DXPLPC_TARGET={target}",
                 "-DXPLPC_ADD_CUSTOM_DATA=ON",
                 "-DXPLPC_ENABLE_TESTS=ON",
+                f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
             ]
         )
 
@@ -197,6 +204,7 @@ def do_build(target, build_type, platform, framework_list, has_interface):
             f"-DDEPLOYMENT_TARGET={item['deployment_target']}",
             f"-DCMAKE_OSX_DEPLOYMENT_TARGET={item['deployment_target']}",
             f"-DSDK_VERSION={item['sdk_version']}",
+            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
 
         if has_interface:

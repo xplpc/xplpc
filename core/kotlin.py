@@ -16,7 +16,10 @@ def run_task_build():
 
     # environment
     target = "kotlin"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -46,6 +49,7 @@ def run_task_build():
         "-DXPLPC_ADD_CUSTOM_DATA=ON",
         f"-DCMAKE_BUILD_TYPE={build_type}",
         f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
     ]
 
     if interface:

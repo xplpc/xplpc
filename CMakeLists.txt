@@ -9,6 +9,9 @@ if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()
 
+# settings
+set(XPLPC_DEPENDENCY_TOOL_VALUES "cpm" "conan")
+
 # variables
 set(XPLPC_ADD_CUSTOM_DATA OFF CACHE BOOL "Build Custom Data")
 set(XPLPC_CUSTOM_DATA_PATH "cxx/custom" CACHE STRING "Custom Data Path")
@@ -26,11 +29,17 @@ set(XPLPC_PUBLIC_HEADER_FILES "" CACHE INTERNAL "Public Header Files")
 set(XPLPC_PROJECT_NAME ${PROJECT_NAME} CACHE INTERNAL "Project Name Suffix")
 set(XPLPC_VERSION "1.0.0" CACHE STRING "Version Name")
 set(XPLPC_VERSION_CODE "1" CACHE STRING "Version Code")
+set(XPLPC_DEPENDENCY_TOOL "cpm" CACHE STRING "Dependency Tool")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(XPLPC_ENABLE_LOG ON CACHE BOOL "Enable Log Messages")
 else()
     set(XPLPC_ENABLE_LOG OFF CACHE BOOL "Enable Log Messages")
+endif()
+
+# validate dependency tool
+if(NOT XPLPC_DEPENDENCY_TOOL IN_LIST XPLPC_DEPENDENCY_TOOL_VALUES)
+    message(FATAL_ERROR "Dependency tool need be one of: ${XPLPC_DEPENDENCY_TOOL_VALUES}")
 endif()
 
 # output directories
@@ -47,10 +56,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 
 # dependency manager
-include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+endif()
 
 # logger
-CPMAddPackage("gh:gabime/spdlog@1.11.0")
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    CPMAddPackage("gh:gabime/spdlog@1.11.0")
+endif()
 
 if(XPLPC_ENABLE_LOG)
     add_compile_definitions(XPLPC_ENABLE_LOG)
@@ -58,7 +71,10 @@ endif()
 
 # serializer
 if(XPLPC_ENABLE_SERIALIZER_FOR_JSON)
-    CPMAddPackage("gh:nlohmann/json@3.11.2")
+    if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+        CPMAddPackage("gh:nlohmann/json@3.11.2")
+    endif()
+
     add_compile_definitions(XPLPC_SERIALIZER_JSON)
 else()
     message(FATAL_ERROR "You need enable one serializer")
