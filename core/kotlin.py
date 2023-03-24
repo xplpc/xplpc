@@ -123,8 +123,26 @@ def run_task_test():
 
     # test
     l.i("Testing...")
-    util.run_gradle(["test"], lib_dir)
-    util.run_gradle(["connectedAndroidTest"], lib_dir)
+
+    # unit
+    util.run_gradle(
+        [
+            "test",
+            "-P",
+            f"xplpc_dependency_tool={c.dependency_tool}",
+        ],
+        lib_dir,
+    )
+
+    # integration
+    util.run_gradle(
+        [
+            "connectedAndroidTest",
+            "-P",
+            f"xplpc_dependency_tool={c.dependency_tool}",
+        ],
+        lib_dir,
+    )
 
     l.ok()
 
