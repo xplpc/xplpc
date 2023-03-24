@@ -7,6 +7,9 @@ options = {}
 build_type = "Release"
 build_type_kotlin = "RelWithDebInfo"
 
+# dependency (cpm, conan)
+dependency_tool = "cpm"
+
 # swift
 swift_framework_list_for_ios = [
     {

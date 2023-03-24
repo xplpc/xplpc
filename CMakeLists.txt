@@ -9,7 +9,10 @@ if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()
 
-# variables
+# settings
+set(XPLPC_DEPENDENCY_TOOL_VALUES "cpm" "conan")
+
+# options
 set(XPLPC_ADD_CUSTOM_DATA OFF CACHE BOOL "Build Custom Data")
 set(XPLPC_CUSTOM_DATA_PATH "cxx/custom" CACHE STRING "Custom Data Path")
 set(XPLPC_CUSTOM_DATA_INCLUDE_PATH "cxx/custom/include" CACHE STRING "Custom Data Include Path")
@@ -26,11 +29,17 @@ set(XPLPC_PUBLIC_HEADER_FILES "" CACHE INTERNAL "Public Header Files")
 set(XPLPC_PROJECT_NAME ${PROJECT_NAME} CACHE INTERNAL "Project Name Suffix")
 set(XPLPC_VERSION "1.0.0" CACHE STRING "Version Name")
 set(XPLPC_VERSION_CODE "1" CACHE STRING "Version Code")
+set(XPLPC_DEPENDENCY_TOOL "cpm" CACHE STRING "Dependency Tool")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(XPLPC_ENABLE_LOG ON CACHE BOOL "Enable Log Messages")
 else()
     set(XPLPC_ENABLE_LOG OFF CACHE BOOL "Enable Log Messages")
+endif()
+
+# validate dependency tool
+if(NOT XPLPC_DEPENDENCY_TOOL IN_LIST XPLPC_DEPENDENCY_TOOL_VALUES)
+    message(FATAL_ERROR "Dependency tool need be one of: ${XPLPC_DEPENDENCY_TOOL_VALUES}")
 endif()
 
 # output directories
@@ -46,25 +55,33 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 
-# dependency manager
-include(${CMAKE_SOURCE_DIR}/cmake/CPM.cmake)
+# download dependency tool
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm-downloader.cmake)
+elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
+    include(${CMAKE_SOURCE_DIR}/cmake/conan-downloader.cmake)
+endif()
 
-# logger
-CPMAddPackage("gh:gabime/spdlog@1.11.0")
+# setup all dependencies
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm-dependency.cmake)
+elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
+    include(${CMAKE_SOURCE_DIR}/cmake/conan-dependency.cmake)
+endif()
 
+# setup log
 if(XPLPC_ENABLE_LOG)
     add_compile_definitions(XPLPC_ENABLE_LOG)
 endif()
 
-# serializer
+# setup serializer
 if(XPLPC_ENABLE_SERIALIZER_FOR_JSON)
-    CPMAddPackage("gh:nlohmann/json@3.11.2")
     add_compile_definitions(XPLPC_SERIALIZER_JSON)
 else()
     message(FATAL_ERROR "You need enable one serializer")
 endif()
 
-# check target
+# setup target
 if(XPLPC_TARGET STREQUAL "")
     message(FATAL_ERROR "You need set the target")
 else()
@@ -215,9 +232,6 @@ endif()
 # tests
 if(XPLPC_ENABLE_TESTS)
     if(XPLPC_TARGET STREQUAL "cxx-static" OR XPLPC_TARGET STREQUAL "cxx-shared")
-        CPMAddPackage("gh:google/googletest@1.13.0")
-        find_package(googletest REQUIRED)
-
         enable_testing()
         add_subdirectory(cxx/tests)
         set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
@@ -253,9 +267,6 @@ if(XPLPC_ENABLE_TESTS)
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${FOUNDATION_LIBRARY})
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE "c++")
     elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
-        CPMAddPackage("gh:google/googletest@1.13.0")
-        find_package(googletest REQUIRED)
-
         enable_testing()
         add_subdirectory(c/tests)
         set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})

@@ -15,7 +15,10 @@ def run_task_build_static():
 
     # environment
     target = "cxx-static"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -42,6 +45,7 @@ def run_task_build_static():
         f"-DXPLPC_TARGET={target}",
         "-DXPLPC_ADD_CUSTOM_DATA=ON",
         f"-DCMAKE_BUILD_TYPE={build_type}",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
     ]
 
     if interface:
@@ -65,7 +69,10 @@ def run_task_build_shared():
 
     # environment
     target = "cxx-shared"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -93,6 +100,7 @@ def run_task_build_shared():
         "-DXPLPC_ADD_CUSTOM_DATA=ON",
         "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
         f"-DCMAKE_BUILD_TYPE={build_type}",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
     ]
 
     if interface:
@@ -116,7 +124,10 @@ def run_task_build_sample():
 
     # environment
     target = "cxx-static"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -141,6 +152,7 @@ def run_task_build_sample():
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ENABLE_SAMPLES=ON",
             f"-DCMAKE_BUILD_TYPE={build_type}",
+            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
     )
 
@@ -167,8 +179,11 @@ def run_task_build_leaks():
 
     # environment
     target = "cxx-static"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
     os.environ["MallocStackLogging"] = "1"
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -190,6 +205,7 @@ def run_task_build_leaks():
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ENABLE_SAMPLES=ON",
             "-DCMAKE_BUILD_TYPE=Debug",
+            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
     )
 
@@ -221,7 +237,10 @@ def run_task_test():
 
     # environment
     target = "cxx-static"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -246,6 +265,8 @@ def run_task_test():
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             "-DXPLPC_ENABLE_TESTS=ON",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
+            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
     )
 

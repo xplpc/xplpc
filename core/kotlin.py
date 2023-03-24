@@ -16,7 +16,10 @@ def run_task_build():
 
     # environment
     target = "kotlin"
-    os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
     l.i(f"Configuring...")
@@ -46,6 +49,7 @@ def run_task_build():
         "-DXPLPC_ADD_CUSTOM_DATA=ON",
         f"-DCMAKE_BUILD_TYPE={build_type}",
         f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
     ]
 
     if interface:
@@ -92,6 +96,7 @@ def run_task_build_aar():
     l.i("Building...")
 
     run_args = ["clean", ":library:build"]
+    run_args.extend(["-P", f"xplpc_dependency_tool={c.dependency_tool}"])
 
     if interface:
         run_args.extend(["-P", "xplpc_interface"])
@@ -118,8 +123,26 @@ def run_task_test():
 
     # test
     l.i("Testing...")
-    util.run_gradle(["test"], lib_dir)
-    util.run_gradle(["connectedAndroidTest"], lib_dir)
+
+    # unit
+    util.run_gradle(
+        [
+            "test",
+            "-P",
+            f"xplpc_dependency_tool={c.dependency_tool}",
+        ],
+        lib_dir,
+    )
+
+    # integration
+    util.run_gradle(
+        [
+            "connectedAndroidTest",
+            "-P",
+            f"xplpc_dependency_tool={c.dependency_tool}",
+        ],
+        lib_dir,
+    )
 
     l.ok()
 
