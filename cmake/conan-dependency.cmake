@@ -11,9 +11,29 @@ if(XPLPC_ENABLE_TESTS)
     endif()
 endif()
 
-conan_cmake_configure(REQUIRES ${CONAN_REQUIRES} GENERATORS CMakeDeps)
+set(CONAN_IMPORTS
+    "bin, *.dll -> ./bin"
+    "lib, *.dylib -> ./lib"
+    "lib, *.so -> ./lib"
+    "bin, *.pdb -> ./bin"
+    "lib, *.dll -> ./bin"
+    "plugins, * -> ./bin"
+)
+
+conan_cmake_configure(
+    REQUIRES ${CONAN_REQUIRES}
+    GENERATORS CMakeDeps
+    IMPORTS ${CONAN_IMPORTS}
+)
+
 conan_cmake_autodetect(settings)
-conan_cmake_install(PATH_OR_REFERENCE . BUILD missing REMOTE conancenter SETTINGS ${settings})
+
+conan_cmake_install(
+    PATH_OR_REFERENCE .
+    BUILD missing
+    REMOTE conancenter
+    SETTINGS ${settings}
+)
 
 find_package(fmt REQUIRED CONFIG)
 find_package(spdlog REQUIRED CONFIG)
