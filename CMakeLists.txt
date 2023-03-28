@@ -9,8 +9,19 @@ if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()
 
+# policies
+cmake_policy(SET CMP0054 NEW) # only interpret if() arguments as variables or keywords when unquoted
+cmake_policy(SET CMP0076 NEW) # target_sources() command converts relative paths to absolute
+set(CMAKE_POLICY_DEFAULT_CMP0091 NEW) # msvc runtime library flags are selected by an abstraction
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # set the timestamps of all extracted contents to the time of the extraction
+
 # settings
 set(XPLPC_DEPENDENCY_TOOL_VALUES "cpm" "conan")
+
+if (NOT XCODE AND NOT MSVC AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
 
 # options
 set(XPLPC_ADD_CUSTOM_DATA OFF CACHE BOOL "Build Custom Data")
@@ -30,6 +41,7 @@ set(XPLPC_PROJECT_NAME ${PROJECT_NAME} CACHE INTERNAL "Project Name Suffix")
 set(XPLPC_VERSION "1.0.0" CACHE STRING "Version Name")
 set(XPLPC_VERSION_CODE "1" CACHE STRING "Version Code")
 set(XPLPC_DEPENDENCY_TOOL "cpm" CACHE STRING "Dependency Tool")
+set(XPLPC_TARGET_GROUP "" CACHE STRING "Target Group")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(XPLPC_ENABLE_LOG ON CACHE BOOL "Enable Log Messages")
@@ -58,8 +70,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 # download dependency tool
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
     include(${CMAKE_SOURCE_DIR}/cmake/cpm-downloader.cmake)
-elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
-    include(${CMAKE_SOURCE_DIR}/cmake/conan-downloader.cmake)
 endif()
 
 # setup all dependencies
@@ -261,6 +271,8 @@ if(XPLPC_ENABLE_TESTS)
             XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH YES
             XCODE_ATTRIBUTE_SKIP_INSTALL NO
             XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++"
+            XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "-"
+            XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ""
         )
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})

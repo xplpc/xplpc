@@ -51,6 +51,10 @@ You can build this target using some parameters to change configuration:
 
     --interface
 
+**Dry run:**
+
+    --dry
+
 ## Sample project
 
 You can see the sample project in directory `kotlin/sample`.

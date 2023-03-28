@@ -17,6 +17,7 @@ Options:
   --build=<build-type>              Build type.
   --interface                       Enable C interface.
   --platform=<platform>             Define custom platform.
+  --no-deps                         Run without build dependencies.
 
 Examples:
   python3 xplpc.py -h

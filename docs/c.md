@@ -64,3 +64,7 @@ You can build this target using some parameters to change configuration:
 **Build type:**
 
     --build debug
+
+**Dry run:**
+
+    --dry

@@ -21,6 +21,13 @@ def run_task_format():
             "path": os.path.join(c.proj_path, "core"),
             "patterns": ["*.py"],
         },
+        {
+            "path": os.path.join(c.proj_path, "conanfile.py"),
+        },
+        {
+            "path": os.path.join(c.proj_path, "conan"),
+            "patterns": ["*.py"],
+        },
     ]
 
     if path_list:

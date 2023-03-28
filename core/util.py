@@ -162,6 +162,11 @@ def get_param_dry():
 
 
 # -----------------------------------------------------------------------------
+def get_param_no_deps():
+    return cfg.options["--no-deps"]
+
+
+# -----------------------------------------------------------------------------
 def get_cmake_build_type(build_type):
     build_type = build_type.lower()
 

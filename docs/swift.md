@@ -53,6 +53,10 @@ Platforms available: `ios`, `macos`, `ios-flutter`, `macos-flutter`
 
     --interface
 
+**Dry run:**
+
+    --dry
+
 ## Sample project
 
 You can see the sample project in directory `swift/sample`.
