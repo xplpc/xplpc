@@ -14,6 +14,9 @@ def run_task_build():
     tool.check_tool_emsdk()
     emsdk_root = tool.check_and_get_env("EMSDK")
 
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     # environment
     target = "wasm"
 
@@ -44,20 +47,25 @@ def run_task_build():
         "Emscripten.cmake",
     )
 
-    r.run(
-        [
-            "cmake",
-            "-S",
-            ".",
-            "-B",
-            build_dir,
-            f"-DXPLPC_TARGET={target}",
-            "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            f"-DCMAKE_BUILD_TYPE={build_type}",
-            f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
-            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-        ]
-    )
+    run_args = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        build_dir,
+        f"-DXPLPC_TARGET={target}",
+        "-DXPLPC_ADD_CUSTOM_DATA=ON",
+        f"-DCMAKE_BUILD_TYPE={build_type}",
+        f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+    ]
+
+    if c.dependency_tool == "conan":
+        run_args.append(
+            "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
+        )
+
+    r.run(run_args)
 
     r.run(["cmake", "--build", build_dir])
 
