@@ -4,7 +4,6 @@ from pygemstones.io import file as f
 from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
-from core import conan
 from core import config as c
 from core import tool, util
 
@@ -13,6 +12,9 @@ from core import tool, util
 def run_task_build():
     # check
     tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
     # environment
     target = "swift"
@@ -84,6 +86,9 @@ def run_task_build_xcframework():
 def run_task_test():
     # check
     tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
     # environment
     target = "swift"
@@ -159,61 +164,22 @@ def run_task_format():
 # -----------------------------------------------------------------------------
 def do_build(target, build_type, platform, target_data, has_interface, has_tests):
     build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
-    conan_build_dir = os.path.join(
-        c.proj_path, "build", "conan", f"{target}-{platform}"
-    )
 
     # dry run
     dry_run = util.get_param_dry()
     if not dry_run:
         f.recreate_dir(build_dir)
 
-    # dependencies
-    no_deps = util.get_param_no_deps()
-
-    if not dry_run and not no_deps and c.dependency_tool == "conan":
-        tool.check_tool_conan()
-
-        for item in target_data:
-            l.i(f"Building dependencies for arch {item['arch']}/{item['group']}...")
-
-            arch_dir = os.path.join(conan_build_dir, item["group"], item["arch"])
-            f.recreate_dir(arch_dir)
-
-            # conan
-            build_profile = conan.get_build_profile()
-
-            if build_profile != "default":
-                build_profile = os.path.join(
-                    c.proj_path, "conan", "profiles", build_profile
-                )
-
-            run_args = [
-                "conan",
-                "install",
-                c.proj_path,
-                "-pr:b",
-                build_profile,
-                "-pr:h",
-                os.path.join(c.proj_path, "conan", "profiles", item["conan_profile"]),
-            ]
-
-            conan.add_target_setup_common_args(run_args, item, build_type)
-
-            run_args.append("--build=missing")
-            run_args.append("--update")
-
-            r.run(run_args, cwd=arch_dir)
-
     # build
     for item in target_data:
         l.i(f"Building for arch {item['arch']}/{item['group']}...")
 
         arch_dir = os.path.join(build_dir, item["group"], item["arch"])
-        conan_arch_dir = os.path.join(conan_build_dir, item["group"], item["arch"])
 
         # configure
-        toolchain_file = os.path.join(c.proj_path, "cmake", "ios.toolchain.cmake")
+        toolchain_file = os.path.join(
+            c.proj_path, "cmake", "ios", "ios.toolchain.cmake"
+        )
 
         configure_args = [
             "cmake",
@@ -227,7 +193,6 @@ def do_build(target, build_type, platform, target_data, has_interface, has_tests
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-            f"-DXPLPC_CONAN_FILES={conan_arch_dir}",
             f"-DPLATFORM={item['platform']}",
             f"-DDEPLOYMENT_TARGET={item['deployment_target']}",
             f"-DCMAKE_OSX_DEPLOYMENT_TARGET={item['deployment_target']}",
@@ -259,6 +224,12 @@ def do_build(target, build_type, platform, target_data, has_interface, has_tests
         if "enable_visibility" in item:
             configure_args.append(
                 "-DENABLE_VISIBILITY={0}".format("ON" if item["visibility"] else "OFF")
+            )
+
+        # toolchain
+        if c.dependency_tool == "conan":
+            configure_args.append(
+                "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
             )
 
         r.run(configure_args)

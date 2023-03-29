@@ -11,7 +11,6 @@ if has_mac_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "xplpc_macos_profile",
                 "deployment_target": "10.15",
                 "sdk": "macosx",
                 "platform": "MAC",
@@ -29,7 +28,6 @@ if has_mac_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_macos_profile",
                 "deployment_target": "11.0",
                 "sdk": "macosx",
                 "platform": "MAC_ARM64",

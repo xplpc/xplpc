@@ -1,5 +1,7 @@
 import os
 
+from pygemstones.io import file as f
+from pygemstones.io import net as n
 from pygemstones.system import platform as p
 from pygemstones.system import runner as r
 from pygemstones.util import log as l
@@ -20,26 +22,32 @@ def run_task_setup():
         [
             "conan",
             "profile",
-            "new",
-            "default",
-            "--detect",
+            "detect",
             "--force",
         ],
         cwd=c.proj_path,
     )
 
-    # install darwin toolchain
-    if c.conan_use_darwin_toolchain and p.is_macos():
-        l.i("Installing darwin toolchain...")
+    # download files
+    f.recreate_dir(os.path.join("build", "conan"))
 
-        r.run(
-            ["conan", "create", ".", "xplpc/stable"],
-            cwd=os.path.join(
-                c.proj_path,
-                "conan",
-                "darwin-toolchain",
-            ),
-        )
+    n.download(
+        "https://raw.githubusercontent.com/conan-io/cmake-conan/develop2/conan_provider.cmake",
+        os.path.join(
+            "build",
+            "conan",
+            "conan_provider.cmake",
+        ),
+    )
+
+    n.download(
+        "https://raw.githubusercontent.com/conan-io/cmake-conan/develop2/conan_support.cmake",
+        os.path.join(
+            "build",
+            "conan",
+            "conan_support.cmake",
+        ),
+    )
 
     l.ok()
 

@@ -13,7 +13,6 @@ if has_arm32:
             {
                 "arch": "armeabi-v7a",
                 "conan_arch": "armv7",
-                "conan_profile": "xplpc_android_profile",
                 "api_level": 19,
             },
         ]
@@ -26,7 +25,6 @@ if has_arm64:
             {
                 "arch": "arm64-v8a",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_android_profile",
                 "api_level": 21,
             },
         ]
@@ -39,7 +37,6 @@ if has_x32:
             {
                 "arch": "x86",
                 "conan_arch": "x86",
-                "conan_profile": "xplpc_android_profile",
                 "api_level": 19,
             },
         ]
@@ -52,7 +49,6 @@ if has_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "xplpc_android_profile",
                 "api_level": 21,
             },
         ]

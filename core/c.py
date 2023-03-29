@@ -13,6 +13,9 @@ def run_task_build_static():
     # check
     tool.check_tool_cmake()
 
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     # environment
     target = "c-static"
 
@@ -45,6 +48,11 @@ def run_task_build_static():
         f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
     ]
 
+    if c.dependency_tool == "conan":
+        run_args.append(
+            "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
+        )
+
     r.run(run_args)
 
     # build
@@ -58,6 +66,9 @@ def run_task_build_static():
 def run_task_build_shared():
     # check
     tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
     # environment
     target = "c-shared"
@@ -92,6 +103,11 @@ def run_task_build_shared():
         f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
     ]
 
+    if c.dependency_tool == "conan":
+        run_args.append(
+            "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
+        )
+
     r.run(run_args)
 
     # build
@@ -105,6 +121,9 @@ def run_task_build_shared():
 def run_task_build_sample():
     # check
     tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
     # environment
     target = "c-static"
@@ -126,19 +145,24 @@ def run_task_build_sample():
     if not dry_run:
         f.recreate_dir(build_dir)
 
-    r.run(
-        [
-            "cmake",
-            "-S",
-            ".",
-            "-B",
-            build_dir,
-            f"-DXPLPC_TARGET={target}",
-            "-DXPLPC_ENABLE_SAMPLES=ON",
-            f"-DCMAKE_BUILD_TYPE={build_type}",
-            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-        ]
-    )
+    run_args = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        build_dir,
+        f"-DXPLPC_TARGET={target}",
+        "-DXPLPC_ENABLE_SAMPLES=ON",
+        f"-DCMAKE_BUILD_TYPE={build_type}",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+    ]
+
+    if c.dependency_tool == "conan":
+        run_args.append(
+            "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
+        )
+
+    r.run(run_args)
 
     # build
     l.i(f"Building...")
@@ -161,6 +185,9 @@ def run_task_build_leaks():
     tool.check_tool_cmake()
     tool.check_tool_leaks()
 
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     # environment
     target = "c-static"
     os.environ["MallocStackLogging"] = "1"
@@ -179,19 +206,24 @@ def run_task_build_leaks():
     if not dry_run:
         f.recreate_dir(build_dir)
 
-    r.run(
-        [
-            "cmake",
-            "-S",
-            ".",
-            "-B",
-            build_dir,
-            f"-DXPLPC_TARGET={target}",
-            "-DXPLPC_ENABLE_SAMPLES=ON",
-            "-DCMAKE_BUILD_TYPE=Debug",
-            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-        ]
-    )
+    run_args = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        build_dir,
+        f"-DXPLPC_TARGET={target}",
+        "-DXPLPC_ENABLE_SAMPLES=ON",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+    ]
+
+    if c.dependency_tool == "conan":
+        run_args.append(
+            "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
+        )
+
+    r.run(run_args)
 
     # build
     l.i(f"Building...")
@@ -219,6 +251,9 @@ def run_task_test():
     # check
     tool.check_tool_cmake()
 
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     # environment
     target = "c-static"
 
@@ -239,20 +274,25 @@ def run_task_test():
     if not dry_run:
         f.recreate_dir(build_dir)
 
-    r.run(
-        [
-            "cmake",
-            "-S",
-            ".",
-            "-B",
-            build_dir,
-            f"-DXPLPC_TARGET={target}",
-            "-DXPLPC_ADD_CUSTOM_DATA=ON",
-            "-DXPLPC_ENABLE_TESTS=ON",
-            f"-DCMAKE_BUILD_TYPE={build_type}",
-            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-        ]
-    )
+    run_args = [
+        "cmake",
+        "-S",
+        ".",
+        "-B",
+        build_dir,
+        f"-DXPLPC_TARGET={target}",
+        "-DXPLPC_ADD_CUSTOM_DATA=ON",
+        "-DXPLPC_ENABLE_TESTS=ON",
+        f"-DCMAKE_BUILD_TYPE={build_type}",
+        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+    ]
+
+    if c.dependency_tool == "conan":
+        run_args.append(
+            "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
+        )
+
+    r.run(run_args)
 
     # build
     l.i(f"Building...")

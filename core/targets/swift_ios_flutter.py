@@ -12,7 +12,6 @@ if has_ios_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_ios_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "iPhoneOS",
                 "sdk": "iphoneos",
@@ -31,7 +30,6 @@ if has_ios_simulator_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "xplpc_ios_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "iPhoneSimulator",
                 "sdk": "iphonesimulator",
@@ -50,7 +48,6 @@ if has_ios_simulator_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_ios_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "iPhoneSimulator",
                 "sdk": "iphonesimulator",

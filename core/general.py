@@ -68,19 +68,6 @@ def run_task_clear():
         os.path.join(c.proj_path, "flutter", "plugin", "example", "macos", "Pods")
     )
 
-    f.remove_dir(
-        os.path.join(c.proj_path, "conan", "darwin-toolchain", "test_package", "build")
-    )
-    f.remove_file(
-        os.path.join(
-            c.proj_path,
-            "conan",
-            "darwin-toolchain",
-            "test_package",
-            "CMakeUserPresets.json",
-        )
-    )
-
     l.ok()
 
 

@@ -4,7 +4,6 @@ from pygemstones.io import file as f
 from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
-from core import conan
 from core import config as c
 from core import tool, util
 
@@ -13,6 +12,10 @@ from core import tool, util
 def run_task_build():
     # check
     tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     ndk_root = tool.check_and_get_env("NDK_ROOT")
 
     # environment
@@ -37,55 +40,16 @@ def run_task_build():
     target_data = get_target_data_for_platform("kotlin")
 
     build_dir = os.path.join(c.proj_path, "build", target)
-    conan_build_dir = os.path.join(c.proj_path, "build", "conan", target)
 
     # dry run
     if not dry_run:
         f.recreate_dir(build_dir)
-
-    # dependencies
-    no_deps = util.get_param_no_deps()
-
-    if not dry_run and not no_deps and c.dependency_tool == "conan":
-        tool.check_tool_conan()
-
-        for item in target_data:
-            l.i(f"Building dependencies for arch {item['arch']}...")
-
-            arch_dir = os.path.join(conan_build_dir, item["arch"])
-            f.recreate_dir(arch_dir)
-
-            # conan
-            build_profile = conan.get_build_profile()
-
-            if build_profile != "default":
-                build_profile = os.path.join(
-                    c.proj_path, "conan", "profiles", build_profile
-                )
-
-            run_args = [
-                "conan",
-                "install",
-                c.proj_path,
-                "-pr:b",
-                build_profile,
-                "-pr:h",
-                os.path.join(c.proj_path, "conan", "profiles", item["conan_profile"]),
-            ]
-
-            conan.add_target_setup_common_args(run_args, item, build_type)
-
-            run_args.append("--build=missing")
-            run_args.append("--update")
-
-            r.run(run_args, cwd=arch_dir)
 
     # build
     for item in target_data:
         l.i(f"Building for arch {item['arch']}...")
 
         arch_dir = os.path.join(build_dir, item["arch"])
-        conan_arch_dir = os.path.join(conan_build_dir, item["arch"])
 
         run_args = [
             "cmake",
@@ -99,17 +63,19 @@ def run_task_build():
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
 
-        if c.dependency_tool == "cpm":
-            toolchain_file = os.path.join(
-                ndk_root, "build", "cmake", "android.toolchain.cmake"
-            )
-            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
-        elif c.dependency_tool == "conan":
-            toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
-            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
-
         if interface:
             run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+
+        # toolchain
+        toolchain_file = os.path.join(
+            ndk_root, "build", "cmake", "android.toolchain.cmake"
+        )
+        run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+
+        if c.dependency_tool == "conan":
+            run_args.append(
+                "-DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=build/conan/conan_provider.cmake"
+            )
 
         r.run(run_args)
 
@@ -126,6 +92,9 @@ def run_task_build_sample():
     sample_dir = os.path.join("kotlin", "sample")
     tool.check_tool_gradlew(sample_dir)
 
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     # build
     l.i("Building...")
     util.run_gradle(["clean", "build"], sample_dir)
@@ -138,6 +107,9 @@ def run_task_build_aar():
     # check
     lib_dir = os.path.join("kotlin", "lib")
     tool.check_tool_gradlew(lib_dir)
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
     # configure
     target = "kotlin"
@@ -154,10 +126,6 @@ def run_task_build_aar():
 
     if interface:
         run_args.extend(["-P", "xplpc_interface"])
-
-    if c.dependency_tool == "conan":
-        conan_build_dir = os.path.join(c.proj_path, "build", "conan", target)
-        run_args.extend(["-P", f"xplpc_conan_build_dir={conan_build_dir}"])
 
     util.run_gradle(run_args, lib_dir)
 
@@ -178,6 +146,9 @@ def run_task_test():
     # check
     lib_dir = os.path.join("kotlin", "lib")
     tool.check_tool_gradlew(lib_dir)
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
     # test
     l.i("Testing...")

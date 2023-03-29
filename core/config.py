@@ -36,10 +36,3 @@ targets["swift-ios-flutter"] = target_swift_ios_flutter.data
 targets["swift-macos-flutter"] = target_swift_macos_flutter.data
 targets["swift-test"] = target_swift_test.data
 targets["kotlin"] = target_kotlin.data
-
-# conan
-conan_use_darwin_toolchain = False
-
-conan_build_profile_macos = "default"
-conan_build_profile_linux = "default"
-conan_build_profile_windows = "default"

@@ -1,6 +1,6 @@
 # archs
 has_ios_arm32 = False
-has_ios_arm64 = False
+has_ios_arm64 = True
 has_ios_simulator_x64 = False
 has_ios_simulator_arm64 = False
 has_tvos_arm64 = False
@@ -10,7 +10,7 @@ has_watchos_arm32 = False
 has_watchos_arm64 = False
 has_watchos_simulator_x64 = False
 has_watchos_simulator_arm64 = False
-has_mac_catalyst_x64 = True
+has_mac_catalyst_x64 = False
 has_mac_catalyst_arm64 = False
 
 data = []
@@ -22,7 +22,6 @@ if has_ios_arm32:
             {
                 "arch": "armv7",
                 "conan_arch": "armv7",
-                "conan_profile": "xplpc_ios_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "iPhoneOS",
                 "sdk": "iphoneos",
@@ -41,7 +40,6 @@ if has_ios_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_ios_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "iPhoneOS",
                 "sdk": "iphoneos",
@@ -60,7 +58,6 @@ if has_ios_simulator_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "xplpc_ios_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "iPhoneSimulator",
                 "sdk": "iphonesimulator",
@@ -79,7 +76,6 @@ if has_ios_simulator_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_ios_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "iPhoneSimulator",
                 "sdk": "iphonesimulator",
@@ -98,7 +94,6 @@ if has_tvos_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_tvos_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "AppleTVOS",
                 "sdk": "appletvos",
@@ -117,7 +112,6 @@ if has_tvos_simulator_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "xplpc_tvos_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "AppleTVSimulator",
                 "sdk": "appletvsimulator",
@@ -136,7 +130,6 @@ if has_tvos_simulator_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_tvos_profile",
                 "deployment_target": "11.0",
                 "supported_platform": "AppleTVSimulator",
                 "sdk": "appletvsimulator",
@@ -155,7 +148,6 @@ if has_watchos_arm32:
             {
                 "arch": "armv7k",
                 "conan_arch": "armv7k",
-                "conan_profile": "xplpc_watchos_profile",
                 "deployment_target": "5.0",
                 "supported_platform": "WatchOS",
                 "sdk": "watchos",
@@ -174,7 +166,6 @@ if has_watchos_arm64:
             {
                 "arch": "arm64_32",
                 "conan_arch": "armv8_32",
-                "conan_profile": "xplpc_watchos_profile",
                 "deployment_target": "5.0",
                 "supported_platform": "WatchOS",
                 "sdk": "watchos",
@@ -193,7 +184,6 @@ if has_watchos_simulator_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "xplpc_watchos_profile",
                 "deployment_target": "5.0",
                 "supported_platform": "WatchSimulator",
                 "sdk": "watchsimulator",
@@ -212,7 +202,6 @@ if has_watchos_simulator_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_watchos_profile",
                 "deployment_target": "5.0",
                 "supported_platform": "WatchSimulator",
                 "sdk": "watchsimulator",
@@ -231,7 +220,6 @@ if has_mac_catalyst_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "xplpc_catalyst_profile",
                 "deployment_target": "13.1",
                 "supported_platform": "MacOSX",
                 "sdk": "macosx",
@@ -251,7 +239,6 @@ if has_mac_catalyst_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "xplpc_catalyst_profile",
                 "deployment_target": "13.1",
                 "supported_platform": "MacOSX",
                 "sdk": "macosx",
