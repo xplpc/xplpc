@@ -119,15 +119,16 @@ def run_task_test():
     l.i(f"Testing...")
 
     build_dir = os.path.join(c.proj_path, "build", "swift-test")
+    group = target_data[0]["group"]
     arch = target_data[0]["arch"]
 
     r.run(
         ["ctest", "-C", build_type, "--output-on-failure"],
-        cwd=os.path.join(build_dir, arch),
+        cwd=os.path.join(build_dir, group, arch),
     )
 
     util.show_file_contents(
-        os.path.join(build_dir, arch, "Testing", "Temporary", "LastTest.log")
+        os.path.join(build_dir, group, arch, "Testing", "Temporary", "LastTest.log")
     )
 
     l.ok()
