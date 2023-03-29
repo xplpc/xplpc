@@ -16,11 +16,22 @@ android {
         consumerProguardFiles "consumer-rules.pro"
         externalNativeBuild {
             cmake {
+                // cxx flags
                 cppFlags '-std=c++17'
-                arguments '-DXPLPC_TARGET=kotlin',
-                '-DXPLPC_ADD_CUSTOM_DATA=ON',
-                '-DXPLPC_DEPENDENCY_TOOL=' + project.property('xplpc_dependency_tool'),
-                project.hasProperty('xplpc_interface') ? '-DXPLPC_ENABLE_INTERFACE=YES' : "-DXPLPC_ENABLE_INTERFACE=NO"
+
+                // cmake arguments
+                def cmakeArguments = []
+                cmakeArguments.add('-DXPLPC_TARGET=kotlin')
+                cmakeArguments.add('-DXPLPC_ADD_CUSTOM_DATA=ON')
+                cmakeArguments.add('-DXPLPC_DEPENDENCY_TOOL=' + (project.hasProperty('xplpc_dependency_tool') ? project.property('xplpc_dependency_tool') : 'cpm'))
+                cmakeArguments.add('-DXPLPC_ENABLE_INTERFACE=' + (project.hasProperty('xplpc_interface') ? 'YES' : 'NO'))
+
+                def cmakeStringArguments = new String[cmakeArguments.size()]
+                for (int i = 0; i < cmakeArguments.size(); i++) {
+                    cmakeStringArguments[i] = cmakeArguments.get(i)
+                }
+
+                arguments(cmakeStringArguments)
             }
         }
     }

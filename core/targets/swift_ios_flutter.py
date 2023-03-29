@@ -19,6 +19,7 @@ if has_ios_arm64:
                 "group": "ios",
                 "platform": "OS64",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -37,6 +38,7 @@ if has_ios_simulator_x64:
                 "group": "ios-simulator",
                 "platform": "SIMULATOR64",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -55,6 +57,7 @@ if has_ios_simulator_arm64:
                 "group": "ios-simulator",
                 "platform": "SIMULATORARM64",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )

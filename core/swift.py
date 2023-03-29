@@ -4,8 +4,8 @@ from pygemstones.io import file as f
 from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
-from core import config as c
 from core import conan
+from core import config as c
 from core import tool, util
 
 
@@ -35,7 +35,7 @@ def run_task_build():
 
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
-    framework_list = get_target_data_for_platform(platform)
+    target_data = get_target_data_for_platform(platform)
 
     # build
     l.i("Building...")
@@ -44,7 +44,7 @@ def run_task_build():
         target=target,
         build_type=build_type,
         platform=platform,
-        framework_list=framework_list,
+        target_data=target_data,
         has_interface=interface,
         has_tests=False,
     )
@@ -66,7 +66,7 @@ def run_task_build_xcframework():
 
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
-    framework_list = get_target_data_for_platform(platform)
+    target_data = get_target_data_for_platform(platform)
 
     # build
     l.i("Building...")
@@ -74,7 +74,7 @@ def run_task_build_xcframework():
     do_build_xcframework(
         target=target,
         platform=platform,
-        framework_list=framework_list,
+        target_data=target_data,
     )
 
     l.ok()
@@ -101,13 +101,13 @@ def run_task_test():
     # test
     l.i("Testing...")
 
-    framework_list = get_target_data_for_platform("test")
+    target_data = get_target_data_for_platform("test")
 
     do_build(
         target=target,
         build_type=build_type,
         platform="test",
-        framework_list=framework_list,
+        target_data=target_data,
         has_interface=False,
         has_tests=True,
     )
@@ -157,7 +157,7 @@ def run_task_format():
 
 
 # -----------------------------------------------------------------------------
-def do_build(target, build_type, platform, framework_list, has_interface, has_tests):
+def do_build(target, build_type, platform, target_data, has_interface, has_tests):
     build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
     conan_build_dir = os.path.join(
         c.proj_path, "build", "conan", f"{target}-{platform}"
@@ -174,8 +174,8 @@ def do_build(target, build_type, platform, framework_list, has_interface, has_te
     if not dry_run and not no_deps and c.dependency_tool == "conan":
         tool.check_tool_conan()
 
-        for item in framework_list:
-            l.i(f"Building dependencies for arch {item['arch']}...")
+        for item in target_data:
+            l.i(f"Building dependencies for arch {item['arch']}/{item['group']}...")
 
             arch_dir = os.path.join(conan_build_dir, item["group"], item["arch"])
             f.recreate_dir(arch_dir)
@@ -206,12 +206,15 @@ def do_build(target, build_type, platform, framework_list, has_interface, has_te
             r.run(run_args, cwd=arch_dir)
 
     # build
-    for item in framework_list:
-        l.i(f"Building for arch {item['arch']}...")
+    for item in target_data:
+        l.i(f"Building for arch {item['arch']}/{item['group']}...")
 
         arch_dir = os.path.join(build_dir, item["group"], item["arch"])
+        conan_arch_dir = os.path.join(conan_build_dir, item["group"], item["arch"])
 
         # configure
+        toolchain_file = os.path.join(c.proj_path, "cmake", "ios.toolchain.cmake")
+
         configure_args = [
             "cmake",
             "-S",
@@ -219,35 +222,44 @@ def do_build(target, build_type, platform, framework_list, has_interface, has_te
             "-B",
             arch_dir,
             "-GXcode",
+            f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
             f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-            f"-DXPLPC_TARGET_GROUP={item['group']}",
+            f"-DXPLPC_CONAN_FILES={conan_arch_dir}",
+            f"-DPLATFORM={item['platform']}",
+            f"-DDEPLOYMENT_TARGET={item['deployment_target']}",
+            f"-DCMAKE_OSX_DEPLOYMENT_TARGET={item['deployment_target']}",
+            f"-DSDK_VERSION={item['sdk_version']}",
+            f"-DARCHS={item['arch']}",
         ]
 
+        # interface
         if has_interface:
             configure_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
 
+        # tests
         if has_tests:
             configure_args.append("-DXPLPC_ENABLE_TESTS=ON")
 
-        if c.dependency_tool == "cpm":
-            toolchain_file = os.path.join(c.proj_path, "cmake", "ios.toolchain.cmake")
-
-            configure_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
-            configure_args.append(f"-DPLATFORM={item['platform']}")
-            configure_args.append(f"-DDEPLOYMENT_TARGET={item['deployment_target']}")
+        # arc
+        if "enable_arc" in item:
             configure_args.append(
-                f"-DCMAKE_OSX_DEPLOYMENT_TARGET={item['deployment_target']}"
-            )
-            configure_args.append(f"-DSDK_VERSION={item['sdk_version']}")
-        elif c.dependency_tool == "conan":
-            toolchain_file = os.path.join(
-                conan_build_dir, item["group"], item["arch"], "conan_toolchain.cmake"
+                "-DENABLE_ARC={0}".format("ON" if item["enable_arc"] else "OFF")
             )
 
-            configure_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+        # bitcode
+        if "enable_bitcode" in item:
+            configure_args.append(
+                "-DENABLE_BITCODE={0}".format("ON" if item["enable_bitcode"] else "OFF")
+            )
+
+        # visibility
+        if "enable_visibility" in item:
+            configure_args.append(
+                "-DENABLE_VISIBILITY={0}".format("ON" if item["visibility"] else "OFF")
+            )
 
         r.run(configure_args)
 
@@ -264,12 +276,12 @@ def do_build(target, build_type, platform, framework_list, has_interface, has_te
 
 
 # -----------------------------------------------------------------------------
-def do_build_xcframework(target, platform, framework_list):
+def do_build_xcframework(target, platform, target_data):
     build_dir_prefix = f"{target}-{platform}"
 
     groups = []
 
-    for item in framework_list:
+    for item in target_data:
         if "group" in item:
             if item["group"] not in groups:
                 groups.append(item["group"])
@@ -292,7 +304,7 @@ def do_build_xcframework(target, platform, framework_list):
         base_framework_arch = None
         arch_dir = None
 
-        for item in framework_list:
+        for item in target_data:
             if item["group"] == group:
                 base_framework_arch = item["arch"]
                 arch_dir = os.path.join(
@@ -317,7 +329,7 @@ def do_build_xcframework(target, platform, framework_list):
         )
 
         if f.dir_exists(group_framework_module_dir):
-            for item in framework_list:
+            for item in target_data:
                 if item["group"] == group:
                     arch_dir = os.path.join(
                         c.proj_path,
@@ -344,7 +356,7 @@ def do_build_xcframework(target, platform, framework_list):
         # generate single framework for group
         lipo_archs_args = []
 
-        for item in framework_list:
+        for item in target_data:
             if item["group"] == group:
                 arch_dir = os.path.join(
                     c.proj_path, "build", build_dir_prefix, item["group"], item["arch"]
@@ -380,7 +392,7 @@ def do_build_xcframework(target, platform, framework_list):
         if has_swift_module_header_file:
             swift_module_header_content = ""
 
-            for item in framework_list:
+            for item in target_data:
                 if item["group"] == group:
                     arch_dir = os.path.join(
                         c.proj_path,

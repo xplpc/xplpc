@@ -41,7 +41,7 @@ set(XPLPC_PROJECT_NAME ${PROJECT_NAME} CACHE INTERNAL "Project Name Suffix")
 set(XPLPC_VERSION "1.0.0" CACHE STRING "Version Name")
 set(XPLPC_VERSION_CODE "1" CACHE STRING "Version Code")
 set(XPLPC_DEPENDENCY_TOOL "cpm" CACHE STRING "Dependency Tool")
-set(XPLPC_TARGET_GROUP "" CACHE STRING "Target Group")
+set(XPLPC_CONAN_FILES "" CACHE STRING "Conan Files")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(XPLPC_ENABLE_LOG ON CACHE BOOL "Enable Log Messages")
@@ -233,6 +233,11 @@ endif()
 
 # dependencies
 target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
+
+# android dependencies
+find_library(ANDROID_LIB android)
+find_library(ANDROID_LOG_LIB log)
+target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
 
 # serializers
 if (XPLPC_ENABLE_SERIALIZER_FOR_JSON)

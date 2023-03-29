@@ -38,7 +38,7 @@ targets["swift-test"] = target_swift_test.data
 targets["kotlin"] = target_kotlin.data
 
 # conan
-conan_install_darwin_toolchain = False
+conan_use_darwin_toolchain = False
 
 conan_build_profile_macos = "default"
 conan_build_profile_linux = "default"

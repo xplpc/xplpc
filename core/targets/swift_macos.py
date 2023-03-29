@@ -17,6 +17,7 @@ if has_mac_x64:
                 "platform": "MAC",
                 "sdk_version": "11.0",
                 "group": "macos",
+                "enable_arc": True,
             },
         ]
     )
@@ -34,6 +35,7 @@ if has_mac_arm64:
                 "platform": "MAC_ARM64",
                 "sdk_version": "11.0",
                 "group": "macos",
+                "enable_arc": True,
             },
         ]
     )

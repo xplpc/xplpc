@@ -4,6 +4,7 @@ from pygemstones.io import file as f
 from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
+from core import conan
 from core import config as c
 from core import tool, util
 
@@ -33,35 +34,88 @@ def run_task_build():
     interface = util.get_param_interface(target)
     l.i(f"Interface: {interface}")
 
+    target_data = get_target_data_for_platform("kotlin")
+
     build_dir = os.path.join(c.proj_path, "build", target)
+    conan_build_dir = os.path.join(c.proj_path, "build", "conan", target)
+
+    # dry run
     if not dry_run:
         f.recreate_dir(build_dir)
 
-    toolchain_file = os.path.join(ndk_root, "build", "cmake", "android.toolchain.cmake")
+    # dependencies
+    no_deps = util.get_param_no_deps()
 
-    run_args = [
-        "cmake",
-        "-S",
-        ".",
-        "-B",
-        build_dir,
-        f"-DXPLPC_TARGET={target}",
-        "-DXPLPC_ADD_CUSTOM_DATA=ON",
-        f"-DCMAKE_BUILD_TYPE={build_type}",
-        f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
-        f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-    ]
+    if not dry_run and not no_deps and c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
-    if interface:
-        run_args.append(
-            "-DXPLPC_ENABLE_INTERFACE=ON",
-        )
+        for item in target_data:
+            l.i(f"Building dependencies for arch {item['arch']}...")
 
-    r.run(run_args)
+            arch_dir = os.path.join(conan_build_dir, item["arch"])
+            f.recreate_dir(arch_dir)
+
+            # conan
+            build_profile = conan.get_build_profile()
+
+            if build_profile != "default":
+                build_profile = os.path.join(
+                    c.proj_path, "conan", "profiles", build_profile
+                )
+
+            run_args = [
+                "conan",
+                "install",
+                c.proj_path,
+                "-pr:b",
+                build_profile,
+                "-pr:h",
+                os.path.join(c.proj_path, "conan", "profiles", item["conan_profile"]),
+            ]
+
+            conan.add_target_setup_common_args(run_args, item, build_type)
+
+            run_args.append("--build=missing")
+            run_args.append("--update")
+
+            r.run(run_args, cwd=arch_dir)
 
     # build
-    l.i(f"Building...")
-    r.run(["cmake", "--build", build_dir])
+    for item in target_data:
+        l.i(f"Building for arch {item['arch']}...")
+
+        arch_dir = os.path.join(build_dir, item["arch"])
+        conan_arch_dir = os.path.join(conan_build_dir, item["arch"])
+
+        run_args = [
+            "cmake",
+            "-S",
+            ".",
+            "-B",
+            arch_dir,
+            f"-DXPLPC_TARGET={target}",
+            "-DXPLPC_ADD_CUSTOM_DATA=ON",
+            f"-DCMAKE_BUILD_TYPE={build_type}",
+            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+        ]
+
+        if c.dependency_tool == "cpm":
+            toolchain_file = os.path.join(
+                ndk_root, "build", "cmake", "android.toolchain.cmake"
+            )
+            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+        elif c.dependency_tool == "conan":
+            toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+
+        if interface:
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+
+        r.run(run_args)
+
+        # build
+        l.i(f"Building...")
+        r.run(["cmake", "--build", arch_dir])
 
     l.ok()
 
@@ -100,6 +154,10 @@ def run_task_build_aar():
 
     if interface:
         run_args.extend(["-P", "xplpc_interface"])
+
+    if c.dependency_tool == "conan":
+        conan_build_dir = os.path.join(c.proj_path, "build", "conan", target)
+        run_args.extend(["-P", f"xplpc_conan_build_dir={conan_build_dir}"])
 
     util.run_gradle(run_args, lib_dir)
 
@@ -182,3 +240,14 @@ def run_task_format():
         l.ok()
     else:
         l.i("No Kotlin files found to format")
+
+
+# -----------------------------------------------------------------------------
+def get_target_data_for_platform(platform):
+    if platform == "kotlin":
+        return c.targets["kotlin"]
+
+    if platform:
+        l.e(f"Invalid platform: {platform}")
+    else:
+        l.e(f"Define a valid platform")

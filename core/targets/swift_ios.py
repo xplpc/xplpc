@@ -1,16 +1,16 @@
 # archs
 has_ios_arm32 = False
-has_ios_arm64 = True
-has_ios_simulator_x64 = True
-has_ios_simulator_arm64 = True
-has_tvos_arm64 = True
-has_tvos_simulator_x64 = True
-has_tvos_simulator_arm64 = True
-has_watchos_arm32 = True
-has_watchos_arm64 = True
-has_watchos_simulator_x64 = True
-has_watchos_simulator_arm64 = True
-has_mac_catalyst_x64 = False
+has_ios_arm64 = False
+has_ios_simulator_x64 = False
+has_ios_simulator_arm64 = False
+has_tvos_arm64 = False
+has_tvos_simulator_x64 = False
+has_tvos_simulator_arm64 = False
+has_watchos_arm32 = False
+has_watchos_arm64 = False
+has_watchos_simulator_x64 = False
+has_watchos_simulator_arm64 = False
+has_mac_catalyst_x64 = True
 has_mac_catalyst_arm64 = False
 
 data = []
@@ -29,6 +29,7 @@ if has_ios_arm32:
                 "group": "ios",
                 "platform": "OS",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -47,6 +48,7 @@ if has_ios_arm64:
                 "group": "ios",
                 "platform": "OS64",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -65,6 +67,7 @@ if has_ios_simulator_x64:
                 "group": "ios-simulator",
                 "platform": "SIMULATOR64",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -83,6 +86,7 @@ if has_ios_simulator_arm64:
                 "group": "ios-simulator",
                 "platform": "SIMULATORARM64",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -101,6 +105,7 @@ if has_tvos_arm64:
                 "group": "tvos",
                 "platform": "TVOS",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -119,6 +124,7 @@ if has_tvos_simulator_x64:
                 "group": "tvos-simulator",
                 "platform": "SIMULATOR_TVOS",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -135,8 +141,9 @@ if has_tvos_simulator_arm64:
                 "supported_platform": "AppleTVSimulator",
                 "sdk": "appletvsimulator",
                 "group": "tvos-simulator",
-                "platform": "",
+                "platform": "SIMULATOR_TVOS",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -155,6 +162,7 @@ if has_watchos_arm32:
                 "group": "watchos",
                 "platform": "WATCHOS",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -173,6 +181,7 @@ if has_watchos_arm64:
                 "group": "watchos",
                 "platform": "WATCHOS",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -191,6 +200,7 @@ if has_watchos_simulator_x64:
                 "group": "watchos-simulator",
                 "platform": "SIMULATOR_WATCHOS",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -209,6 +219,7 @@ if has_watchos_simulator_arm64:
                 "group": "watchos-simulator",
                 "platform": "",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -228,6 +239,7 @@ if has_mac_catalyst_x64:
                 "subsystem_ios_version": "13.1",
                 "platform": "MAC_CATALYST",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
@@ -247,6 +259,7 @@ if has_mac_catalyst_arm64:
                 "subsystem_ios_version": "13.1",
                 "platform": "MAC_CATALYST_ARM64",
                 "sdk_version": "11.0",
+                "enable_arc": True,
             },
         ]
     )
