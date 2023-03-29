@@ -118,7 +118,7 @@ def run_task_test():
     # test
     l.i(f"Testing...")
 
-    build_dir = os.path.join(c.proj_path, "build", "cxx-test")
+    build_dir = os.path.join(c.proj_path, "build", "swift-test")
     arch = target_data[0]["arch"]
 
     r.run(
