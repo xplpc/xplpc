@@ -1,16 +1,16 @@
 # archs
 has_ios_arm32 = False
-has_ios_arm64 = False
-has_ios_simulator_x64 = False
-has_ios_simulator_arm64 = False
-has_tvos_arm64 = False
-has_tvos_simulator_x64 = False
-has_tvos_simulator_arm64 = False
-has_watchos_arm32 = False
-has_watchos_arm64 = False
-has_watchos_simulator_x64 = False
-has_watchos_simulator_arm64 = False
-has_mac_catalyst_x64 = True
+has_ios_arm64 = True
+has_ios_simulator_x64 = True
+has_ios_simulator_arm64 = True
+has_tvos_arm64 = True
+has_tvos_simulator_x64 = True
+has_tvos_simulator_arm64 = True
+has_watchos_arm32 = True
+has_watchos_arm64 = True
+has_watchos_simulator_x64 = True
+has_watchos_simulator_arm64 = True
+has_mac_catalyst_x64 = False
 has_mac_catalyst_arm64 = False
 
 data = []
@@ -30,6 +30,8 @@ if has_ios_arm32:
                 "platform": "OS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -49,6 +51,8 @@ if has_ios_arm64:
                 "platform": "OS64",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -68,6 +72,8 @@ if has_ios_simulator_x64:
                 "platform": "SIMULATOR64",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -87,6 +93,8 @@ if has_ios_simulator_arm64:
                 "platform": "SIMULATORARM64",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -106,6 +114,8 @@ if has_tvos_arm64:
                 "platform": "TVOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -125,6 +135,8 @@ if has_tvos_simulator_x64:
                 "platform": "SIMULATOR_TVOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -144,6 +156,8 @@ if has_tvos_simulator_arm64:
                 "platform": "SIMULATOR_TVOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -163,6 +177,8 @@ if has_watchos_arm32:
                 "platform": "WATCHOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -182,6 +198,8 @@ if has_watchos_arm64:
                 "platform": "WATCHOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -201,6 +219,8 @@ if has_watchos_simulator_x64:
                 "platform": "SIMULATOR_WATCHOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -220,6 +240,8 @@ if has_watchos_simulator_arm64:
                 "platform": "",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -240,6 +262,8 @@ if has_mac_catalyst_x64:
                 "platform": "MAC_CATALYST",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -260,6 +284,8 @@ if has_mac_catalyst_arm64:
                 "platform": "MAC_CATALYST_ARM64",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )

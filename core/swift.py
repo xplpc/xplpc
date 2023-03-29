@@ -14,6 +14,9 @@ def run_task_build():
     # check
     tool.check_tool_cmake()
 
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     # environment
     target = "swift"
 
@@ -98,10 +101,10 @@ def run_task_test():
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
-    # test
-    l.i("Testing...")
-
     target_data = get_target_data_for_platform("test")
+
+    # build
+    l.i(f"Building...")
 
     do_build(
         target=target,
@@ -110,6 +113,21 @@ def run_task_test():
         target_data=target_data,
         has_interface=False,
         has_tests=True,
+    )
+
+    # test
+    l.i(f"Testing...")
+
+    build_dir = os.path.join(c.proj_path, "build", "cxx-test")
+    arch = target_data[0]["arch"]
+
+    r.run(
+        ["ctest", "-C", build_type, "--output-on-failure"],
+        cwd=os.path.join(build_dir, arch),
+    )
+
+    util.show_file_contents(
+        os.path.join(build_dir, arch, "Testing", "Temporary", "LastTest.log")
     )
 
     l.ok()
@@ -172,8 +190,6 @@ def do_build(target, build_type, platform, target_data, has_interface, has_tests
     no_deps = util.get_param_no_deps()
 
     if not dry_run and not no_deps and c.dependency_tool == "conan":
-        tool.check_tool_conan()
-
         for item in target_data:
             l.i(f"Building dependencies for arch {item['arch']}/{item['group']}...")
 
@@ -213,21 +229,17 @@ def do_build(target, build_type, platform, target_data, has_interface, has_tests
         conan_arch_dir = os.path.join(conan_build_dir, item["group"], item["arch"])
 
         # configure
-        toolchain_file = os.path.join(c.proj_path, "cmake", "ios.toolchain.cmake")
-
-        configure_args = [
+        run_args = [
             "cmake",
             "-S",
             ".",
             "-B",
             arch_dir,
             "-GXcode",
-            f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
             f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-            f"-DXPLPC_CONAN_FILES={conan_arch_dir}",
             f"-DPLATFORM={item['platform']}",
             f"-DDEPLOYMENT_TARGET={item['deployment_target']}",
             f"-DCMAKE_OSX_DEPLOYMENT_TARGET={item['deployment_target']}",
@@ -237,42 +249,50 @@ def do_build(target, build_type, platform, target_data, has_interface, has_tests
 
         # interface
         if has_interface:
-            configure_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+        else:
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
 
         # tests
         if has_tests:
-            configure_args.append("-DXPLPC_ENABLE_TESTS=ON")
+            run_args.append("-DXPLPC_ENABLE_TESTS=ON")
+        else:
+            run_args.append("-DXPLPC_ENABLE_TESTS=OFF")
 
         # arc
         if "enable_arc" in item:
-            configure_args.append(
+            run_args.append(
                 "-DENABLE_ARC={0}".format("ON" if item["enable_arc"] else "OFF")
             )
 
         # bitcode
         if "enable_bitcode" in item:
-            configure_args.append(
+            run_args.append(
                 "-DENABLE_BITCODE={0}".format("ON" if item["enable_bitcode"] else "OFF")
             )
 
         # visibility
         if "enable_visibility" in item:
-            configure_args.append(
-                "-DENABLE_VISIBILITY={0}".format("ON" if item["visibility"] else "OFF")
+            run_args.append(
+                "-DENABLE_VISIBILITY={0}".format(
+                    "ON" if item["enable_visibility"] else "OFF"
+                )
             )
 
-        r.run(configure_args)
+        # toolchain
+        if c.dependency_tool == "cpm":
+            toolchain_file = os.path.join(
+                c.proj_path, "cmake", "ios", "ios.toolchain.cmake"
+            )
+            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+        elif c.dependency_tool == "conan":
+            toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+
+        r.run(run_args)
 
         # build
         r.run(["cmake", "--build", arch_dir, "--config", build_type])
-
-        # tests
-        if has_tests:
-            r.run(["ctest", "-C", build_type, "--output-on-failure"], cwd=arch_dir)
-
-            util.show_file_contents(
-                os.path.join(arch_dir, "Testing", "Temporary", "LastTest.log")
-            )
 
 
 # -----------------------------------------------------------------------------

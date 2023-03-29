@@ -13,7 +13,11 @@ from core import tool, util
 def run_task_build():
     # check
     tool.check_tool_cmake()
-    ndk_root = tool.check_and_get_env("NDK_ROOT")
+
+    if c.dependency_tool == "cpm":
+        ndk_root = tool.check_and_get_env("NDK_ROOT")
+    elif c.dependency_tool == "conan":
+        tool.check_tool_conan()
 
     # environment
     target = "kotlin"
@@ -47,8 +51,6 @@ def run_task_build():
     no_deps = util.get_param_no_deps()
 
     if not dry_run and not no_deps and c.dependency_tool == "conan":
-        tool.check_tool_conan()
-
         for item in target_data:
             l.i(f"Building dependencies for arch {item['arch']}...")
 
@@ -99,6 +101,13 @@ def run_task_build():
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
 
+        # interface
+        if interface:
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+        else:
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
+
+        # toolchain
         if c.dependency_tool == "cpm":
             toolchain_file = os.path.join(
                 ndk_root, "build", "cmake", "android.toolchain.cmake"
@@ -107,9 +116,6 @@ def run_task_build():
         elif c.dependency_tool == "conan":
             toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
             run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
-
-        if interface:
-            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
 
         r.run(run_args)
 
@@ -150,15 +156,6 @@ def run_task_build_aar():
     l.i("Building...")
 
     run_args = ["clean", ":library:build"]
-    run_args.extend(["-P", f"xplpc_dependency_tool={c.dependency_tool}"])
-
-    if interface:
-        run_args.extend(["-P", "xplpc_interface"])
-
-    if c.dependency_tool == "conan":
-        conan_build_dir = os.path.join(c.proj_path, "build", "conan", target)
-        run_args.extend(["-P", f"xplpc_conan_build_dir={conan_build_dir}"])
-
     util.run_gradle(run_args, lib_dir)
 
     # copy aar
@@ -183,24 +180,10 @@ def run_task_test():
     l.i("Testing...")
 
     # unit
-    util.run_gradle(
-        [
-            "test",
-            "-P",
-            f"xplpc_dependency_tool={c.dependency_tool}",
-        ],
-        lib_dir,
-    )
+    util.run_gradle(["test"], lib_dir)
 
     # integration
-    util.run_gradle(
-        [
-            "connectedAndroidTest",
-            "-P",
-            f"xplpc_dependency_tool={c.dependency_tool}",
-        ],
-        lib_dir,
-    )
+    util.run_gradle(["connectedAndroidTest"], lib_dir)
 
     l.ok()
 

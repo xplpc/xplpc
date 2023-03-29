@@ -8,7 +8,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/swift/ios-arm64 -GXcode -DXPLPC_TARGET=swift -DXPLPC_ADD_CUSTOM_DATA=ON -DCMAKE_TOOLCHAIN_FILE=cmake/ios.toolchain.cmake -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=11.0
+    cmake -S . -B build/swift/ios-arm64 -GXcode -DXPLPC_TARGET=swift -DXPLPC_ADD_CUSTOM_DATA=ON -DCMAKE_TOOLCHAIN_FILE=cmake/ios/ios.toolchain.cmake -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=11.0
     cmake --build build/swift/ios-arm64 --config Release
 
 ## How to build the XCFramework package for iOS, tvOS, watchOS and macCatalyst

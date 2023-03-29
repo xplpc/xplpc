@@ -20,6 +20,8 @@ if has_ios_arm64:
                 "platform": "OS64",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -39,6 +41,8 @@ if has_ios_simulator_x64:
                 "platform": "SIMULATOR64",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )
@@ -58,6 +62,8 @@ if has_ios_simulator_arm64:
                 "platform": "SIMULATORARM64",
                 "sdk_version": "11.0",
                 "enable_arc": True,
+                "enable_bitcode": False,
+                "enable_visibility": False,
             },
         ]
     )

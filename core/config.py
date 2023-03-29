@@ -1,9 +1,13 @@
 from core.targets import kotlin as target_kotlin
+from core.targets import platform_linux as target_platform_linux
+from core.targets import platform_macos as target_platform_macos
+from core.targets import platform_windows as target_platform_windows
 from core.targets import swift_ios as target_swift_ios
 from core.targets import swift_ios_flutter as target_swift_ios_flutter
 from core.targets import swift_macos as target_swift_macos
 from core.targets import swift_macos_flutter as target_swift_macos_flutter
 from core.targets import swift_test as target_swift_test
+from core.targets import wasm as target_wasm
 
 # general
 debug = False
@@ -36,6 +40,10 @@ targets["swift-ios-flutter"] = target_swift_ios_flutter.data
 targets["swift-macos-flutter"] = target_swift_macos_flutter.data
 targets["swift-test"] = target_swift_test.data
 targets["kotlin"] = target_kotlin.data
+targets["wasm"] = target_wasm.data
+targets["platform-macos"] = target_platform_macos.data
+targets["platform-windows"] = target_platform_windows.data
+targets["platform-linux"] = target_platform_linux.data
 
 # conan
 conan_use_darwin_toolchain = False

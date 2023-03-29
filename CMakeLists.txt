@@ -41,7 +41,6 @@ set(XPLPC_PROJECT_NAME ${PROJECT_NAME} CACHE INTERNAL "Project Name Suffix")
 set(XPLPC_VERSION "1.0.0" CACHE STRING "Version Name")
 set(XPLPC_VERSION_CODE "1" CACHE STRING "Version Code")
 set(XPLPC_DEPENDENCY_TOOL "cpm" CACHE STRING "Dependency Tool")
-set(XPLPC_CONAN_FILES "" CACHE STRING "Conan Files")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(XPLPC_ENABLE_LOG ON CACHE BOOL "Enable Log Messages")
@@ -69,14 +68,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 
 # download dependency tool
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm-downloader.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-downloader.cmake)
 endif()
 
 # setup all dependencies
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm-dependency.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-dependency.cmake)
 elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
-    include(${CMAKE_SOURCE_DIR}/cmake/conan-dependency.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/conan/conan-dependency.cmake)
 endif()
 
 # setup log
@@ -187,7 +186,7 @@ else()
             PUBLIC_HEADER "${XPLPC_PUBLIC_HEADER_FILES}"
         )
     elseif(XPLPC_TARGET STREQUAL "wasm")
-        set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1")
+        set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -s \"EXPORTED_FUNCTIONS=['_malloc', '_free']\"")
         set(XPLPC_WASM_COMPILER_FLAGS "-fwasm-exceptions")
 
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XPLPC_WASM_LINKER_FLAGS}")
@@ -235,9 +234,11 @@ endif()
 target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
 
 # android dependencies
-find_library(ANDROID_LIB android)
-find_library(ANDROID_LOG_LIB log)
-target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
+if(XPLPC_TARGET STREQUAL "kotlin")
+    find_library(ANDROID_LIB android)
+    find_library(ANDROID_LOG_LIB log)
+    target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
+endif()
 
 # serializers
 if (XPLPC_ENABLE_SERIALIZER_FOR_JSON)
