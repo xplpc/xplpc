@@ -7,6 +7,6 @@ endif()
 
 if(XPLPC_ENABLE_TESTS)
     if("${XPLPC_TARGET}" MATCHES "^(cxx|c)-(static|shared)$")
-        find_package(gtest REQUIRED CONFIG)
+        find_package(GTest REQUIRED CONFIG)
     endif()
 endif()
