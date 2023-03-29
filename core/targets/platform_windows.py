@@ -18,7 +18,7 @@ if has_windows_x64:
             {
                 "arch": "x86_64",
                 "conan_arch": "x86_64",
-                "conan_profile": "nativium_windows_profile",
+                "conan_profile": "xplpc_windows_profile",
             },
         ]
     )
@@ -30,7 +30,7 @@ if has_windows_arm64:
             {
                 "arch": "arm64",
                 "conan_arch": "armv8",
-                "conan_profile": "nativium_windows_profile",
+                "conan_profile": "xplpc_windows_profile",
             },
         ]
     )
