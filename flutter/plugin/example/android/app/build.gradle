@@ -51,6 +51,10 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+
+        ndk {
+            debugSymbolLevel 'full'
+        }
     }
 
     buildTypes {
@@ -68,5 +72,5 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation files("$rootProject/../../../../../../build/kotlin-aar/library-release.aar")
+    implementation files("$rootProject/../../../../../../build/kotlin-aar-flutter/library-release.aar")
 }

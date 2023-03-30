@@ -43,7 +43,7 @@ You can build this target using some parameters to change configuration:
 
     --platform ios
 
-Platforms available: `ios`, `macos`, `ios-flutter`, `macos-flutter`
+Platforms available: `ios`, `macos`, `ios-flutter`, `macos-flutter`, `test`
 
 **Build type:**
 

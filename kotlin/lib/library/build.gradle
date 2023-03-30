@@ -17,7 +17,30 @@ android {
 
     sourceSets {
         main {
-            def jniLibsDir = file(project.projectDir.absolutePath + "/../../../build/kotlin-jni-libs")
+            // default settings
+            String platform = "android"
+
+            if (project.hasProperty("xplpc_platform")) {
+                platform = project.property("xplpc_platform")
+            }
+
+            if (!platform) {
+                platform = "android"
+            }
+
+            // settings from local properties file
+            def localProps = new Properties()
+            def localPropsFile = rootProject.file("local.properties")
+
+            if (localPropsFile.exists()) {
+                localProps.load(new FileInputStream(localPropsFile))
+
+                if (localProps.getProperty("xplpc.platform")) {
+                    platform = localProps.getProperty("xplpc.platform")
+                }
+            }
+
+            def jniLibsDir = file(project.projectDir.absolutePath + "/../../../build/kotlin-jni-libs-$platform")
             jniLibs.srcDirs += [jniLibsDir]
         }
     }
@@ -58,17 +81,41 @@ dependencies {
 }
 
 task copyJniLibs {
-    def jniLibsTargetDir = file(project.projectDir.absolutePath + "/../../../build/kotlin-jni-libs")
+    // default settings
+    String platform = "android"
+
+    if (project.hasProperty("xplpc_platform")) {
+        platform = project.property("xplpc_platform")
+    }
+
+    if (!platform) {
+        platform = "android"
+    }
+
+    // settings from local properties file
+    def localProps = new Properties()
+    def localPropsFile = rootProject.file("local.properties")
+
+    if (localPropsFile.exists()) {
+        localProps.load(new FileInputStream(localPropsFile))
+
+        if (localProps.getProperty("xplpc.platform")) {
+            platform = localProps.getProperty("xplpc.platform")
+        }
+    }
+
+    // jni libs
+    def jniLibsTargetDir = file(project.projectDir.absolutePath + "/../../../build/kotlin-jni-libs-$platform")
     jniLibsTargetDir.deleteDir()
 
     def abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
 
     abis.each { abi ->
         copy {
-            def jniLibsSourceDir = file(project.projectDir.absolutePath + "/../../../build/kotlin/$abi")
+            def jniLibsSourceDir = file(project.projectDir.absolutePath + "/../../../build/kotlin-$platform/$abi")
 
             if (!jniLibsSourceDir.exists()) {
-                throw new GradleException("XPLPC: You need build libraries for ABI $abi inside path $jniLibsSourceDir")
+                throw new GradleException("XPLPC: You need build libraries for platform \"$platform\" and ABI \"$abi\" inside path \"$jniLibsSourceDir\".")
             }
 
             from file("$jniLibsSourceDir/lib")

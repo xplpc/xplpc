@@ -4,18 +4,18 @@
 
 Execute on terminal:
 
-    python3 xplpc.py kotlin-build
+    python3 xplpc.py kotlin-build --platform android
 
 or
 
     cmake -S . -B build/kotlin -DXPLPC_TARGET=kotlin -DXPLPC_ADD_CUSTOM_DATA=ON -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake
-    cmake --build build/kotlin
+    cmake --build build/kotlin-android
 
 ## How to build the AAR package for Android
 
 Execute on terminal:
 
-    python3 xplpc.py kotlin-build-aar
+    python3 xplpc.py kotlin-build-aar --platform android
 
 or
 
@@ -24,7 +24,7 @@ or
 
 To enable C interface you can use:
 
-    python3 xplpc.py kotlin-build-aar --interface
+    python3 xplpc.py kotlin-build-aar --interface --platform android
 
 ## How to format the Kotlin code
 
