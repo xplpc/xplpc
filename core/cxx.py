@@ -26,7 +26,7 @@ def run_task_build_static():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
@@ -40,7 +40,7 @@ def run_task_build_static():
     target_data = get_target_data_for_platform()
 
     # build
-    l.i(f"Building...")
+    l.i("Building...")
 
     do_build(
         target=target,
@@ -73,7 +73,7 @@ def run_task_build_shared():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
@@ -87,7 +87,7 @@ def run_task_build_shared():
     target_data = get_target_data_for_platform()
 
     # build
-    l.i(f"Building...")
+    l.i("Building...")
 
     do_build(
         target=target,
@@ -120,7 +120,7 @@ def run_task_build_sample():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
@@ -131,7 +131,7 @@ def run_task_build_sample():
     target_data = get_target_data_for_platform()
 
     # build
-    l.i(f"Building...")
+    l.i("Building...")
 
     do_build(
         target=target,
@@ -180,7 +180,7 @@ def run_task_build_leaks():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     dry_run = util.get_param_dry()
     l.i(f"Dry run: {dry_run}")
@@ -188,7 +188,7 @@ def run_task_build_leaks():
     target_data = get_target_data_for_platform()
 
     # build
-    l.i(f"Building...")
+    l.i("Building...")
 
     do_build(
         target=target,
@@ -203,7 +203,7 @@ def run_task_build_leaks():
     )
 
     # check leaks
-    l.i(f"Checking for leaks...")
+    l.i("Checking for leaks...")
 
     arch = target_data[0]["arch"]
 
@@ -243,7 +243,7 @@ def run_task_test():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
@@ -254,7 +254,7 @@ def run_task_test():
     target_data = get_target_data_for_platform()
 
     # build
-    l.i(f"Building...")
+    l.i("Building...")
 
     do_build(
         target=target,
@@ -269,7 +269,7 @@ def run_task_test():
     )
 
     # test
-    l.i(f"Testing...")
+    l.i("Testing...")
 
     build_dir = os.path.join(c.proj_path, "build", "cxx-test")
     arch = target_data[0]["arch"]

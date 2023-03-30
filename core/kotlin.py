@@ -27,7 +27,7 @@ def run_task_build():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
@@ -120,7 +120,6 @@ def run_task_build():
         r.run(run_args)
 
         # build
-        l.i(f"Building...")
         r.run(["cmake", "--build", arch_dir])
 
     l.ok()
@@ -147,7 +146,7 @@ def run_task_build_aar():
 
     # configure
     target = "kotlin"
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     interface = util.get_param_interface(target)
     l.i(f"Interface: {interface}")
