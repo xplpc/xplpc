@@ -9,9 +9,6 @@ Execute on terminal:
 or
 
     cmake -S . -B build/kotlin -DXPLPC_TARGET=kotlin -DXPLPC_ADD_CUSTOM_DATA=ON -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake
-
-<!---->
-
     cmake --build build/kotlin
 
 ## How to build the AAR package for Android
