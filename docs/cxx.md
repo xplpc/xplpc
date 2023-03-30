@@ -32,13 +32,7 @@ Execute on terminal:
 or
 
     cmake -S . -B build/cxx-sample -DXPLPC_TARGET=cxx-static -DXPLPC_ENABLE_SAMPLES=ON
-
-<!---->
-
     cmake --build build/cxx-sample
-
-<!---->
-
     ./build/cxx-sample/bin/xplpc
 
 ## How to build the C++ sample to check leaks
@@ -50,13 +44,7 @@ Execute on terminal:
 or
 
     cmake -S . -B build/cxx-leaks -DXPLPC_TARGET=cxx-static -DXPLPC_ENABLE_SAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
-
-<!---->
-
     MallocStackLogging=1 cmake --build build/cxx-leaks
-
-<!---->
-
     leaks --atExit --list -- ./build/cxx-leaks/bin/xplpc
 
 ## How to format the C++ code

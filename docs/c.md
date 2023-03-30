@@ -24,13 +24,7 @@ Execute on terminal:
 or
 
     cmake -S . -B build/c-sample -DXPLPC_TARGET=c-static -DXPLPC_ENABLE_SAMPLES=ON
-
-<!---->
-
     cmake --build build/c-sample
-
-<!---->
-
     ./build/c-sample/bin/xplpc
 
 ## How to build the C sample to check leaks
@@ -42,13 +36,7 @@ Execute on terminal:
 or
 
     cmake -S . -B build/c-leaks -DXPLPC_TARGET=c-static -DXPLPC_ENABLE_SAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
-
-<!---->
-
     MallocStackLogging=1 cmake --build build/c-leaks
-
-<!---->
-
     leaks --atExit --list -- ./build/c-leaks/bin/xplpc
 
 ## How to format the C code
