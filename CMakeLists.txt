@@ -9,8 +9,19 @@ if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()
 
+# policies
+cmake_policy(SET CMP0054 NEW) # only interpret if() arguments as variables or keywords when unquoted
+cmake_policy(SET CMP0076 NEW) # target_sources() command converts relative paths to absolute
+set(CMAKE_POLICY_DEFAULT_CMP0091 NEW) # msvc runtime library flags are selected by an abstraction
+set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # set the timestamps of all extracted contents to the time of the extraction
+
 # settings
 set(XPLPC_DEPENDENCY_TOOL_VALUES "cpm" "conan")
+
+if (NOT XCODE AND NOT MSVC AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
 
 # options
 set(XPLPC_ADD_CUSTOM_DATA OFF CACHE BOOL "Build Custom Data")
@@ -57,16 +68,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 
 # download dependency tool
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm-downloader.cmake)
-elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
-    include(${CMAKE_SOURCE_DIR}/cmake/conan-downloader.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-downloader.cmake)
 endif()
 
 # setup all dependencies
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm-dependency.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-dependency.cmake)
 elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
-    include(${CMAKE_SOURCE_DIR}/cmake/conan-dependency.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/conan/conan-dependency.cmake)
 endif()
 
 # setup log
@@ -177,7 +186,7 @@ else()
             PUBLIC_HEADER "${XPLPC_PUBLIC_HEADER_FILES}"
         )
     elseif(XPLPC_TARGET STREQUAL "wasm")
-        set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1")
+        set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -s \"EXPORTED_FUNCTIONS=['_malloc', '_free']\"")
         set(XPLPC_WASM_COMPILER_FLAGS "-fwasm-exceptions")
 
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XPLPC_WASM_LINKER_FLAGS}")
@@ -224,6 +233,13 @@ endif()
 # dependencies
 target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
 
+# android dependencies
+if(XPLPC_TARGET STREQUAL "kotlin")
+    find_library(ANDROID_LIB android)
+    find_library(ANDROID_LOG_LIB log)
+    target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
+endif()
+
 # serializers
 if (XPLPC_ENABLE_SERIALIZER_FOR_JSON)
     target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
@@ -261,6 +277,8 @@ if(XPLPC_ENABLE_TESTS)
             XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH YES
             XCODE_ATTRIBUTE_SKIP_INSTALL NO
             XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++"
+            XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "-"
+            XCODE_ATTRIBUTE_DEVELOPMENT_TEAM ""
         )
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})

@@ -90,6 +90,10 @@ You can build this target using some parameters to change configuration:
 
     --build debug
 
+**Dry run:**
+
+    --dry
+
 ## Online demo
 
 You can see the online demo on URL:

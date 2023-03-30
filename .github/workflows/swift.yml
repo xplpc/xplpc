@@ -24,12 +24,14 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
       - name: Python Requirements
-        run: python3 -m pip install -r requirements.txt --user
+        run: |
+          python3 -m pip install -r requirements.txt --user
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v1.8
@@ -46,6 +48,9 @@ jobs:
           python3 --version
           cmake --version
           ninja --version
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
 
       - name: Test
         run: python3 xplpc.py swift-test

@@ -7,21 +7,18 @@ android {
     namespace 'com.xplpc.library'
     compileSdk 33
     buildToolsVersion '30.0.3'
-    ndkVersion '25.1.8937393'
 
     defaultConfig {
         minSdk 16
         targetSdk 33
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        externalNativeBuild {
-            cmake {
-                cppFlags '-std=c++17'
-                arguments '-DXPLPC_TARGET=kotlin',
-                '-DXPLPC_ADD_CUSTOM_DATA=ON',
-                '-DXPLPC_DEPENDENCY_TOOL=' + project.property('xplpc_dependency_tool'),
-                project.hasProperty('xplpc_interface') ? '-DXPLPC_ENABLE_INTERFACE=YES' : "-DXPLPC_ENABLE_INTERFACE=NO"
-            }
+    }
+
+    sourceSets {
+        main {
+            def jniLibsDir = file(project.projectDir.absolutePath + "/../../../build/kotlin-jni-libs")
+            jniLibs.srcDirs += [jniLibsDir]
         }
     }
 
@@ -48,13 +45,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-
-    externalNativeBuild {
-        cmake {
-            path file(project.projectDir.absolutePath + '/../../../CMakeLists.txt')
-            version '3.24.0+'
-        }
-    }
 }
 
 dependencies {
@@ -66,3 +56,29 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
+
+task copyJniLibs {
+    def jniLibsTargetDir = file(project.projectDir.absolutePath + "/../../../build/kotlin-jni-libs")
+    jniLibsTargetDir.deleteDir()
+
+    def abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+
+    abis.each { abi ->
+        copy {
+            def jniLibsSourceDir = file(project.projectDir.absolutePath + "/../../../build/kotlin/$abi")
+
+            if (!jniLibsSourceDir.exists()) {
+                throw new GradleException("XPLPC: You need build libraries for ABI $abi inside path $jniLibsSourceDir")
+            }
+
+            from file("$jniLibsSourceDir/lib")
+            into file("$jniLibsTargetDir/$abi")
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn(copyJniLibs)
+}
+
+clean.dependsOn 'cleanCopyJniLibs'

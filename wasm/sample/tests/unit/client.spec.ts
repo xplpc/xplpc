@@ -10,7 +10,7 @@ import { IXWasmModule } from "@/xplpc/module/xplpc-module";
 import { JsonSerializer } from "@/xplpc/serializer/json-serializer";
 import { XDataView } from "@/xplpc/type/data-view";
 
-import Module from "@xplpc/build/wasm/bin/xplpc";
+import Module from "@xplpc/build/wasm/wasm32/bin/xplpc";
 
 function batteryLevel(message: XMessage): Promise<string> {
     return new Promise<string>((resolve) => {

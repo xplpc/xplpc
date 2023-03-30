@@ -1,145 +1,29 @@
+from core.targets import kotlin as target_kotlin
+from core.targets import platform_linux as target_platform_linux
+from core.targets import platform_macos as target_platform_macos
+from core.targets import platform_windows as target_platform_windows
+from core.targets import swift_ios as target_swift_ios
+from core.targets import swift_ios_flutter as target_swift_ios_flutter
+from core.targets import swift_macos as target_swift_macos
+from core.targets import swift_macos_flutter as target_swift_macos_flutter
+from core.targets import swift_test as target_swift_test
+from core.targets import wasm as target_wasm
+
 # general
 debug = False
 task = ""
 proj_path = ""
 options = {}
 
+# build type
 build_type = "Release"
 build_type_kotlin = "RelWithDebInfo"
 
 # dependency (cpm, conan)
-dependency_tool = "cpm"
+dependency_tool = "conan"
 
-# swift
-swift_framework_list_for_ios = [
-    {
-        "arch": "ios-arm64",
-        "platform": "OS64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "ios",
-    },
-    {
-        "arch": "ios-sim-arm64",
-        "platform": "SIMULATORARM64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "ios-sim",
-    },
-    {
-        "arch": "ios-sim-x64",
-        "platform": "SIMULATOR64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "ios-sim",
-    },
-    {
-        "arch": "tvos-arm64",
-        "platform": "TVOS",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "tvos",
-    },
-    {
-        "arch": "tvos-sim-x64",
-        "platform": "SIMULATOR_TVOS",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "tvos-sim",
-    },
-    {
-        "arch": "watchos-arm64",
-        "platform": "WATCHOS",
-        "deployment_target": "4.0",
-        "sdk_version": "11.0",
-        "group": "watchos",
-    },
-    {
-        "arch": "watchos-sim-x64",
-        "platform": "SIMULATOR_WATCHOS",
-        "deployment_target": "4.0",
-        "sdk_version": "11.0",
-        "group": "watchos-sim",
-    },
-    {
-        "arch": "catalyst-x64",
-        "platform": "MAC_CATALYST",
-        "deployment_target": "13.1",
-        "sdk_version": "11.0",
-        "group": "catalyst",
-    },
-    {
-        "arch": "catalyst-arm64",
-        "platform": "MAC_CATALYST_ARM64",
-        "deployment_target": "13.1",
-        "sdk_version": "11.0",
-        "group": "catalyst",
-    },
-]
-
-swift_framework_list_for_ios_flutter = [
-    {
-        "arch": "ios-arm64",
-        "platform": "OS64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "ios",
-    },
-    {
-        "arch": "ios-sim-arm64",
-        "platform": "SIMULATORARM64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "ios-sim",
-    },
-    {
-        "arch": "ios-sim-x64",
-        "platform": "SIMULATOR64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "ios-sim",
-    },
-]
-
-swift_framework_list_for_macos = [
-    {
-        "arch": "macos-x64",
-        "platform": "MAC",
-        "deployment_target": "10.13",
-        "sdk_version": "11.0",
-        "group": "macos",
-    },
-    {
-        "arch": "macos-arm64",
-        "platform": "MAC_ARM64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "macos",
-    },
-]
-
-swift_framework_list_for_macos_flutter = [
-    {
-        "arch": "macos-x64",
-        "platform": "MAC",
-        "deployment_target": "10.13",
-        "sdk_version": "11.0",
-        "group": "macos",
-    },
-    {
-        "arch": "macos-arm64",
-        "platform": "MAC_ARM64",
-        "deployment_target": "11.0",
-        "sdk_version": "11.0",
-        "group": "macos",
-    },
-]
-
-swift_test_list = [
-    {
-        "arch": "macos-arm64",
-    },
-]
+# serializer
+serializer = "json"
 
 # http
 http_server_host = "127.0.0.1"
@@ -147,3 +31,23 @@ http_server_port = "8000"
 
 # wasm
 wasm_base_url = "/wasm-demo"
+
+# targets
+targets = {}
+targets["swift-ios"] = target_swift_ios.data
+targets["swift-macos"] = target_swift_macos.data
+targets["swift-ios-flutter"] = target_swift_ios_flutter.data
+targets["swift-macos-flutter"] = target_swift_macos_flutter.data
+targets["swift-test"] = target_swift_test.data
+targets["kotlin"] = target_kotlin.data
+targets["wasm"] = target_wasm.data
+targets["platform-macos"] = target_platform_macos.data
+targets["platform-windows"] = target_platform_windows.data
+targets["platform-linux"] = target_platform_linux.data
+
+# conan
+conan_use_darwin_toolchain = False
+
+conan_build_profile_macos = "default"
+conan_build_profile_linux = "default"
+conan_build_profile_windows = "default"

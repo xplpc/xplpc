@@ -12,18 +12,20 @@ Thumbs.db
 *.autosave
 *.user
 *.user.*
-CMakeSettings.json
 .vs
 __pycache__
 Brewfile.lock.json
 .metals
+.ruff_cache
 
 # node
 node_modules
 package-lock.json
 
-# conan
-/CMakeUserPresets.json
+# cmake
+CMakeUserPresets.json
+CMakeSettings.json
+CMakeLists.txt.user
 
 # java/kotlin
 .gradle

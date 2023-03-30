@@ -224,6 +224,16 @@ def check_tool_flutter():
 
 
 # -----------------------------------------------------------------------------
+def check_tool_conan():
+    try:
+        subprocess.check_output(["conan", "--version"])
+        return True
+    except OSError:
+        l.e("Conan is not installed, check: https://github.com/conan-io/conan")
+        return False
+
+
+# -----------------------------------------------------------------------------
 def check_and_get_env(name):
     env = os.environ.get(name)
 

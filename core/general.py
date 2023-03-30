@@ -39,6 +39,7 @@ def run_task_clear():
 
     f.remove_dir(os.path.join(c.proj_path, "build"))
     f.remove_file(os.path.join(c.proj_path, "CMakeUserPresets.json"))
+    f.remove_file(os.path.join(c.proj_path, "CMakeLists.txt.user"))
 
     f.remove_dir(os.path.join(c.proj_path, "kotlin", "lib", "build"))
     f.remove_dir(os.path.join(c.proj_path, "kotlin", "lib", "library", "build"))
@@ -65,6 +66,19 @@ def run_task_clear():
     )
     f.remove_dir(
         os.path.join(c.proj_path, "flutter", "plugin", "example", "macos", "Pods")
+    )
+
+    f.remove_dir(
+        os.path.join(c.proj_path, "conan", "darwin-toolchain", "test_package", "build")
+    )
+    f.remove_file(
+        os.path.join(
+            c.proj_path,
+            "conan",
+            "darwin-toolchain",
+            "test_package",
+            "CMakeUserPresets.json",
+        )
     )
 
     l.ok()

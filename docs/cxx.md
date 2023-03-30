@@ -76,3 +76,7 @@ You can build this target using some parameters to change configuration:
 **Enable C interface:**
 
     --interface
+
+**Dry run:**
+
+    --dry

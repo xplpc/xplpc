@@ -4,6 +4,7 @@ from pygemstones.io import file as f
 from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
+from core import conan
 from core import config as c
 from core import tool, util
 
@@ -13,6 +14,9 @@ def run_task_build():
     # check
     tool.check_tool_cmake()
 
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
     # environment
     target = "swift"
 
@@ -21,7 +25,7 @@ def run_task_build():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
@@ -34,7 +38,7 @@ def run_task_build():
 
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
-    framework_list = get_framework_list(platform)
+    target_data = get_target_data_for_platform(platform)
 
     # build
     l.i("Building...")
@@ -43,8 +47,9 @@ def run_task_build():
         target=target,
         build_type=build_type,
         platform=platform,
-        framework_list=framework_list,
+        target_data=target_data,
         has_interface=interface,
+        has_tests=False,
     )
 
     l.ok()
@@ -57,14 +62,14 @@ def run_task_build_xcframework():
 
     # configure
     target = "swift"
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     dry_run = util.get_param_dry()
     l.i(f"Dry run: {dry_run}")
 
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
-    framework_list = get_framework_list(platform)
+    target_data = get_target_data_for_platform(platform)
 
     # build
     l.i("Building...")
@@ -72,7 +77,7 @@ def run_task_build_xcframework():
     do_build_xcframework(
         target=target,
         platform=platform,
-        framework_list=framework_list,
+        target_data=target_data,
     )
 
     l.ok()
@@ -91,44 +96,40 @@ def run_task_test():
         os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
 
     # configure
-    l.i(f"Configuring...")
+    l.i("Configuring...")
 
     build_type = util.get_param_build_type(target, "cmake")
     l.i(f"Build type: {build_type}")
 
+    target_data = get_target_data_for_platform("test")
+
+    # build
+    l.i("Building...")
+
+    do_build(
+        target=target,
+        build_type=build_type,
+        platform="test",
+        target_data=target_data,
+        has_interface=False,
+        has_tests=True,
+    )
+
     # test
     l.i("Testing...")
-    build_dir = os.path.join(c.proj_path, "build", f"{target}-test")
-    f.recreate_dir(build_dir)
 
-    for item in c.swift_test_list:
-        l.i(f"Testing for arch {item['arch']}...")
+    build_dir = os.path.join(c.proj_path, "build", "swift-test")
+    group = target_data[0]["group"]
+    arch = target_data[0]["arch"]
 
-        arch_dir = os.path.join(build_dir, item["arch"])
+    r.run(
+        ["ctest", "-C", build_type, "--output-on-failure"],
+        cwd=os.path.join(build_dir, group, arch),
+    )
 
-        r.run(
-            [
-                "cmake",
-                "-S",
-                ".",
-                "-B",
-                arch_dir,
-                "-GXcode",
-                f"-DCMAKE_BUILD_TYPE={build_type}",
-                f"-DXPLPC_TARGET={target}",
-                "-DXPLPC_ADD_CUSTOM_DATA=ON",
-                "-DXPLPC_ENABLE_TESTS=ON",
-                f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
-            ]
-        )
-
-        r.run(["cmake", "--build", arch_dir, "--config", build_type])
-
-        r.run(["ctest", "-C", build_type, "--output-on-failure"], cwd=arch_dir)
-
-        util.show_file_contents(
-            os.path.join(arch_dir, "Testing", "Temporary", "LastTest.log")
-        )
+    util.show_file_contents(
+        os.path.join(build_dir, group, arch, "Testing", "Temporary", "LastTest.log")
+    )
 
     l.ok()
 
@@ -175,21 +176,61 @@ def run_task_format():
 
 
 # -----------------------------------------------------------------------------
-def do_build(target, build_type, platform, framework_list, has_interface):
+def do_build(target, build_type, platform, target_data, has_interface, has_tests):
     build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
+    conan_build_dir = os.path.join(
+        c.proj_path, "build", "conan", f"{target}-{platform}"
+    )
 
+    # dry run
     dry_run = util.get_param_dry()
     if not dry_run:
         f.recreate_dir(build_dir)
 
-    for item in framework_list:
-        l.i(f"Building for arch {item['arch']}...")
+    # dependencies
+    no_deps = util.get_param_no_deps()
 
-        arch_dir = os.path.join(build_dir, item["arch"])
-        toolchain_file = os.path.join(c.proj_path, "cmake", "ios.toolchain.cmake")
+    if not dry_run and not no_deps and c.dependency_tool == "conan":
+        for item in target_data:
+            l.i(f"Building dependencies for arch {item['arch']}/{item['group']}...")
+
+            arch_dir = os.path.join(conan_build_dir, item["group"], item["arch"])
+            f.recreate_dir(arch_dir)
+
+            # conan
+            build_profile = conan.get_build_profile()
+
+            if build_profile != "default":
+                build_profile = os.path.join(
+                    c.proj_path, "conan", "profiles", build_profile
+                )
+
+            run_args = [
+                "conan",
+                "install",
+                c.proj_path,
+                "-pr:b",
+                build_profile,
+                "-pr:h",
+                os.path.join(c.proj_path, "conan", "profiles", item["conan_profile"]),
+            ]
+
+            conan.add_target_setup_common_args(run_args, item, build_type)
+
+            run_args.append("--build=missing")
+            run_args.append("--update")
+
+            r.run(run_args, cwd=arch_dir)
+
+    # build
+    for item in target_data:
+        l.i(f"Building for arch {item['arch']}/{item['group']}...")
+
+        arch_dir = os.path.join(build_dir, item["group"], item["arch"])
+        conan_arch_dir = os.path.join(conan_build_dir, item["group"], item["arch"])
 
         # configure
-        configure_args = [
+        run_args = [
             "cmake",
             "-S",
             ".",
@@ -197,35 +238,77 @@ def do_build(target, build_type, platform, framework_list, has_interface):
             arch_dir,
             "-GXcode",
             f"-DCMAKE_BUILD_TYPE={build_type}",
-            f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}",
             f"-DXPLPC_TARGET={target}",
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
+            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
             f"-DPLATFORM={item['platform']}",
             f"-DDEPLOYMENT_TARGET={item['deployment_target']}",
             f"-DCMAKE_OSX_DEPLOYMENT_TARGET={item['deployment_target']}",
             f"-DSDK_VERSION={item['sdk_version']}",
-            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+            f"-DARCHS={item['arch']}",
         ]
 
+        # interface
         if has_interface:
-            configure_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+        else:
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
 
-        r.run(configure_args)
+        # tests
+        if has_tests:
+            run_args.append("-DXPLPC_ENABLE_TESTS=ON")
+        else:
+            run_args.append("-DXPLPC_ENABLE_TESTS=OFF")
+
+        # arc
+        if "enable_arc" in item:
+            run_args.append(
+                "-DENABLE_ARC={0}".format("ON" if item["enable_arc"] else "OFF")
+            )
+
+        # bitcode
+        if "enable_bitcode" in item:
+            run_args.append(
+                "-DENABLE_BITCODE={0}".format("ON" if item["enable_bitcode"] else "OFF")
+            )
+
+        # visibility
+        if "enable_visibility" in item:
+            run_args.append(
+                "-DENABLE_VISIBILITY={0}".format(
+                    "ON" if item["enable_visibility"] else "OFF"
+                )
+            )
+
+        # toolchain
+        if c.dependency_tool == "cpm":
+            toolchain_file = os.path.join(
+                c.proj_path, "cmake", "ios", "ios.toolchain.cmake"
+            )
+            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+        elif c.dependency_tool == "conan":
+            toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+
+        r.run(run_args)
 
         # build
         r.run(["cmake", "--build", arch_dir, "--config", build_type])
 
 
 # -----------------------------------------------------------------------------
-def do_build_xcframework(target, platform, framework_list):
+def do_build_xcframework(target, platform, target_data):
     build_dir_prefix = f"{target}-{platform}"
 
     groups = []
 
-    for item in framework_list:
+    for item in target_data:
         if "group" in item:
             if item["group"] not in groups:
                 groups.append(item["group"])
+
+    if not groups:
+        l.e("No group was defined in target data")
 
     # generate framework for each group
     groups_command = []
@@ -242,11 +325,11 @@ def do_build_xcframework(target, platform, framework_list):
         base_framework_arch = None
         arch_dir = None
 
-        for item in framework_list:
+        for item in target_data:
             if item["group"] == group:
                 base_framework_arch = item["arch"]
                 arch_dir = os.path.join(
-                    c.proj_path, "build", build_dir_prefix, item["arch"]
+                    c.proj_path, "build", build_dir_prefix, item["group"], item["arch"]
                 )
 
         if not base_framework_arch:
@@ -267,10 +350,14 @@ def do_build_xcframework(target, platform, framework_list):
         )
 
         if f.dir_exists(group_framework_module_dir):
-            for item in framework_list:
+            for item in target_data:
                 if item["group"] == group:
                     arch_dir = os.path.join(
-                        c.proj_path, "build", build_dir_prefix, item["arch"]
+                        c.proj_path,
+                        "build",
+                        build_dir_prefix,
+                        item["group"],
+                        item["arch"],
                     )
 
                     framework_module_dir = os.path.join(
@@ -290,10 +377,10 @@ def do_build_xcframework(target, platform, framework_list):
         # generate single framework for group
         lipo_archs_args = []
 
-        for item in framework_list:
+        for item in target_data:
             if item["group"] == group:
                 arch_dir = os.path.join(
-                    c.proj_path, "build", build_dir_prefix, item["arch"]
+                    c.proj_path, "build", build_dir_prefix, item["group"], item["arch"]
                 )
 
                 lipo_archs_args.append(
@@ -306,23 +393,12 @@ def do_build_xcframework(target, platform, framework_list):
             "-output",
         ]
 
-        if f.dir_exists(
-            os.path.join(
-                group_framework_dir,
-                "Versions",
-            )
-        ):
+        if f.dir_exists(os.path.join(group_framework_dir, "Versions")):
             lipo_args.extend(
-                [
-                    os.path.join(group_framework_dir, "Versions", "A", "xplpc"),
-                ]
+                [os.path.join(group_framework_dir, "Versions", "A", "xplpc")]
             )
         else:
-            lipo_args.extend(
-                [
-                    os.path.join(group_framework_dir, "xplpc"),
-                ]
-            )
+            lipo_args.extend([os.path.join(group_framework_dir, "xplpc")])
 
         lipo_args.extend(lipo_archs_args)
         r.run(lipo_args, cwd=c.proj_path)
@@ -337,10 +413,14 @@ def do_build_xcframework(target, platform, framework_list):
         if has_swift_module_header_file:
             swift_module_header_content = ""
 
-            for item in framework_list:
+            for item in target_data:
                 if item["group"] == group:
                     arch_dir = os.path.join(
-                        c.proj_path, "build", build_dir_prefix, item["arch"]
+                        c.proj_path,
+                        "build",
+                        build_dir_prefix,
+                        item["group"],
+                        item["arch"],
                     )
                     framework_dir = os.path.join(arch_dir, "lib", "xplpc.framework")
                     header_file = os.path.join(
@@ -389,17 +469,19 @@ def do_build_xcframework(target, platform, framework_list):
 
 
 # -----------------------------------------------------------------------------
-def get_framework_list(platform):
+def get_target_data_for_platform(platform):
     if platform == "ios":
-        return c.swift_framework_list_for_ios
+        return c.targets["swift-ios"]
     elif platform == "macos":
-        return c.swift_framework_list_for_macos
+        return c.targets["swift-macos"]
     elif platform == "ios-flutter":
-        return c.swift_framework_list_for_ios_flutter
+        return c.targets["swift-ios-flutter"]
     elif platform == "macos-flutter":
-        return c.swift_framework_list_for_macos_flutter
+        return c.targets["swift-macos-flutter"]
+    elif platform == "test":
+        return c.targets["swift-test"]
 
     if platform:
         l.e(f"Invalid platform: {platform}")
     else:
-        l.e(f"Define a valid platform")
+        l.e("Define a valid platform")

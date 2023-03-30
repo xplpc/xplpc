@@ -17,6 +17,7 @@ Options:
   --build=<build-type>              Build type.
   --interface                       Enable C interface.
   --platform=<platform>             Define custom platform.
+  --no-deps                         Run without build dependencies.
 
 Examples:
   python3 xplpc.py -h
@@ -30,6 +31,7 @@ Tasks:
 
   - docs-format
   - python-format
+  - conan-setup
 
   - cxx-format
   - cxx-build-static
@@ -75,6 +77,7 @@ from pygemstones.system import bootstrap as b
 from pygemstones.util import log as l
 
 import core.c as c
+import core.conan as conan
 import core.config as cfg
 import core.cxx as cxx
 import core.docs as docs
@@ -135,6 +138,14 @@ def main(options):
     # format
     elif task == "docs-format":
         docs.run_task_format()
+
+    #######################
+    # CONAN
+    #######################
+
+    # setup
+    elif task == "conan-setup":
+        conan.run_task_setup()
 
     #######################
     # PYTHON

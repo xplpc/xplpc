@@ -84,12 +84,14 @@ jobs:
         uses: codacy/codacy-analysis-cli-action@master
 
       - name: Install Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
       - name: Python Requirements
-        run: python3 -m pip install -r requirements.txt --user
+        run: |
+          python3 -m pip install -r requirements.txt --user
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v1.8
@@ -112,6 +114,9 @@ jobs:
         uses: github/codeql-action/init@v2
         with:
           languages: cpp
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
 
       - name: Test
         run: python3 xplpc.py c-test
