@@ -94,6 +94,10 @@ You can build this target using some parameters to change configuration:
 
     --dry
 
+**No dependencies:**
+
+    --no-deps
+
 ## Online demo
 
 You can see the online demo on URL:

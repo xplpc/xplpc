@@ -57,6 +57,10 @@ Platforms available: `ios`, `macos`, `ios-flutter`, `macos-flutter`
 
     --dry
 
+**No dependencies:**
+
+    --no-deps
+
 ## Sample project
 
 You can see the sample project in directory `swift/sample`.

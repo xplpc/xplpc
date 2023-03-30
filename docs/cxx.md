@@ -68,3 +68,7 @@ You can build this target using some parameters to change configuration:
 **Dry run:**
 
     --dry
+
+**No dependencies:**
+
+    --no-deps

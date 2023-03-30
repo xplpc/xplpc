@@ -48,6 +48,10 @@ You can build this target using some parameters to change configuration:
 
     --dry
 
+**No dependencies:**
+
+    --no-deps
+
 ## Sample project
 
 You can see the sample project in directory `kotlin/sample`.
