@@ -464,4 +464,4 @@ def get_target_data_for_platform():
     elif p.is_linux():
         return c.targets["platform-linux"]
     else:
-        l.e(f"Unknown platform")
+        l.e("Unknown platform")

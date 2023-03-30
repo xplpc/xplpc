@@ -151,7 +151,7 @@ def get_param_platform(target):
     param_platform = cfg.options["--platform"]
 
     if not param_platform:
-        l.e(f"Define a valid platform")
+        l.e("Define a valid platform")
 
     return param_platform.lower()
 
