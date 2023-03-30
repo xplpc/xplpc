@@ -32,6 +32,16 @@ size_t PlatformProxyList::count() const noexcept
     return list.size();
 }
 
+std::shared_ptr<PlatformProxyList> PlatformProxyList::shared()
+{
+    if (instance == nullptr)
+    {
+        instance = std::make_shared<PlatformProxyList>();
+    }
+
+    return instance;
+}
+
 #if defined(__EMSCRIPTEN__)
 void PlatformProxyList::appendFromJavascript(PlatformProxy *item)
 {
@@ -43,16 +53,6 @@ void PlatformProxyList::insertFromJavascript(size_t index, PlatformProxy *item)
     shared()->insertFromPtr(index, item);
 }
 #endif
-
-std::shared_ptr<PlatformProxyList> PlatformProxyList::shared()
-{
-    if (instance == nullptr)
-    {
-        instance = std::make_shared<PlatformProxyList>();
-    }
-
-    return instance;
-}
 
 } // namespace data
 } // namespace xplpc
