@@ -60,7 +60,7 @@ jobs:
         uses: ./.github/actions/get-avd-info
         id: avd-info
         with:
-            api-level: 31
+            api-level: 33
 
       - name: Conan
         run: python3 xplpc.py conan-setup
@@ -71,7 +71,7 @@ jobs:
       - name: Test
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 31
+          api-level: 33
           arch: ${{ steps.avd-info.outputs.arch }}
           target: ${{ steps.avd-info.outputs.target }}
           disable-animations: true
