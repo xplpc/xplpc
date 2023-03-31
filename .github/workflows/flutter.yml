@@ -18,7 +18,7 @@ jobs:
         - {
             name: "macOS Latest Clang",
             os: macos-12,
-            library-task: "swift-build --platform macos-flutter --interface",
+            library-task: "swift-build --interface --platform macos-flutter",
             xcframework-task: "swift-build-xcframework --platform macos-flutter"
           }
 

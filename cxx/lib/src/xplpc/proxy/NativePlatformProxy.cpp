@@ -4,6 +4,8 @@
 #include "xplpc/map/MappingItem.hpp"
 #include "xplpc/serializer/Serializer.hpp"
 
+#include "spdlog/spdlog.h"
+
 namespace xplpc
 {
 namespace proxy

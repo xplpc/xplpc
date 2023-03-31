@@ -8,6 +8,8 @@
 #include "xplpc/custom/Todo.hpp"
 #include "xplpc/xplpc.hpp"
 
+#include "spdlog/spdlog.h"
+
 #ifdef XPLPC_SERIALIZER_JSON
 #include "xplpc/custom/json/AllTypesJson.hpp"
 #include "xplpc/custom/json/TodoJson.hpp"

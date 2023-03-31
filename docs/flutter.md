@@ -22,24 +22,25 @@ We currently support these Flutter platforms:
 
 *Obs: WebAssembly is currently not tested.*
 
-## How to build the native library for iOS
-
-Execute on terminal:
-
-    python3 xplpc.py swift-build --platform ios-flutter --interface
-    python3 xplpc.py swift-build-xcframework --platform ios-flutter
-
 ## How to build the native library for Android
 
 Execute on terminal:
 
-    python3 xplpc.py kotlin-build-aar --interface
+    python3 xplpc.py kotlin-build --interface --platform flutter
+    python3 xplpc.py kotlin-build-aar --platform flutter
+
+## How to build the native library for iOS
+
+Execute on terminal:
+
+    python3 xplpc.py swift-build --interface --platform ios-flutter
+    python3 xplpc.py swift-build-xcframework --platform ios-flutter
 
 ## How to build the native library for macOS
 
 Execute on terminal:
 
-    python3 xplpc.py swift-build --platform macos-flutter --interface
+    python3 xplpc.py swift-build --interface --platform macos-flutter
     python3 xplpc.py swift-build-xcframework --platform macos-flutter
 
 ## How to build the native library for Linux
@@ -88,7 +89,14 @@ void main() {
 
 ## Sample project
 
-Before using the sample, don't forget to build the native library for your platform first.
+Before using the sample you need:
+
+1.  Build the `native library` for your platform first.
+2.  Run the `build_runner` inside example folder:
+
+        cd flutter/plugin/example
+        flutter pub get
+        flutter pub run build_runner build --delete-conflicting-outputs
 
 You can see the sample project in directory `flutter/plugin/example`.
 

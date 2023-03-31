@@ -38,10 +38,15 @@ def run_task_build():
     interface = util.get_param_interface(target)
     l.i(f"Interface: {interface}")
 
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
     target_data = get_target_data_for_platform("kotlin")
 
-    build_dir = os.path.join(c.proj_path, "build", target)
-    conan_build_dir = os.path.join(c.proj_path, "build", "conan", target)
+    build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
+    conan_build_dir = os.path.join(
+        c.proj_path, "build", "conan", f"{target}-{platform}"
+    )
 
     # dry run
     if not dry_run:
@@ -151,14 +156,20 @@ def run_task_build_aar():
     interface = util.get_param_interface(target)
     l.i(f"Interface: {interface}")
 
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
     # build
     l.i("Building...")
 
     run_args = ["clean", ":library:build"]
+    run_args.extend(["-P", f"xplpc_platform={platform}"])
     util.run_gradle(run_args, lib_dir)
 
     # copy aar
-    aar_dir = os.path.join(c.proj_path, "build", "kotlin-aar")
+    aar_dir = os.path.join(c.proj_path, "build", f"kotlin-aar-{platform}")
+    f.recreate_dir(aar_dir)
+
     output_dir = os.path.join(lib_dir, "library", "build", "outputs", "aar")
 
     files = f.find_files(output_dir, "*.aar")

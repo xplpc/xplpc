@@ -127,20 +127,20 @@ public:
 
         // find the mapped function in proxy list
         auto functionName = Serializer::decodeFunctionName(requestData);
-        auto found = false;
 
-        for (auto const &proxy : PlatformProxyList::shared()->list)
+        auto proxyIt = std::find_if(PlatformProxyList::shared()->list.begin(),
+                                    PlatformProxyList::shared()->list.end(),
+                                    [&](const auto &proxy)
+                                    {
+                                        return proxy->hasMapping(functionName);
+                                    });
+
+        if (proxyIt != PlatformProxyList::shared()->list.end())
         {
-            if (proxy->hasMapping(functionName))
-            {
-                // call the platform proxy mapped function
-                proxy->callProxy(key, requestData);
-                found = true;
-                break;
-            }
+            // call the platform proxy mapped function
+            (*proxyIt)->callProxy(key, requestData);
         }
-
-        if (!found)
+        else
         {
             spdlog::error("[Client : call] Function not found: {0}", functionName);
             callback("");
