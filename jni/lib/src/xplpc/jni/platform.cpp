@@ -74,7 +74,7 @@ extern "C"
     {
         auto pointer = (jbyte *)env->GetPrimitiveArrayCritical(data, nullptr);
         auto address = reinterpret_cast<std::uintptr_t>(pointer);
-        env->ReleasePrimitiveArrayCritical(data, pointer, JNI_ABORT);
+        env->ReleasePrimitiveArrayCritical(data, pointer, 0);
         return static_cast<jlong>(address);
     }
 
