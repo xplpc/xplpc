@@ -131,6 +131,7 @@ Client.call<String>(request, (response) {
 *   [Swift](docs/swift.md)
 *   [WASM](docs/wasm.md)
 *   [Flutter](docs/flutter.md)
+*   [Dependency Manager](docs/dependency-manager.md)
 *   [Contribution](docs/contribution.md)
 *   [Purpose](docs/purpose.md)
 
