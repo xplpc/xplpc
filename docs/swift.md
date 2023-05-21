@@ -1,5 +1,16 @@
 # Swift
 
+## Requirements
+
+*   Xcode
+*   Command Line Tools
+
+Make sure that you have installed both `Xcode` and `Command Line Tools` on your system.
+
+To download `Xcode` from Apple, please visit the following link: https://apps.apple.com/us/app/xcode/id497799835.
+
+Once installed, open the terminal and execute the command `xcode-select --install` to install the `Command Line Tools`.
+
 ## How to build the library for Swift
 
 Execute on terminal:

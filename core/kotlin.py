@@ -15,7 +15,7 @@ def run_task_build():
     tool.check_tool_cmake()
 
     if c.dependency_tool == "cpm":
-        ndk_root = tool.check_and_get_env("NDK_ROOT")
+        ndk_root = tool.check_and_get_env("ANDROID_NDK_ROOT")
     elif c.dependency_tool == "conan":
         tool.check_tool_conan()
 
@@ -105,6 +105,16 @@ def run_task_build():
             f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
+
+        # abi
+        if c.dependency_tool == "cpm":
+            abi = item["arch"]
+            run_args.append(f"-DANDROID_ABI={abi}")
+
+        # api level
+        if c.dependency_tool == "cpm":
+            api_level = item["api_level"]
+            run_args.append(f"-DANDROID_PLATFORM={api_level}")
 
         # interface
         if interface:

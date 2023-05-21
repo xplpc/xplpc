@@ -10,8 +10,8 @@ has_watchos_arm32 = True
 has_watchos_arm64 = True
 has_watchos_simulator_x64 = True
 has_watchos_simulator_arm64 = True
-has_mac_catalyst_x64 = False
-has_mac_catalyst_arm64 = False
+has_mac_catalyst_x64 = True
+has_mac_catalyst_arm64 = True
 
 data = []
 
@@ -237,7 +237,7 @@ if has_watchos_simulator_arm64:
                 "supported_platform": "WatchSimulator",
                 "sdk": "watchsimulator",
                 "group": "watchos-simulator",
-                "platform": "",
+                "platform": "SIMULATOR_WATCHOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
                 "enable_bitcode": False,

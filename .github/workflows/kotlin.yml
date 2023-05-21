@@ -49,12 +49,20 @@ jobs:
           distribution: "adopt"
           java-version: "11"
 
+      - name: Install NDK (only when use cpm)
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r25c
+          add-to-path: true
+
       - name: Verify
         run: |
           python3 --version
           cmake --version
           ninja --version
           java -version
+          ndk-build -version
 
       - name: Get AVD info
         uses: ./.github/actions/get-avd-info
@@ -62,11 +70,16 @@ jobs:
         with:
             api-level: 31
 
-      - name: Conan
+      - name: Conan (only when use conan)
         run: python3 xplpc.py conan-setup
 
       - name: Build
         run: python3 xplpc.py kotlin-build --platform android
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build AAR
+        run: python3 xplpc.py kotlin-build-aar --platform android
 
       - name: Test
         uses: reactivecircus/android-emulator-runner@v2
@@ -79,6 +92,3 @@ jobs:
           ram-size: 4096M
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           script: python3 xplpc.py kotlin-test
-
-      - name: Build AAR
-        run: python3 xplpc.py kotlin-build-aar --platform android
