@@ -2,8 +2,8 @@
 
 There are two supported tools for managing dependencies.
 
-- CPM: You can find it at https://github.com/cpm-cmake/CPM.cmake.
-- Conan: You can find it at https://github.com/conan-io/conan.
+*   CPM: You can find it at https://github.com/cpm-cmake/CPM.cmake.
+*   Conan: You can find it at https://github.com/conan-io/conan.
 
 By default, the chosen dependency manager tool is `CPM`.
 

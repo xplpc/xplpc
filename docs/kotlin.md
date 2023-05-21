@@ -1,5 +1,13 @@
 # Kotlin
 
+## Requirements
+
+*   Android NDK (if you are using `CPM` as your package manager)
+
+If you are using `CPM` as your package manager, you will need to manually install the `Android NDK` and set the `NDK_ROOT` environment variable to the root folder of the NDK after installation.
+
+To download the NDK, please visit the following link: https://developer.android.com/ndk/downloads
+
 ## How to build the library for Kotlin
 
 Execute on terminal:
