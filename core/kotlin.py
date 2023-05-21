@@ -15,7 +15,7 @@ def run_task_build():
     tool.check_tool_cmake()
 
     if c.dependency_tool == "cpm":
-        ndk_root = tool.check_and_get_env("NDK_ROOT")
+        ndk_root = tool.check_and_get_env("ANDROID_NDK_ROOT")
     elif c.dependency_tool == "conan":
         tool.check_tool_conan()
 

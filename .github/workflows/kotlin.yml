@@ -75,6 +75,8 @@ jobs:
 
       - name: Build
         run: python3 xplpc.py kotlin-build --platform android
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
 
       - name: Test
         uses: reactivecircus/android-emulator-runner@v2

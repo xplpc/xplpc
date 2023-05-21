@@ -4,7 +4,7 @@
 
 *   Android NDK (if you are using `CPM` as your package manager)
 
-If you are using `CPM` as your package manager, you will need to manually install the `Android NDK` and set the `NDK_ROOT` environment variable to the root folder of the NDK after installation.
+If you are using `CPM` as your package manager, you will need to manually install the `Android NDK` and set the `ANDROID_NDK_ROOT` environment variable to the root folder of the NDK after installation.
 
 To download the NDK, please visit the following link: https://developer.android.com/ndk/downloads
 
@@ -16,7 +16,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/kotlin -DXPLPC_TARGET=kotlin -DXPLPC_ADD_CUSTOM_DATA=ON -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake
+    cmake -S . -B build/kotlin -DXPLPC_TARGET=kotlin -DXPLPC_ADD_CUSTOM_DATA=ON -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake
     cmake --build build/kotlin-android
 
 ## How to build the AAR package for Android
