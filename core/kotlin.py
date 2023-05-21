@@ -106,6 +106,16 @@ def run_task_build():
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
 
+        # abi
+        if c.dependency_tool == "cpm":
+            abi = item["arch"]
+            run_args.append(f"-DANDROID_ABI={abi}")
+
+        # api level
+        if c.dependency_tool == "cpm":
+            api_level = item["api_level"]
+            run_args.append(f"-DANDROID_PLATFORM={api_level}")
+
         # interface
         if interface:
             run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
