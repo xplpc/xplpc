@@ -23,7 +23,7 @@ Pod::Spec.new do |s|
   s.swift_version = '5.0'
 
   # Versions.
-  s.ios.deployment_target = '11.0'
+  s.ios.deployment_target = '12.0'
 
   # Name of the xcframework.
   s.ios.vendored_frameworks = 'xplpc.xcframework'
