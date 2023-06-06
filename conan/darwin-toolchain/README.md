@@ -24,7 +24,7 @@ include(default)
 
 [settings]
 os=iOS
-os.version=11.0
+os.version=12.0
 arch=armv8
 
 [tool_requires]
@@ -53,7 +53,7 @@ include(default)
 
 [settings]
 os=tvOS
-os.version=11.0
+os.version=12.0
 arch=armv8
 
 [tool_requires]
