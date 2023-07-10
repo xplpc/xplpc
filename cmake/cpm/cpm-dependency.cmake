@@ -1,4 +1,4 @@
-CPMAddPackage("gh:gabime/spdlog@1.11.0")
+CPMAddPackage("gh:gabime/spdlog@1.12.0")
 
 if(XPLPC_ENABLE_SERIALIZER_FOR_JSON)
     CPMAddPackage("gh:nlohmann/json@3.11.2")
