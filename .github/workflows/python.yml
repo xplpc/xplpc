@@ -56,8 +56,13 @@ jobs:
         run: python3 xplpc.py conan-setup
 
       - name: Build Native Library
-        run: |
-          python3 xplpc.py c-build-shared
+        run: python3 xplpc.py c-build-shared
+
+      - name: Build Python Package
+        run: python3 xplpc.py python-build
+
+      - name: Install Python Package
+        run: python3 xplpc.py python-install
 
       - name: Test
         run: python3 xplpc.py python-test
