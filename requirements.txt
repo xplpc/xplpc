@@ -3,3 +3,4 @@ docopt>=0.6.0
 black>=22.0.0
 conan>=1.55,<2
 pytest
+wheel>=0.34.0

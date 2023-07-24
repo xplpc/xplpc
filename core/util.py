@@ -180,3 +180,11 @@ def get_cmake_build_type(build_type):
         return "Profile"
 
     l.e(f"Invalid build type: {build_type}")
+
+
+# -----------------------------------------------------------------------------
+def get_lib_binary_dir():
+    if p.is_windows():
+        return "bin"
+
+    return "lib"

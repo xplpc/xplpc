@@ -22,7 +22,7 @@ def run_task_build():
 
     l.i("Copying binary files...")
     lib_arch = get_binary_arch_path()
-    binary_dir = os.path.join("build", "c-shared", lib_arch, "lib")
+    binary_dir = os.path.join("build", "c-shared", lib_arch, util.get_lib_binary_dir())
     build_binary_dir = os.path.join(build_dir, "src", "xplpc", "lib", lib_arch)
     f.copy_all(binary_dir, build_binary_dir)
 

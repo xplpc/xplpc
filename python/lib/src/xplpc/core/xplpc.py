@@ -39,7 +39,7 @@ class XPLPC(metaclass=SingletonMeta):
         lib_name = ""
 
         if plat.startswith("win"):
-            lib_name = "libxplpc.dll"
+            lib_name = "xplpc.dll"
         elif plat.startswith("darwin"):
             lib_name = "libxplpc.dylib"
         elif plat.startswith("linux"):
