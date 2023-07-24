@@ -22,11 +22,11 @@ class XPLPC(metaclass=SingletonMeta):
         self.config = None
 
     def initialize(self, config: Config):
-        if XPLPC.initialized:
+        if self.initialized:
             return
 
-        XPLPC.initialized = True
-        XPLPC.config = config
+        self.initialized = True
+        self.config = config
 
         # Load the shared library into c types.
 
@@ -163,3 +163,6 @@ class XPLPC(metaclass=SingletonMeta):
         print("Calling xplpc_core_finalize...")
         xplpc_core_finalize()
         print("OK")
+
+    def is_initialized(self):
+        return self.initialized
