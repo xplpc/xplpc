@@ -30,7 +30,6 @@ Tasks:
   - brew
 
   - docs-format
-  - python-format
   - conan-setup
 
   - cxx-format
@@ -68,6 +67,12 @@ Tasks:
   - c-build-leaks
 
   - flutter-test
+
+  - python-format
+  - python-build
+  - python-install
+  - python-test
+  - python-sample
 """
 
 import os
@@ -154,6 +159,22 @@ def main(options):
     # format
     elif task == "python-format":
         python.run_task_format()
+
+    # build
+    elif task == "python-build":
+        python.run_task_build()
+
+    # install
+    elif task == "python-install":
+        python.run_task_install()
+
+    # test
+    elif task == "python-test":
+        python.run_task_test()
+
+    # sample
+    elif task == "python-sample":
+        python.run_task_sample()
 
     #######################
     # CXX

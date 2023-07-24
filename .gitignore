@@ -39,3 +39,7 @@ CMakeLists.txt.user
 # custom
 build
 build-*
+
+# python
+*.egg-info
+.pytest_cache
