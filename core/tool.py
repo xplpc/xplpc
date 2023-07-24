@@ -264,6 +264,18 @@ def check_tool_pytest():
 
 
 # -----------------------------------------------------------------------------
+def check_tool_pyinstaller():
+    try:
+        subprocess.check_output(["pyinstaller", "--version"])
+        return True
+    except OSError:
+        l.e(
+            "PyInstaller is not installed, check: https://github.com/pyinstaller/pyinstaller"
+        )
+        return False
+
+
+# -----------------------------------------------------------------------------
 def check_and_get_env(name):
     env = os.environ.get(name)
 

@@ -73,6 +73,7 @@ Tasks:
   - python-install
   - python-test
   - python-sample
+  - python-pyinstaller
 """
 
 import os
@@ -175,6 +176,10 @@ def main(options):
     # sample
     elif task == "python-sample":
         python.run_task_sample()
+
+    # pyinstaller
+    elif task == "python-pyinstaller":
+        python.run_task_pyinstaller()
 
     #######################
     # CXX

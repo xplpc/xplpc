@@ -69,7 +69,37 @@ def run_task_sample():
     tool.check_tool_python()
 
     l.i("Running...")
-    r.run(["python3", os.path.join("python", "sample", "sample.py")])
+    sample_dir = os.path.join("python", "sample", "src")
+    r.run(["python3", "main.py"], cwd=sample_dir)
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_pyinstaller():
+    tool.check_tool_pyinstaller()
+
+    l.i("Running...")
+
+    dist_dir = os.path.join(c.proj_path, "build", "pyinstaller-dist")
+    temp_dir = os.path.join(c.proj_path, "build", "pyinstaller-temp")
+
+    f.recreate_dir(dist_dir)
+    f.recreate_dir(temp_dir)
+
+    sample_dir = os.path.join("python", "sample")
+    r.run(
+        [
+            "pyinstaller",
+            "pyinstaller.spec",
+            "--distpath",
+            dist_dir,
+            "--workpath",
+            temp_dir,
+            "--noconfirm",
+            "--clean",
+        ],
+        cwd=sample_dir,
+    )
     l.ok()
 
 
