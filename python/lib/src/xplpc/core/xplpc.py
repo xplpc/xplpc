@@ -54,7 +54,7 @@ class XPLPC(metaclass=SingletonMeta):
         elif arch == "i686" or arch == "x86":
             lib_arch = "x86"
         elif arch == "x86_64" or arch == "amd64":
-            lib_arch = "x64"
+            lib_arch = "x86_64"
         else:
             raise OSError(f"The architecture {arch} is not supported.")
 
