@@ -33,8 +33,8 @@ class XPLPC(metaclass=SingletonMeta):
         print("Loading library...")
 
         # library name
-        arch = platform.machine()
-        plat = sys.platform
+        arch = platform.machine().lower()
+        plat = sys.platform.lower()
         lib_arch = ""
         lib_name = ""
 
@@ -53,8 +53,8 @@ class XPLPC(metaclass=SingletonMeta):
             lib_arch = "arm64"
         elif arch == "i686" or arch == "x86":
             lib_arch = "x86"
-        elif arch == "x86_64":
-            lib_arch = "x86_64"
+        elif arch == "x86_64" or arch == "amd64":
+            lib_arch = "x64"
         else:
             raise OSError(f"The architecture {arch} is not supported.")
 

@@ -123,7 +123,7 @@ def run_task_format():
 
 # -----------------------------------------------------------------------------
 def get_binary_arch_path():
-    arch = platform.machine()
+    arch = platform.machine().lower()
     lib_arch = ""
 
     if arch == "armv7l" or arch == "armv7":
@@ -132,8 +132,8 @@ def get_binary_arch_path():
         lib_arch = "arm64"
     elif arch == "i686" or arch == "x86":
         lib_arch = "x86"
-    elif arch == "x86_64":
-        lib_arch = "x86_64"
+    elif arch == "x86_64" or arch == "amd64":
+        lib_arch = "x64"
     else:
         l.e(f"The architecture {arch} is not supported.")
 
