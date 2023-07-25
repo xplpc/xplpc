@@ -1,15 +1,15 @@
 class BaseSerializer:
-    def decodeFunctionName(self, data):
+    def decode_function_name(self, data):
         pass
 
-    def decodeFunctionReturnValue(self, data, class_type=None):
+    def decode_function_return_value(self, data, class_type=None):
         pass
 
-    def decodeMessage(self, data):
+    def decode_message(self, data):
         pass
 
-    def encodeFunctionReturnValue(self, data):
+    def encode_function_return_value(self, data):
         pass
 
-    def encodeRequest(self, functionName, params=None):
+    def encode_request(self, function_name, params=None):
         pass

@@ -1,16 +1,21 @@
 import json
+import logging as log
+
+from xplpc.message.message import Message
 from xplpc.serializer.base_serializer import BaseSerializer
 
 
 class JsonSerializer(BaseSerializer):
-    def decodeFunctionName(self, data):
+    def decode_function_name(self, data):
         try:
             return json.loads(data)["f"]
         except Exception as e:
-            print(f"[JsonSerializer : decodeFunctionName] Error when parse json: {e}")
+            log.error(
+                f"[JsonSerializer : decode_function_name] Error when parse json: {e}"
+            )
         return ""
 
-    def decodeFunctionReturnValue(self, data, class_type=None):
+    def decode_function_return_value(self, data, class_type=None):
         try:
             if class_type:
                 instance = class_type()
@@ -19,12 +24,12 @@ class JsonSerializer(BaseSerializer):
             else:
                 return json.loads(data)["r"]
         except Exception as e:
-            print(
-                f"[JsonSerializer : decodeFunctionReturnValue] Error when parse json: {e}"
+            log.error(
+                f"[JsonSerializer : decode_function_return_value] Error when parse json: {e}"
             )
         return None
 
-    def decodeMessage(self, data):
+    def decode_message(self, data):
         try:
             decodedData = json.loads(data)
             message = Message()
@@ -34,26 +39,28 @@ class JsonSerializer(BaseSerializer):
 
             return message
         except Exception as e:
-            print(f"[JsonSerializer : decodeMessage] Error when decode message: {e}")
+            log.error(
+                f"[JsonSerializer : decode_message] Error when decode message: {e}"
+            )
         return None
 
-    def encodeFunctionReturnValue(self, data):
+    def encode_function_return_value(self, data):
         try:
             return json.dumps({"r": data})
         except Exception as e:
-            print(
-                f"[JsonSerializer : encodeFunctionReturnValue] Error when encode data: {e}"
+            log.error(
+                f"[JsonSerializer : encode_function_return_value] Error when encode data: {e}"
             )
         return ""
 
-    def encodeRequest(self, functionName, params=None):
+    def encode_request(self, function_name, params=None):
         try:
             return json.dumps(
                 {
-                    "f": functionName,
+                    "f": function_name,
                     "p": params if params else [],
                 }
             )
         except Exception as e:
-            print(f"[JsonSerializer : encodeRequest] Error when encode data: {e}")
+            log.error(f"[JsonSerializer : encode_request] Error when encode data: {e}")
         return ""
