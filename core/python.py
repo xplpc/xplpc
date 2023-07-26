@@ -80,15 +80,20 @@ def run_task_pyinstaller():
 
     l.i("Running...")
 
-    dist_dir = os.path.join(c.proj_path, "build", "pyinstaller-dist")
+    dist_dir = os.path.join(c.proj_path, "build", "pyinstaller")
     temp_dir = os.path.join(c.proj_path, "build", "pyinstaller-temp")
 
     f.recreate_dir(dist_dir)
     f.recreate_dir(temp_dir)
 
     sample_dir = os.path.join("python", "sample")
+
+    r.run(["poetry", "install", "--sync"], cwd=sample_dir)
+
     r.run(
         [
+            "poetry",
+            "run",
             "pyinstaller",
             "pyinstaller.spec",
             "--distpath",
@@ -100,6 +105,7 @@ def run_task_pyinstaller():
         ],
         cwd=sample_dir,
     )
+
     l.ok()
 
 

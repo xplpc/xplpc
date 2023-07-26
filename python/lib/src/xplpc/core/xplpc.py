@@ -1,4 +1,7 @@
+import logging as log
+
 from xplpc.core.config import Config
+from xplpc.proxy.platform_proxy import PlatformProxy
 
 
 class SingletonMeta(type):
@@ -21,6 +24,8 @@ class XPLPC(metaclass=SingletonMeta):
 
         self.initialized = True
         self.config = config
+
+        PlatformProxy.initialize()
 
     def is_initialized(self):
         return self.initialized

@@ -5,23 +5,15 @@ import platform
 import sys
 from ctypes import CFUNCTYPE, c_bool, c_char_p, c_size_t, cdll
 
-from xplpc.core.xplpc import XPLPC
 from xplpc.data.callback_list import CallbackList
 from xplpc.data.mapping_list import MappingList
 
 
 class PlatformProxy:
-    def __init__(self) -> None:
-        self.xplpc_core_initialize = None
-        self.xplpc_core_finalize = None
-        self.xplpc_core_is_initialized = None
-        self.xplpc_native_call_proxy = None
-        self.xplpc_native_call_proxy_callback = None
-
     @staticmethod
     def initialize():
-        # load the shared library into c types.
-        print("Loading native library...")
+        # load the shared library into c types
+        log.debug("Loading native library...")
 
         # library name
         arch = platform.machine().lower()
@@ -49,13 +41,34 @@ class PlatformProxy:
         else:
             raise OSError(f"The architecture {arch} is not supported.")
 
-        lib_path = os.path.join(
-            os.path.dirname(__file__), "..", "lib", lib_arch, lib_name
-        )
+        lib_path = ""
+
+        if getattr(sys, "frozen", False):
+            lib_path = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "..",
+                    "..",
+                    "xplpc",
+                    "lib",
+                    lib_arch,
+                    lib_name,
+                )
+            )
+        else:
+            lib_path = os.path.abspath(
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "..",
+                    "lib",
+                    lib_arch,
+                    lib_name,
+                )
+            )
 
         libc = cdll.LoadLibrary(lib_path)
 
-        print("OK")
+        log.debug("OK")
 
         # declare the prototypes for the functions.
         OnInitializePlatform = CFUNCTYPE(None)
@@ -64,7 +77,7 @@ class PlatformProxy:
         OnNativeProxyCallback = CFUNCTYPE(None, c_char_p, c_size_t, c_char_p, c_size_t)
         OnNativeProxyCall = CFUNCTYPE(None, c_char_p, c_size_t, c_char_p, c_size_t)
 
-        print("Binding: xplpc_core_initialize...")
+        log.debug("Binding: xplpc_core_initialize...")
         PlatformProxy.xplpc_core_initialize = libc.xplpc_core_initialize
         PlatformProxy.xplpc_core_initialize.argtypes = [
             c_bool,
@@ -74,17 +87,17 @@ class PlatformProxy:
             OnNativeProxyCall,
             OnNativeProxyCallback,
         ]
-        print("OK")
+        log.debug("OK")
 
-        print("Binding: xplpc_core_finalize...")
+        log.debug("Binding: xplpc_core_finalize...")
         PlatformProxy.xplpc_core_finalize = libc.xplpc_core_finalize
-        print("OK")
+        log.debug("OK")
 
-        print("Binding: xplpc_core_is_initialized...")
+        log.debug("Binding: xplpc_core_is_initialized...")
         PlatformProxy.xplpc_core_is_initialized = libc.xplpc_core_is_initialized
-        print("OK")
+        log.debug("OK")
 
-        print("Binding: xplpc_native_call_proxy...")
+        log.debug("Binding: xplpc_native_call_proxy...")
         PlatformProxy.xplpc_native_call_proxy = libc.xplpc_native_call_proxy
         PlatformProxy.xplpc_native_call_proxy.argtypes = [
             c_char_p,
@@ -92,9 +105,9 @@ class PlatformProxy:
             c_char_p,
             c_size_t,
         ]
-        print("OK")
+        log.debug("OK")
 
-        print("Binding: xplpc_native_call_proxy_callback...")
+        log.debug("Binding: xplpc_native_call_proxy_callback...")
         PlatformProxy.xplpc_native_call_proxy_callback = (
             libc.xplpc_native_call_proxy_callback
         )
@@ -104,9 +117,9 @@ class PlatformProxy:
             c_char_p,
             c_size_t,
         ]
-        print("OK")
+        log.debug("OK")
 
-        print("Binding with Python...")
+        log.debug("Binding with Python...")
         initialize_callback = OnInitializePlatform(PlatformProxy.onInitializePlatform)
         finalize_callback = OnFinalizePlatform(PlatformProxy.onFinalizePlatform)
         has_mapping_callback = OnHasMapping(PlatformProxy.onHasMapping)
@@ -114,9 +127,9 @@ class PlatformProxy:
         native_proxy_callback_callback = OnNativeProxyCallback(
             PlatformProxy.onNativeProxyCallback
         )
-        print("OK")
+        log.debug("OK")
 
-        print("Calling xplpc_core_initialize...")
+        log.debug("Calling xplpc_core_initialize...")
         PlatformProxy.xplpc_core_initialize(
             True,
             initialize_callback,
@@ -125,28 +138,32 @@ class PlatformProxy:
             native_proxy_call_callback,
             native_proxy_callback_callback,
         )
-        print("OK")
+        log.debug("OK")
 
-        print("Calling xplpc_core_is_initialized...")
+        log.debug("Calling xplpc_core_is_initialized...")
         is_init = PlatformProxy.xplpc_core_is_initialized()
-        print(f"Is initialized? {is_init}")
-        print("OK")
+        log.debug(f"Is initialized? {is_init}")
+        log.debug("OK")
 
-        print("Calling xplpc_native_call_proxy...")
+        log.debug("Calling xplpc_native_call_proxy...")
         data = {"f": "sample.login"}
         data = json.dumps(data).encode("utf-8")
         PlatformProxy.xplpc_native_call_proxy(b"key", len(b"key"), data, len(data))
-        print("OK")
+        log.debug("OK")
 
-        print("Calling xplpc_native_call_proxy...")
+        log.debug("Calling xplpc_native_call_proxy...")
         PlatformProxy.xplpc_native_call_proxy_callback(
             b"key", len(b"key"), b"data", len(b"data")
         )
-        print("OK")
+        log.debug("OK")
 
-        print("Calling xplpc_core_finalize...")
+        log.debug("Calling _call_native_proxy_with...")
+        PlatformProxy._call_native_proxy_with("key", "data")
+        log.debug("OK")
+
+        log.debug("Calling xplpc_core_finalize...")
         PlatformProxy.xplpc_core_finalize()
-        print("OK")
+        log.debug("OK")
 
     @staticmethod
     def onInitializePlatform():
@@ -165,6 +182,8 @@ class PlatformProxy:
 
     @staticmethod
     def onNativeProxyCall(key, keySize, data, dataSize):
+        from xplpc.core.xplpc import XPLPC
+
         print(f"Native proxy call: {key}, {keySize}, {data}, {dataSize}")
 
         keyStr = key[:keySize].decode()

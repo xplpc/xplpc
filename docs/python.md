@@ -35,6 +35,22 @@ Execute on terminal:
 
     python3 xplpc.py python-sample
 
+## How to run the Python sample with PyInstaller
+
+Before run the Python sample with PyInstaller, you need install Poetry packages with command:
+
+    python3 -m pip install poetry
+
+Build the Python package for Poetry find it locally on `build/python` folder:
+
+    python3 xplpc.py python-build
+
+Now execute PyInstaller:
+
+    python3 xplpc.py python-pyinstaller
+
+You can execute the binary inside folder `build/pyinstaller`.
+
 ## How to run the Python tests
 
 Before run the Python tests, you need install the Python package.
