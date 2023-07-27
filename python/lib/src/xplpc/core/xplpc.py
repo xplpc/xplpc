@@ -1,20 +1,17 @@
-import logging as log
-
 from xplpc.core.config import Config
 from xplpc.proxy.platform_proxy import PlatformProxy
 
 
-class SingletonMeta(type):
-    _instances = {}
+class XPLPC:
+    _instance = None
 
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(SingletonMeta, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(XPLPC, cls).__new__(cls)
+            cls._instance._init()
+        return cls._instance
 
-
-class XPLPC(metaclass=SingletonMeta):
-    def __init__(self):
+    def _init(self):
         self.initialized = False
         self.config = None
 
@@ -25,7 +22,7 @@ class XPLPC(metaclass=SingletonMeta):
         self.initialized = True
         self.config = config
 
-        PlatformProxy.initialize()
+        PlatformProxy().initialize()
 
     def is_initialized(self):
         return self.initialized

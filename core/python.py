@@ -37,20 +37,33 @@ def run_task_build():
 def run_task_install():
     tool.check_tool_pip()
 
-    # find package
-    l.i("Searching for package...")
-    dist_dir = os.path.join("build", "python", "dist")
-    packages = f.find_files(dist_dir, "*.whl")
+    use_package = False
 
-    if len(packages) > 0:
-        package = packages[0]
-        l.i(f"Package found: {package}")
+    if use_package:
+        # find package
+        l.i("Searching for package...")
+        dist_dir = os.path.join("build", "python", "dist")
+        packages = f.find_files(dist_dir, "*.whl")
+
+        if len(packages) > 0:
+            package = packages[0]
+            l.i(f"Package found: {package}")
+        else:
+            l.e("No package found")
+
+        # install
+        l.i("Installing...")
+        r.run(["python3", "-m", "pip", "install", package, "--force-reinstall"])
     else:
-        l.e("No package found")
+        # install
+        l.i("Installing...")
 
-    # install
-    l.i("Installing...")
-    r.run(["python3", "-m", "pip", "install", package, "--force-reinstall"])
+        lib_dir = os.path.join("python", "lib")
+
+        r.run(
+            ["python3", "-m", "pip", "install", "-e", ".", "--force-reinstall"],
+            cwd=lib_dir,
+        )
 
     l.ok()
 

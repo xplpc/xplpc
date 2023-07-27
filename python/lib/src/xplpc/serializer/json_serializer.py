@@ -55,10 +55,18 @@ class JsonSerializer(BaseSerializer):
 
     def encode_request(self, function_name, params=None):
         try:
+            if not params:
+                params = []
+            else:
+                params = [
+                    param.to_json() if hasattr(param, "to_json") else param
+                    for param in params
+                ]
+
             return json.dumps(
                 {
                     "f": function_name,
-                    "p": params if params else [],
+                    "p": params,
                 }
             )
         except Exception as e:
