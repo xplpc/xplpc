@@ -14,5 +14,5 @@ class Param:
         }
 
     @classmethod
-    def from_json(cls, json_data: Dict[str, Any]) -> "Param":
-        return cls(json_data["n"], json_data["v"])
+    def from_json(cls, data: Dict[str, Any]) -> "Param":
+        return cls(data["n"], data["v"])

@@ -1,3 +1,4 @@
+import inspect
 import json
 import logging as log
 
@@ -19,7 +20,13 @@ class JsonSerializer(BaseSerializer):
     def decode_function_return_value(self, data, class_type=None):
         try:
             if class_type:
-                instance = class_type()
+                if inspect.signature(class_type.__init__) == inspect.signature(
+                    object.__init__
+                ):
+                    instance = class_type.__new__(class_type)
+                else:
+                    instance = class_type()
+
                 instance.__dict__.update(json.loads(data)["r"])
                 return instance
             else:
