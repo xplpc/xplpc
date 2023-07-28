@@ -4,9 +4,9 @@ import os
 import platform
 
 # general
-root_dir = os.path.abspath(os.getcwd())
+root_dir = os.path.abspath(os.path.join(os.getcwd(), ".."))
 platform_name = platform.system().lower()
-extras_dir = os.path.join(root_dir, "resources")
+extras_dir = os.path.join(root_dir, "pyinstaller", "resources")
 
 # platform data
 program_name = "Runner"
@@ -29,6 +29,7 @@ block_cipher = None
 a = Analysis(
     [
         os.path.join(
+            root_dir,
             "src",
             "main.py",
         )

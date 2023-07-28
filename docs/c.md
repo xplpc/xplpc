@@ -15,6 +15,8 @@ or
     cmake -S . -B build/c-static -DXPLPC_TARGET=c-static -DXPLPC_ADD_CUSTOM_DATA=ON
     cmake --build build/c-static
 
+Obs: A shared version can also be built by simply replacing "c-static" with "c-shared".
+
 ## How to build the C sample
 
 Execute on terminal:

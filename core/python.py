@@ -37,9 +37,19 @@ def run_task_build():
 def run_task_install():
     tool.check_tool_pip()
 
-    use_package = False
+    use_dev = True
 
-    if use_package:
+    if use_dev:
+        # install
+        l.i("Installing development package...")
+
+        lib_dir = os.path.join("python", "lib")
+
+        r.run(
+            ["python3", "-m", "pip", "install", "-e", ".", "--force-reinstall"],
+            cwd=lib_dir,
+        )
+    else:
         # find package
         l.i("Searching for package...")
         dist_dir = os.path.join("build", "python", "dist")
@@ -49,21 +59,11 @@ def run_task_install():
             package = packages[0]
             l.i(f"Package found: {package}")
         else:
-            l.e("No package found")
+            l.e("No package found, you need build it first")
 
         # install
-        l.i("Installing...")
+        l.i("Installing wheel package...")
         r.run(["python3", "-m", "pip", "install", package, "--force-reinstall"])
-    else:
-        # install
-        l.i("Installing...")
-
-        lib_dir = os.path.join("python", "lib")
-
-        r.run(
-            ["python3", "-m", "pip", "install", "-e", ".", "--force-reinstall"],
-            cwd=lib_dir,
-        )
 
     l.ok()
 
@@ -100,7 +100,7 @@ def run_task_pyinstaller():
     f.recreate_dir(dist_dir)
     f.recreate_dir(temp_dir)
 
-    sample_dir = os.path.join("python", "sample")
+    sample_dir = os.path.join("python", "sample", "pyinstaller")
 
     r.run(["poetry", "install", "--sync"], cwd=sample_dir)
 
