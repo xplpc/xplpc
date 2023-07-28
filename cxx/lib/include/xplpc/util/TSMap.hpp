@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 #include <utility>
 
@@ -14,10 +15,18 @@ template <class Key, class Value>
 class TSMap
 {
 public:
-    Value get(Key const &k)
+    std::optional<Value> get(Key const &k)
     {
         std::unique_lock<decltype(mtx)> lock(mtx);
-        return list[k];
+
+        auto it = list.find(k);
+
+        if (it != list.end())
+        {
+            return it->second;
+        }
+
+        return std::nullopt;
     }
 
     template <class ValueC>

@@ -24,6 +24,8 @@ class CallbackList:
             self.list[key] = callback
 
     def execute(self, key, data):
+        callback = None
+
         with self.lock:
             callback = self.list.pop(key, None)
 

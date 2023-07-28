@@ -73,7 +73,8 @@ def run_task_test():
     tool.check_tool_pytest()
 
     l.i("Testing...")
-    r.run(["pytest"])
+    python_dir = os.path.join("python", "tests")
+    r.run(["pytest"], cwd=python_dir)
     l.ok()
 
 

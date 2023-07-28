@@ -13,6 +13,7 @@ class JsonSerializer(BaseSerializer):
             log.error(
                 f"[JsonSerializer : decode_function_name] Error when parse json: {e}"
             )
+
         return ""
 
     def decode_function_return_value(self, data, class_type=None):
@@ -27,6 +28,7 @@ class JsonSerializer(BaseSerializer):
             log.error(
                 f"[JsonSerializer : decode_function_return_value] Error when parse json: {e}"
             )
+
         return None
 
     def decode_message(self, data):
@@ -42,6 +44,7 @@ class JsonSerializer(BaseSerializer):
             log.error(
                 f"[JsonSerializer : decode_message] Error when decode message: {e}"
             )
+
         return None
 
     def encode_function_return_value(self, data):
@@ -51,6 +54,7 @@ class JsonSerializer(BaseSerializer):
             log.error(
                 f"[JsonSerializer : encode_function_return_value] Error when encode data: {e}"
             )
+
         return ""
 
     def encode_request(self, function_name, params=None):
@@ -71,4 +75,5 @@ class JsonSerializer(BaseSerializer):
             )
         except Exception as e:
             log.error(f"[JsonSerializer : encode_request] Error when encode data: {e}")
+
         return ""

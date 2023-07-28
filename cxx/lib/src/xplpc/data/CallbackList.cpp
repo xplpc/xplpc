@@ -15,11 +15,11 @@ void CallbackList::add(const std::string &key, const std::function<void(const st
 void CallbackList::execute(const std::string &key, const std::string &data)
 {
     const auto callback = list.get(key);
-    list.remove(key);
 
-    if (callback)
+    if (callback.has_value())
     {
-        callback(data);
+        list.remove(key);
+        callback.value()(data);
     }
 }
 

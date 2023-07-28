@@ -3,7 +3,7 @@ import logging as log
 import os
 import platform
 import sys
-from ctypes import CFUNCTYPE, c_bool, c_char_p, c_size_t, cdll, create_string_buffer
+from ctypes import CFUNCTYPE, c_bool, c_char_p, c_size_t, cdll
 
 import xplpc.util.plaform as p
 from xplpc.data.callback_list import CallbackList
@@ -26,6 +26,12 @@ class PlatformProxy:
         self.xplpc_core_is_initialized = None
         self.xplpc_native_call_proxy = None
         self.xplpc_native_call_proxy_callback = None
+
+        self.initialize_callback = None
+        self.finalize_callback = None
+        self.has_mapping_callback = None
+        self.native_proxy_call_callback = None
+        self.native_proxy_callback_callback = None
 
     def initialize(self):
         # load the shared library into c types
@@ -86,11 +92,11 @@ class PlatformProxy:
         log.debug("OK")
 
         log.debug("Binding with Python...")
-        initialize_callback = OnInitializePlatform(self.onInitializePlatform)
-        finalize_callback = OnFinalizePlatform(self.onFinalizePlatform)
-        has_mapping_callback = OnHasMapping(self.onHasMapping)
-        native_proxy_call_callback = OnNativeProxyCall(self.onNativeProxyCall)
-        native_proxy_callback_callback = OnNativeProxyCallback(
+        self.initialize_callback = OnInitializePlatform(self.onInitializePlatform)
+        self.finalize_callback = OnFinalizePlatform(self.onFinalizePlatform)
+        self.has_mapping_callback = OnHasMapping(self.onHasMapping)
+        self.native_proxy_call_callback = OnNativeProxyCall(self.onNativeProxyCall)
+        self.native_proxy_callback_callback = OnNativeProxyCallback(
             self.onNativeProxyCallback
         )
         log.debug("OK")
@@ -98,11 +104,11 @@ class PlatformProxy:
         log.debug("Calling xplpc_core_initialize...")
         self.xplpc_core_initialize(
             True,
-            initialize_callback,
-            finalize_callback,
-            has_mapping_callback,
-            native_proxy_call_callback,
-            native_proxy_callback_callback,
+            self.initialize_callback,
+            self.finalize_callback,
+            self.has_mapping_callback,
+            self.native_proxy_call_callback,
+            self.native_proxy_callback_callback,
         )
         log.debug("OK")
 
@@ -134,21 +140,16 @@ class PlatformProxy:
         log.debug("OK")
 
     def onInitializePlatform(self):
-        print("Platform initialized")
         pass
 
     def onFinalizePlatform(self):
-        print("Platform finalized")
         MappingList().clear()
 
     def onHasMapping(self, name, nameSize):
-        print(f"Checking mapping: {name}, {nameSize}")
-        return MappingList().has(name)
+        return MappingList().has(name[:nameSize].decode())
 
     def onNativeProxyCall(self, key, keySize, data, dataSize):
         from xplpc.core.xplpc import XPLPC
-
-        print(f"Native proxy call: {key}, {keySize}, {data}, {dataSize}")
 
         # TODO: optimize using only decode for data since key is the same received
         keyStr = key[:keySize].decode()
@@ -210,28 +211,28 @@ class PlatformProxy:
 
     def native_call_proxy_callback(self, key, data):
         # create ctypes string buffer
-        key_buffer = create_string_buffer(key.encode("utf-8"))
-        data_buffer = create_string_buffer(data.encode("utf-8"))
+        key_buffer = key.encode("utf-8")
+        data_buffer = data.encode("utf-8")
 
         # call native function
         self.xplpc_native_call_proxy_callback(
             key_buffer,
-            len(key_buffer.raw),
+            len(key_buffer),
             data_buffer,
-            len(data_buffer.raw),
+            len(data_buffer),
         )
 
     def native_call_proxy(self, key, data):
         # create ctypes string buffer
-        key_buffer = create_string_buffer(key.encode("utf-8"))
-        data_buffer = create_string_buffer(data.encode("utf-8"))
+        key_buffer = key.encode("utf-8")
+        data_buffer = data.encode("utf-8")
 
         # call native function
         self.xplpc_native_call_proxy(
             key_buffer,
-            len(key_buffer.raw),
+            len(key_buffer),
             data_buffer,
-            len(data_buffer.raw),
+            len(data_buffer),
         )
 
     def get_lib_path(self):

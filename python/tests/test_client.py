@@ -48,11 +48,15 @@ def setup_and_teardown():
 
 def battery_level(m: Message, r: Response):
     suffix = m.get("suffix")
-    r("100$suffix")
+    r(f"100{suffix}")
 
 
 def reverse(m: Message, r: Response):
     r("ok")
+
+
+def raise_assertion_error(message):
+    pytest.fail(message)
 
 
 # ------------------------------------------------------------------------------
@@ -75,6 +79,21 @@ def test_battery_level():
 
     Client.call(
         request,
-        lambda response: response == "99%"
-        or AssertionError("Response not equal to 100%"),
+        lambda response: response == "100%"
+        or raise_assertion_error(f"'{response}' not equal to '100%'"),
+    )
+
+
+def test_reverse():
+    MappingList().add(
+        "platform.reverse.response",
+        MappingItem(reverse),
+    )
+
+    request = Request("sample.reverse")
+
+    Client.call(
+        request,
+        lambda response: response == "response-is-ok"
+        or raise_assertion_error(f"'{response}' not equal to 'response-is-ok'"),
     )

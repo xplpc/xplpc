@@ -10,7 +10,10 @@ from xplpc.util.unique_id import UniqueID
 
 class Client:
     @staticmethod
-    def call(request: Request, callback: typedefs.ClientCallback):
+    def call(
+        request: Request,
+        callback: typedefs.ClientCallback,
+    ):
         try:
             key = UniqueID().generate()
 
@@ -21,15 +24,15 @@ class Client:
                 ),
             )
 
-            # TODO: crash when call this
-            # PlatformProxy().native_call_proxy(key, request.data())
+            PlatformProxy().native_call_proxy(key, request.data())
         except Exception as e:
             log.error(f"[Client : call] Error: {e}")
             callback(None)
 
     @staticmethod
     def call_from_string(
-        request_data: str, callback: typedefs.ClientCallbackFromString
+        request_data: str,
+        callback: typedefs.ClientCallbackFromString,
     ):
         try:
             key = UniqueID().generate()
