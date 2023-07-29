@@ -113,3 +113,7 @@ print(response)
 You can see the sample project in directory `python/sample`.
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-python-macos.png?raw=true">
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-python-windows.png?raw=true">
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-python-linux.png?raw=true">
