@@ -29,6 +29,9 @@ classifiers = [
 [tool.poetry.dependencies]
 python = ">=3.7.0,<3.13"
 xplpc = { path = "../../../build/python", develop = true }
+psutil = "^5.9.5"
+kivy = "^2.2.1"
+kivymd = "^1.1.1"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "5.13.0"

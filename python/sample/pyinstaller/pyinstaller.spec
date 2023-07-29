@@ -40,7 +40,7 @@ a = Analysis(
     ],
     binaries=[],
     datas=[],
-    hiddenimports=["xplpc"],
+    hiddenimports=["xplpc", "kivymd.icon_definitions"],
     hookspath=["hooks"],
     runtime_hooks=[],
     excludes=[],

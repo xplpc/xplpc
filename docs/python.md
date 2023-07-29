@@ -50,9 +50,9 @@ Build the Python package for Poetry find it locally on `build/python` folder:
 
     python3 xplpc.py python-build
 
-Before run the Python sample with PyInstaller, you need install Poetry packages with command:
+Before run the Python sample with PyInstaller, you need install Poetry and PyInstaller packages with command:
 
-    python3 -m pip install poetry
+    python3 -m pip install -r python/sample/pyinstaller/requirements.txt
 
 Execute PyInstaller:
 
@@ -73,3 +73,37 @@ Execute on terminal:
 Execute on terminal:
 
     python3 xplpc.py python-format
+
+## Synchronous and Asynchronous call
+
+You can use synchronous call:
+
+```python
+request = Request(
+    "sample.login",
+    [
+        Param("username", "paulo"),
+        Param("password", "123456"),
+        Param("remember", True),
+    ],
+)
+
+response = Client.call(request)
+print(response)
+```
+
+or asynchronous call:
+
+```python
+request = Request(
+    "sample.login",
+    [
+        Param("username", "paulo"),
+        Param("password", "123456"),
+        Param("remember", True),
+    ],
+)
+
+response = await Client.async_call(request)
+print(response)
+```

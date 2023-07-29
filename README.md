@@ -113,6 +113,22 @@ Client.call<String>(request, (response) {
 });
 ```
 
+Using Python code:
+
+```python
+request = Request(
+    "sample.login",
+    [
+        Param("username", "paulo"),
+        Param("password", "123456"),
+        Param("remember", True),
+    ],
+)
+
+response = Client.call(request)
+print(response)
+```
+
 ## Supported platforms
 
 *   C
