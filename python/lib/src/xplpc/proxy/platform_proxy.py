@@ -40,8 +40,6 @@ class PlatformProxy:
         lib_path = self.get_lib_path()
         self.libc = cdll.LoadLibrary(lib_path)
 
-        log.debug("OK")
-
         # declare the prototypes for the functions.
         OnInitializePlatform = CFUNCTYPE(None)
         OnFinalizePlatform = CFUNCTYPE(None)
