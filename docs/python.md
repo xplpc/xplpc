@@ -107,3 +107,9 @@ request = Request(
 response = await Client.async_call(request)
 print(response)
 ```
+
+## Sample project
+
+You can see the sample project in directory `python/sample`.
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-python-macos.png?raw=true">
