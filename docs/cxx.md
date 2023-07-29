@@ -23,6 +23,8 @@ or
     cmake -S . -B build/cxx-static -DXPLPC_TARGET=cxx-static -DXPLPC_ADD_CUSTOM_DATA=ON
     cmake --build build/cxx-static
 
+Obs: A shared version can also be built by simply replacing "cxx-static" with "cxx-shared".
+
 ## How to build the C++ sample
 
 Execute on terminal:

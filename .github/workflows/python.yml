@@ -1,0 +1,69 @@
+name: Python
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { name: "Linux", os: ubuntu-latest }
+          - { name: "macOS", os: macos-latest }
+          - { name: "Windows", os: windows-latest }
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade PIP
+        run: python3 -m pip install --upgrade pip setuptools wheel
+
+      - name: Python Requirements
+        run: |
+          python3 -m pip install -r requirements.txt --user
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/Library/Python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.24.0"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: "1.10.0"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
+
+      - name: Build Native Library
+        run: python3 xplpc.py c-build-shared
+
+      - name: Build Python Package
+        run: python3 xplpc.py python-build
+
+      - name: Install Python Package
+        run: python3 xplpc.py python-install
+
+      - name: Test
+        run: python3 xplpc.py python-test

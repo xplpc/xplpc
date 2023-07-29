@@ -40,7 +40,7 @@ def check_tool_xcodebuild():
         subprocess.check_output(["xcodebuild", "-version"])
         return True
     except OSError:
-        l.e("Xcode is not installed, check: https://developer.apple.com/xcode/")
+        l.e("Xcode is not installed, check: https://developer.apple.com/xcode")
         return False
 
 
@@ -161,7 +161,7 @@ def check_tool_leaks():
     if f.file_exists("/usr/bin/leaks"):
         return True
 
-    l.e("Leaks tool is not installed, check: https://developer.apple.com/xcode/")
+    l.e("Leaks tool is not installed, check: https://developer.apple.com/xcode")
     return False
 
 
@@ -230,6 +230,48 @@ def check_tool_conan():
         return True
     except OSError:
         l.e("Conan is not installed, check: https://github.com/conan-io/conan")
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_python():
+    try:
+        subprocess.check_output(["python3", "--version"])
+        return True
+    except OSError:
+        l.e("Python is not installed, check: https://www.python.org")
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_pip():
+    try:
+        subprocess.check_output(["python3", "-m", "pip", "--version"])
+        return True
+    except OSError:
+        l.e("PIP is not installed, check: https://pypi.org/project/pip")
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_pytest():
+    try:
+        subprocess.check_output(["pytest", "--version"])
+        return True
+    except OSError:
+        l.e("PyTest is not installed, check: https://www.pytest.org")
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_pyinstaller():
+    try:
+        subprocess.check_output(["pyinstaller", "--version"])
+        return True
+    except OSError:
+        l.e(
+            "PyInstaller is not installed, check: https://github.com/pyinstaller/pyinstaller"
+        )
         return False
 
 

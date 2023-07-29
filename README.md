@@ -14,6 +14,7 @@
     <a href="https://github.com/xplpc/xplpc/actions/workflows/swift.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/swift.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml/badge.svg"></a>
+    <a href="https://github.com/xplpc/xplpc/actions/workflows/python.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/python.yml/badge.svg"></a>
 </p>
 
 <p align="center">
@@ -112,6 +113,22 @@ Client.call<String>(request, (response) {
 });
 ```
 
+Using Python code:
+
+```python
+request = Request(
+    "sample.login",
+    [
+        Param("username", "paulo"),
+        Param("password", "123456"),
+        Param("remember", True),
+    ],
+)
+
+response = Client.call(request)
+print(response)
+```
+
 ## Supported platforms
 
 *   C
@@ -120,6 +137,7 @@ Client.call<String>(request, (response) {
 *   Swift
 *   WASM
 *   Flutter
+*   Python
 
 ## Documentation
 
@@ -127,10 +145,10 @@ Client.call<String>(request, (response) {
 *   [C](docs/c.md)
 *   [C++](docs/cxx.md)
 *   [Kotlin](docs/kotlin.md)
-*   [Python](docs/python.md)
 *   [Swift](docs/swift.md)
 *   [WASM](docs/wasm.md)
 *   [Flutter](docs/flutter.md)
+*   [Python](docs/python.md)
 *   [Dependency Manager](docs/dependency-manager.md)
 *   [Contribution](docs/contribution.md)
 *   [Purpose](docs/purpose.md)

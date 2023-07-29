@@ -1,0 +1,41 @@
+[tool.poetry]
+description = "XPLPC - Sample"
+name = "xplpc-sample"
+version = "1.0.0"
+
+authors = ["Paulo Coutinho <paulocoutinhox@gmail.com>"]
+license = "MIT"
+maintainers = []
+
+documentation = "https://github.com/xplpc/xplpc"
+homepage = "https://github.com/xplpc/xplpc"
+repository = "https://github.com/xplpc/xplpc"
+
+keywords = []
+
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7.0,<3.13"
+xplpc = { path = "../../../build/python", develop = true }
+psutil = "^5.9.5"
+kivy = "^2.2.1"
+kivymd = "^1.1.1"
+
+[tool.poetry.dev-dependencies]
+pyinstaller = "5.13.0"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry_core>=1.0.0"]
