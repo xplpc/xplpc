@@ -119,7 +119,6 @@ class PlatformProxy:
     def onNativeProxyCall(self, key, keySize, data, dataSize):
         from xplpc.core.xplpc import XPLPC
 
-        # TODO: optimize using only decode for data since key is the same received
         keyStr = key[:keySize].decode()
         dataStr = data[:dataSize].decode()
 
