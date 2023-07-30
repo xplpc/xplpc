@@ -41,7 +41,7 @@ def run_task_build():
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
 
-    target_data = get_target_data_for_platform("kotlin")
+    target_data = get_target_data_for_platform(platform)
 
     build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
     conan_build_dir = os.path.join(
@@ -142,8 +142,17 @@ def run_task_build():
 
 # -----------------------------------------------------------------------------
 def run_task_build_sample():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
     # check
-    sample_dir = os.path.join("kotlin", "sample")
+    sample_dir = os.path.join("kotlin", platform, "sample")
     tool.check_tool_gradlew(sample_dir)
 
     # build
@@ -155,19 +164,18 @@ def run_task_build_sample():
 
 # -----------------------------------------------------------------------------
 def run_task_build_aar():
-    # check
-    lib_dir = os.path.join("kotlin", "lib")
-    tool.check_tool_gradlew(lib_dir)
+    # environment
+    target = "kotlin"
 
     # configure
-    target = "kotlin"
     l.i("Configuring...")
-
-    interface = util.get_param_interface(target)
-    l.i(f"Interface: {interface}")
 
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
+
+    # check
+    lib_dir = os.path.join("kotlin", platform, "lib")
+    tool.check_tool_gradlew(lib_dir)
 
     # build
     l.i("Building...")
@@ -192,8 +200,17 @@ def run_task_build_aar():
 
 # -----------------------------------------------------------------------------
 def run_task_test():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
     # check
-    lib_dir = os.path.join("kotlin", "lib")
+    lib_dir = os.path.join("kotlin", platform, "lib")
     tool.check_tool_gradlew(lib_dir)
 
     # test
@@ -203,7 +220,8 @@ def run_task_test():
     util.run_gradle(["test"], lib_dir)
 
     # integration
-    util.run_gradle(["connectedAndroidTest"], lib_dir)
+    if platform == "android":
+        util.run_gradle(["connectedAndroidTest"], lib_dir)
 
     l.ok()
 
@@ -216,11 +234,19 @@ def run_task_format():
     # format
     path_list = [
         {
-            "path": os.path.join(c.proj_path, "kotlin", "lib"),
+            "path": os.path.join(c.proj_path, "kotlin", "android", "lib"),
             "patterns": ["*.kt"],
         },
         {
-            "path": os.path.join(c.proj_path, "kotlin", "sample"),
+            "path": os.path.join(c.proj_path, "kotlin", "desktop", "lib"),
+            "patterns": ["*.kt"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "kotlin", "android", "sample"),
+            "patterns": ["*.kt"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "kotlin", "desktop", "sample"),
             "patterns": ["*.kt"],
         },
     ]
@@ -234,6 +260,7 @@ def run_task_format():
                 [
                     "ktlint",
                     os.path.relpath(file_item),
+                    "--format",
                 ],
                 cwd=c.proj_path,
             ),
@@ -247,8 +274,10 @@ def run_task_format():
 
 # -----------------------------------------------------------------------------
 def get_target_data_for_platform(platform):
-    if platform == "kotlin":
-        return c.targets["kotlin"]
+    if platform == "android":
+        return c.targets["kotlin-android"]
+    elif platform == "desktop":
+        return c.targets["kotlin-desktop"]
 
     if platform:
         l.e(f"Invalid platform: {platform}")

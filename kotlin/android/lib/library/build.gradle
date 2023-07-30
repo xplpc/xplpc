@@ -1,0 +1,133 @@
+plugins {
+    id 'org.jetbrains.kotlin.android'
+    id 'com.android.library'
+}
+
+android {
+    namespace 'com.xplpc.library'
+
+    defaultConfig {
+        buildToolsVersion = '33.0.1'
+
+        minSdk 16
+        targetSdk 34
+        compileSdk 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    sourceSets {
+        main {
+            // default settings
+            String platform = "android"
+
+            if (project.hasProperty("xplpc_platform")) {
+                platform = project.property("xplpc_platform")
+            }
+
+            if (!platform) {
+                platform = "android"
+            }
+
+            // settings from local properties file
+            def localProps = new Properties()
+            def localPropsFile = rootProject.file("local.properties")
+
+            if (localPropsFile.exists()) {
+                localProps.load(new FileInputStream(localPropsFile))
+
+                if (localProps.getProperty("xplpc.platform")) {
+                    platform = localProps.getProperty("xplpc.platform")
+                }
+            }
+
+            def jniLibsDir = file(project.projectDir.absolutePath + "/../../../../build/kotlin-jni-libs-$platform")
+            jniLibs.srcDirs += [jniLibsDir]
+        }
+    }
+
+    buildTypes {
+        debug {
+            packagingOptions {
+                doNotStrip '**/*.so'
+            }
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            packagingOptions {
+                doNotStrip '**/*.so'
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
+    implementation 'com.google.code.gson:gson:2.10'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+tasks.register('copyJniLibs') {
+    // default settings
+    String platform = "android"
+
+    if (project.hasProperty("xplpc_platform")) {
+        platform = project.property("xplpc_platform")
+    }
+
+    if (!platform) {
+        platform = "android"
+    }
+
+    // settings from local properties file
+    def localProps = new Properties()
+    def localPropsFile = rootProject.file("local.properties")
+
+    if (localPropsFile.exists()) {
+        localProps.load(new FileInputStream(localPropsFile))
+
+        if (localProps.getProperty("xplpc.platform")) {
+            platform = localProps.getProperty("xplpc.platform")
+        }
+    }
+
+    // jni libs
+    def jniLibsTargetDir = file(project.projectDir.absolutePath + "/../../../../build/kotlin-jni-libs-$platform")
+    jniLibsTargetDir.deleteDir()
+
+    def abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+
+    abis.each { abi ->
+        copy {
+            def jniLibsSourceDir = file(project.projectDir.absolutePath + "/../../../../build/kotlin-$platform/$abi")
+
+            if (!jniLibsSourceDir.exists()) {
+                throw new GradleException("XPLPC: You need build libraries for platform \"$platform\" and ABI \"$abi\" inside path \"$jniLibsSourceDir\".")
+            }
+
+            from file("$jniLibsSourceDir/lib")
+            into file("$jniLibsTargetDir/$abi")
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    compileTask -> compileTask.dependsOn(copyJniLibs)
+}
+
+clean.dependsOn 'cleanCopyJniLibs'

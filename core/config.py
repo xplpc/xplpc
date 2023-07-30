@@ -1,4 +1,5 @@
-from core.targets import kotlin as target_kotlin
+from core.targets import kotlin_android as target_kotlin_android
+from core.targets import kotlin_desktop as target_kotlin_desktop
 from core.targets import platform_linux as target_platform_linux
 from core.targets import platform_macos as target_platform_macos
 from core.targets import platform_windows as target_platform_windows
@@ -39,7 +40,8 @@ targets["swift-macos"] = target_swift_macos.data
 targets["swift-ios-flutter"] = target_swift_ios_flutter.data
 targets["swift-macos-flutter"] = target_swift_macos_flutter.data
 targets["swift-test"] = target_swift_test.data
-targets["kotlin"] = target_kotlin.data
+targets["kotlin-android"] = target_kotlin_android.data
+targets["kotlin-desktop"] = target_kotlin_desktop.data
 targets["wasm"] = target_wasm.data
 targets["platform-macos"] = target_platform_macos.data
 targets["platform-windows"] = target_platform_windows.data

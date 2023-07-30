@@ -1,6 +1,10 @@
 # Kotlin
 
-## Requirements
+Kotlin support on XPLPC allows you to build, run, and test samples for both Android and Desktop platforms.
+
+When executing the commands, simply pass the `--platform android` or `--platform desktop` parameter.
+
+## Requirements for Android
 
 *   Android NDK (if you are using `CPM` as your package manager)
 
@@ -8,7 +12,7 @@ If you are using `CPM` as your package manager, you will need to manually instal
 
 To download the NDK, please visit the following link: https://developer.android.com/ndk/downloads
 
-## How to build the library for Kotlin
+## How to build a Kotlin library for Android
 
 Execute on terminal:
 
@@ -60,9 +64,13 @@ You can build this target using some parameters to change configuration:
 
     --no-deps
 
+**Platform:**
+
+    --platform (android or desktop)
+
 ## Sample project
 
-You can see the sample project in directory `kotlin/sample`.
+You can see the sample project in directory `kotlin/android/sample` and `kotlin/desktop/sample`.
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-android.png?raw=true">
 

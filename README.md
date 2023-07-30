@@ -10,7 +10,7 @@
 <p align="center">
     <a href="https://github.com/xplpc/xplpc/actions/workflows/c.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/c.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/cxx.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/cxx.yml/badge.svg"></a>
-    <a href="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/kotlin.yml/badge.svg"></a>
+    <a href="https://github.com/xplpc/xplpc/actions/workflows/kotlin-android.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/kotlin-android.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/swift.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/swift.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml/badge.svg"></a>
