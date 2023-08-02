@@ -1,4 +1,10 @@
-CPMAddPackage("gh:gabime/spdlog@1.12.0")
+CPMAddPackage(
+    NAME "spdlog"
+    VERSION "1.12.0"
+    GITHUB_REPOSITORY "gabime/spdlog"
+    OPTIONS
+        "SPDLOG_BUILD_PIC ON"
+)
 
 if(XPLPC_ENABLE_SERIALIZER_FOR_JSON)
     CPMAddPackage("gh:nlohmann/json@3.11.2")

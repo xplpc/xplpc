@@ -106,7 +106,7 @@ def run_task_build():
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
 
-        if platform == "android":
+        if platform in ["android", "flutter"]:
             # abi
             if c.dependency_tool == "cpm":
                 abi = item["arch"]
@@ -159,7 +159,7 @@ def run_task_build_sample():
     l.i(f"Platform: {platform}")
 
     # check
-    sample_dir = os.path.join("kotlin", platform, "sample")
+    sample_dir = os.path.join("kotlin", get_project_by_platform(platform), "sample")
     tool.check_tool_gradlew(sample_dir)
 
     # build
@@ -181,7 +181,7 @@ def run_task_build_aar():
     l.i(f"Platform: {platform}")
 
     # check
-    lib_dir = os.path.join("kotlin", platform, "lib")
+    lib_dir = os.path.join("kotlin", get_project_by_platform(platform), "lib")
     tool.check_tool_gradlew(lib_dir)
 
     # build
@@ -217,7 +217,7 @@ def run_task_build_jar():
     l.i(f"Platform: {platform}")
 
     # check
-    lib_dir = os.path.join("kotlin", platform, "lib")
+    lib_dir = os.path.join("kotlin", get_project_by_platform(platform), "lib")
     tool.check_tool_gradlew(lib_dir)
 
     arch_path = util.get_arch_path()
@@ -255,7 +255,7 @@ def run_task_test():
     l.i(f"Platform: {platform}")
 
     # check
-    lib_dir = os.path.join("kotlin", platform, "lib")
+    lib_dir = os.path.join("kotlin", get_project_by_platform(platform), "lib")
     tool.check_tool_gradlew(lib_dir)
 
     # test
@@ -283,7 +283,7 @@ def run_task_run_sample():
     l.i(f"Platform: {platform}")
 
     # check
-    sample_dir = os.path.join("kotlin", platform, "sample")
+    sample_dir = os.path.join("kotlin", get_project_by_platform(platform), "sample")
     tool.check_tool_gradlew(sample_dir)
 
     # run
@@ -346,8 +346,18 @@ def get_target_data_for_platform(platform):
         return c.targets["kotlin-android"]
     elif platform == "desktop":
         return c.targets["kotlin-desktop"]
+    elif platform == "flutter":
+        return c.targets["kotlin-flutter"]
 
     if platform:
         l.e(f"Invalid platform: {platform}")
     else:
-        l.e("Define a valid platform")
+        l.e("Define a valid platfor m")
+
+
+# -----------------------------------------------------------------------------
+def get_project_by_platform(platform):
+    if platform == "flutter":
+        return "android"
+    else:
+        return platform
