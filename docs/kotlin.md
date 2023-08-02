@@ -4,8 +4,15 @@ Kotlin support on XPLPC allows you to build, run, and test samples for both Andr
 
 When executing the commands, simply pass the `--platform android` or `--platform desktop` parameter.
 
+Disable `wildcard` imports in your IDE (Preferences > Editor >Code Style > Kotlin > Imports):
+
+*   Top-Level Symbols: Use single name import
+*   Java Static and Enum Members: Use single name import
+*   Packages to Use Import with '\*': Delete all rows
+
 ## Requirements for Android
 
+*   Java 11 or later
 *   Android NDK (if you are using `CPM` as your package manager)
 
 If you are using `CPM` as your package manager, you will need to manually install the `Android NDK` and set the `ANDROID_NDK_ROOT` environment variable to the root folder of the NDK after installation.
@@ -101,3 +108,5 @@ You can see the sample project in directory `kotlin/android/sample` and `kotlin/
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-android.png?raw=true">
 
 <img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-android2.png?raw=true">
+
+<img width="280" src="https://github.com/xplpc/xplpc/blob/main/extras/images/screenshot-kotlin-cmp-macos.png?raw=true">
