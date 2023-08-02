@@ -9,8 +9,13 @@ import com.xplpc.core.Config
 import com.xplpc.core.XPLPC
 import com.xplpc.serializer.JsonSerializer
 
-class PlatformInitProvider : ContentProvider() {
+class PlatformInitializer : ContentProvider() {
     override fun onCreate(): Boolean {
+        initialize()
+        return true
+    }
+
+    private fun initialize() {
         var debug = false
 
         context?.let {
@@ -20,8 +25,6 @@ class PlatformInitProvider : ContentProvider() {
         XPLPC.initialize(
             Config(debug, JsonSerializer()),
         )
-
-        return true
     }
 
     override fun query(

@@ -1,5 +1,4 @@
 import os
-import platform
 
 from pygemstones.io import file as f
 from pygemstones.system import runner as r
@@ -21,7 +20,7 @@ def run_task_build():
     f.copy_all(module_dir, build_dir)
 
     l.i("Copying binary files...")
-    lib_arch = get_binary_arch_path()
+    lib_arch = util.get_arch_path()
     binary_dir = os.path.join("build", "c-shared", lib_arch, util.get_lib_binary_dir())
     build_binary_dir = os.path.join(build_dir, "src", "xplpc", "lib", lib_arch)
     f.copy_all(binary_dir, build_binary_dir)
@@ -169,22 +168,3 @@ def run_task_format():
         l.ok()
     else:
         l.i("No Python files found to format")
-
-
-# -----------------------------------------------------------------------------
-def get_binary_arch_path():
-    arch = platform.machine().lower()
-    lib_arch = ""
-
-    if arch == "armv7l" or arch == "armv7":
-        lib_arch = "arm32"
-    elif arch == "aarch64" or arch == "arm64":
-        lib_arch = "arm64"
-    elif arch == "i686" or arch == "x86":
-        lib_arch = "x86"
-    elif arch == "x86_64" or arch == "amd64":
-        lib_arch = "x86_64"
-    else:
-        l.e(f"The architecture {arch} is not supported.")
-
-    return lib_arch

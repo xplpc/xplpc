@@ -3,7 +3,7 @@
 
     <application>
         <provider
-            android:name="com.xplpc.platform.PlatformInitProvider"
+            android:name="com.xplpc.platform.PlatformInitializer"
             android:authorities="${applicationId}.platform.initializer.provider"
             android:exported="false" />
     </application>

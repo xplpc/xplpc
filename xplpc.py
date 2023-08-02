@@ -45,6 +45,7 @@ Tasks:
   - kotlin-test
   - kotlin-build-sample
   - kotlin-build-aar
+  - kotlin-build-jar
 
   - swift-format
   - swift-build
@@ -236,6 +237,10 @@ def main(options):
     # build aar
     elif task == "kotlin-build-aar":
         kotlin.run_task_build_aar()
+
+    # build jar
+    elif task == "kotlin-build-jar":
+        kotlin.run_task_build_jar()
 
     #######################
     # SWIFT

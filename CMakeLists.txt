@@ -235,9 +235,18 @@ target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
 
 # android dependencies
 if(XPLPC_TARGET STREQUAL "kotlin")
-    find_library(ANDROID_LIB android)
-    find_library(ANDROID_LOG_LIB log)
-    target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
+    if (CMAKE_SYSTEM_NAME MATCHES "Android")
+        find_library(ANDROID_LIB android)
+        find_library(ANDROID_LOG_LIB log)
+        target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
+    else()
+        set(JAVA_AWT_LIBRARY NotNeeded)
+        set(JAVA_JVM_LIBRARY NotNeeded)
+        set(JAVA_INCLUDE_PATH2 NotNeeded)
+        set(JAVA_AWT_INCLUDE_PATH NotNeeded)
+        find_package(JNI REQUIRED)
+        target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE JNI::JNI)
+    endif()
 endif()
 
 # serializers

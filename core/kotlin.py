@@ -106,33 +106,40 @@ def run_task_build():
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
 
-        # abi
-        if c.dependency_tool == "cpm":
-            abi = item["arch"]
-            run_args.append(f"-DANDROID_ABI={abi}")
+        if platform == "android":
+            # abi
+            if c.dependency_tool == "cpm":
+                abi = item["arch"]
+                run_args.append(f"-DANDROID_ABI={abi}")
 
-        # api level
-        if c.dependency_tool == "cpm":
-            api_level = item["api_level"]
-            run_args.append(f"-DANDROID_PLATFORM={api_level}")
+            # api level
+            if c.dependency_tool == "cpm":
+                api_level = item["api_level"]
+                run_args.append(f"-DANDROID_PLATFORM={api_level}")
 
-        # interface
-        if interface:
-            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
-        else:
-            run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
+            # interface
+            if interface:
+                run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+            else:
+                run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
 
-        # toolchain
-        if c.dependency_tool == "cpm":
-            toolchain_file = os.path.join(
-                ndk_root, "build", "cmake", "android.toolchain.cmake"
-            )
-            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
-        elif c.dependency_tool == "conan":
-            toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
-            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+            # toolchain
+            if c.dependency_tool == "cpm":
+                toolchain_file = os.path.join(
+                    ndk_root, "build", "cmake", "android.toolchain.cmake"
+                )
+                run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+            elif c.dependency_tool == "conan":
+                toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+                run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
 
-        r.run(run_args)
+            r.run(run_args)
+        elif platform == "desktop":
+            if c.dependency_tool == "conan":
+                toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+                run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+
+            r.run(run_args)
 
         # build
         r.run(["cmake", "--build", arch_dir])
@@ -194,6 +201,44 @@ def run_task_build_aar():
 
     for file in files:
         f.copy_file(file, os.path.join(aar_dir, os.path.basename(file)))
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_build_jar():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
+    # check
+    lib_dir = os.path.join("kotlin", platform, "lib")
+    tool.check_tool_gradlew(lib_dir)
+
+    arch_path = util.get_arch_path()
+
+    # build
+    l.i("Building...")
+
+    run_args = ["clean", "jar"]
+    run_args.extend(["-P", f"xplpc_arch={arch_path}"])
+    util.run_gradle(run_args, lib_dir)
+
+    # copy jar
+    jar_dir = os.path.join(c.proj_path, "build", f"kotlin-jar-{platform}")
+    f.recreate_dir(jar_dir)
+
+    output_dir = os.path.join(lib_dir, "build", "libs")
+
+    files = f.find_files(output_dir, "*.jar")
+
+    for file in files:
+        f.copy_file(file, os.path.join(jar_dir, os.path.basename(file)))
 
     l.ok()
 

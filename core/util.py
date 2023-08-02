@@ -1,4 +1,5 @@
 import os
+import platform
 import sys
 
 from pygemstones.io import file as f
@@ -188,3 +189,22 @@ def get_lib_binary_dir():
         return "bin"
 
     return "lib"
+
+
+# -----------------------------------------------------------------------------
+def get_arch_path():
+    arch = platform.machine().lower()
+    lib_arch = ""
+
+    if arch == "armv7l" or arch == "armv7":
+        lib_arch = "arm32"
+    elif arch == "aarch64" or arch == "arm64":
+        lib_arch = "arm64"
+    elif arch == "i686" or arch == "x86":
+        lib_arch = "x86"
+    elif arch == "x86_64" or arch == "amd64":
+        lib_arch = "x86_64"
+    else:
+        l.e(f"The architecture {arch} is not supported.")
+
+    return lib_arch

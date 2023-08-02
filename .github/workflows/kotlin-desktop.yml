@@ -1,0 +1,77 @@
+name: Kotlin Desktop
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+          name: "Windows Latest MSVC",
+          os: windows-latest
+        }
+        - {
+          name: "Ubuntu Latest GCC",
+          os: ubuntu-latest
+        }
+        - {
+          name: "macOS Latest Clang",
+          os: macos-latest
+        }
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      - name: Python Requirements
+        run: |
+          python3 -m pip install -r requirements.txt --user
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: "3.24.0"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@master
+        with:
+          version: "1.10.0"
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "17"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+          java -version
+
+      - name: Conan (only when use conan)
+        run: python3 xplpc.py conan-setup
+
+      - name: Build
+        run: python3 xplpc.py kotlin-build --platform desktop
+
+      - name: Test
+        run: python3 xplpc.py kotlin-test --platform desktop
+
+      - name: Build JAR
+        run: python3 xplpc.py kotlin-build-jar --platform desktop

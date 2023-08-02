@@ -1,17 +1,24 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.9.0'
-    id 'application'
+    id 'java-library'
 }
 
 group = 'com.xplpc.library'
-version = '1.0-SNAPSHOT'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation 'com.google.code.gson:gson:2.10.1'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 test {
@@ -19,13 +26,36 @@ test {
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = '1.8'
+    kotlinOptions.jvmTarget = '11'
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = '1.8'
+    kotlinOptions.jvmTarget = '11'
 }
 
-application {
-    mainClassName = 'MainKt'
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java', '../../shared/src'
+        }
+    }
+}
+
+jar {
+    archiveFileName = "${project.name}-${project.version}.jar"
+}
+
+processResources {
+    def arch = project.hasProperty('xplpc_arch') ? project.property('xplpc_arch') : null
+    def libsArchPath = arch ? arch : file("../../../build/kotlin-desktop").listFiles().find { it.directory }?.name
+
+    if (libsArchPath == null || libsArchPath == '') {
+        throw new GradleException("The architecture of native library cannot be null or empty!")
+    } else {
+        println("Architecture of native library: $libsArchPath")
+    }
+
+    from("../../../build/kotlin-desktop/${libsArchPath}/lib") {
+        into 'native-libs'
+    }
 }

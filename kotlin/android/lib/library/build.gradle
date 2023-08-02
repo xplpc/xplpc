@@ -44,6 +44,10 @@ android {
 
             def jniLibsDir = file(project.projectDir.absolutePath + "/../../../../build/kotlin-jni-libs-$platform")
             jniLibs.srcDirs += [jniLibsDir]
+
+            java {
+                srcDirs 'src/main/java', '../../../shared/src'
+            }
         }
     }
 
@@ -74,8 +78,8 @@ android {
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.10.1'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation 'com.google.code.gson:gson:2.10.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
