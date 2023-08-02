@@ -59,6 +59,7 @@ if has_windows_arm64:
             },
         ]
     )
+
 # linux - x64
 if has_linux_x64:
     data.extend(
@@ -82,6 +83,7 @@ if has_linux_arm64:
             },
         ]
     )
+
 # macos - x64
 if has_macos_x64:
     data.extend(

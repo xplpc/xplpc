@@ -354,7 +354,7 @@ def get_target_data_for_platform(platform):
     if platform:
         l.e(f"Invalid platform: {platform}")
     else:
-        l.e("Define a valid platfor m")
+        l.e("Define a valid platform")
 
 
 # -----------------------------------------------------------------------------
