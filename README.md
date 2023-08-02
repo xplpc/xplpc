@@ -136,7 +136,7 @@ print(response)
 *   C++
 *   Kotlin
 *   Swift
-*   WASM
+*   WebAssembly
 *   Flutter
 *   Python
 
