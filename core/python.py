@@ -78,7 +78,7 @@ def run_task_test():
 
 
 # -----------------------------------------------------------------------------
-def run_task_sample():
+def run_task_run_sample():
     tool.check_tool_python()
 
     l.i("Running...")

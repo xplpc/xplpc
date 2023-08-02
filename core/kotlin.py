@@ -261,12 +261,35 @@ def run_task_test():
     # test
     l.i("Testing...")
 
-    # unit
+    # unit tests
     util.run_gradle(["test"], lib_dir)
 
-    # integration
+    # integration tests
     if platform == "android":
         util.run_gradle(["connectedAndroidTest"], lib_dir)
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_run_sample():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
+    # check
+    sample_dir = os.path.join("kotlin", platform, "sample")
+    tool.check_tool_gradlew(sample_dir)
+
+    # run
+    l.i("Running...")
+
+    util.run_gradle(["run"], sample_dir)
 
     l.ok()
 

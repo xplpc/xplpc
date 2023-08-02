@@ -44,6 +44,7 @@ Tasks:
   - kotlin-build
   - kotlin-test
   - kotlin-build-sample
+  - kotlin-run-sample
   - kotlin-build-aar
   - kotlin-build-jar
 
@@ -73,7 +74,7 @@ Tasks:
   - python-build
   - python-install
   - python-test
-  - python-sample
+  - python-run-sample
   - python-pyinstaller
 """
 
@@ -174,9 +175,9 @@ def main(options):
     elif task == "python-test":
         python.run_task_test()
 
-    # sample
-    elif task == "python-sample":
-        python.run_task_sample()
+    # run sample
+    elif task == "python-run-sample":
+        python.run_task_run_sample()
 
     # pyinstaller
     elif task == "python-pyinstaller":
@@ -233,6 +234,10 @@ def main(options):
     # build sample
     elif task == "kotlin-build-sample":
         kotlin.run_task_build_sample()
+
+    # run sample
+    elif task == "kotlin-run-sample":
+        kotlin.run_task_run_sample()
 
     # build aar
     elif task == "kotlin-build-aar":
