@@ -46,7 +46,7 @@ jobs:
       - name: Install Java
         uses: actions/setup-java@v3
         with:
-          distribution: "adopt"
+          distribution: "corretto"
           java-version: "17"
 
       - name: Install NDK (only when use cpm)
