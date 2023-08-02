@@ -9,6 +9,7 @@ namespace proxy
 {
 
 std::shared_ptr<JNIPlatformProxy> JNIPlatformProxy::instance = nullptr;
+thread_local JNIEnv *JNIPlatformProxy::threadEnv = nullptr;
 
 std::shared_ptr<JNIPlatformProxy> JNIPlatformProxy::shared()
 {
@@ -98,7 +99,7 @@ JNIEnv *JNIPlatformProxy::jniGetThreadEnv()
 #else
         res = javaVM->AttachCurrentThread(reinterpret_cast<void **>(&env), nullptr);
 #endif
-        pthread_setspecific(threadExitCallbackKey, env);
+        threadEnv = env;
     }
 
     if (res != 0 || !env)

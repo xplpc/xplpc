@@ -1,0 +1,64 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.9.0'
+    id 'java-library'
+}
+
+group = 'com.xplpc.library'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.10.1'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = '1.8'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java', '../../shared/src'
+        }
+    }
+}
+
+jar {
+    archiveFileName = "${project.name}.jar"
+}
+
+processResources {
+    def arch = project.hasProperty('xplpc_arch') ? project.property('xplpc_arch') : null
+    def libsArchPath = arch ? arch : file("../../../build/kotlin-desktop").listFiles().find { it.directory }?.name
+
+    if (libsArchPath == null || libsArchPath == '') {
+        throw new GradleException("The architecture of native library cannot be null or empty!")
+    } else {
+        println("Architecture of native library: $libsArchPath")
+    }
+
+    def osName = System.getProperty('os.name').toLowerCase()
+    def libsPath = osName.contains('win') ? 'bin' : 'lib'
+
+    from("../../../build/kotlin-desktop/${libsArchPath}/${libsPath}") {
+        into 'native-libs'
+    }
+}

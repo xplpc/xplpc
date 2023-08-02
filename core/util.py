@@ -1,4 +1,5 @@
 import os
+import platform
 import sys
 
 from pygemstones.io import file as f
@@ -125,12 +126,15 @@ def get_param_arch(target):
 
 
 # -----------------------------------------------------------------------------
-def get_param_build_type(target, format=None):
+def get_param_build_type(target, platform=None, format=None):
     param_build_type = cfg.options["--build"]
 
     if not param_build_type:
         if target == "kotlin":
-            param_build_type = cfg.build_type_kotlin
+            if platform and platform in ["android", "flutter"]:
+                param_build_type = cfg.build_type_kotlin
+            else:
+                param_build_type = cfg.build_type
         else:
             param_build_type = cfg.build_type
 
@@ -188,3 +192,22 @@ def get_lib_binary_dir():
         return "bin"
 
     return "lib"
+
+
+# -----------------------------------------------------------------------------
+def get_arch_path():
+    arch = platform.machine().lower()
+    lib_arch = ""
+
+    if arch == "armv7l" or arch == "armv7":
+        lib_arch = "arm32"
+    elif arch == "aarch64" or arch == "arm64":
+        lib_arch = "arm64"
+    elif arch == "i686" or arch == "x86":
+        lib_arch = "x86"
+    elif arch == "x86_64" or arch == "amd64":
+        lib_arch = "x86_64"
+    else:
+        l.e(f"The architecture {arch} is not supported.")
+
+    return lib_arch

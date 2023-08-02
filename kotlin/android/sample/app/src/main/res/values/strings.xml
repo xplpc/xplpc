@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">XPLPC</string>
+    <string name="button_submit">SUBMIT</string>
+    <string name="button_open">OPEN</string>
+    <string name="battery_level_result">Battery Level: %s</string>
+    <string name="login_result">Response: %s</string>
+    <string name="hint_form_username">Your username</string>
+    <string name="hint_form_password">Your password</string>
+    <string name="hint_form_remember">Remember</string>
+    <string name="message_press_button">Press Button To Execute</string>
+    <string name="title_battery_level">BATTERY LEVEL</string>
+    <string name="title_login">LOGIN</string>
+    <string name="title_camera">CAMERA</string>
+    <string name="permission_required_text">Test camera processing image in realtime</string>
+    <string name="process_info">Time to process: %1$.3f seconds\nImage size: %2$d kb</string>
+    <string name="process_loading">Loading…</string>
+</resources>

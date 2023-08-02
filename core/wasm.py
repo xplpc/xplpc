@@ -28,7 +28,7 @@ def run_task_build():
     # configure
     l.i("Configuring...")
 
-    build_type = util.get_param_build_type(target, "cmake")
+    build_type = util.get_param_build_type(target, format="cmake")
     l.i(f"Build type: {build_type}")
 
     dry_run = util.get_param_dry()

@@ -11,16 +11,18 @@ from core import tool, util
 
 # -----------------------------------------------------------------------------
 def run_task_build():
+    # environment
+    target = "kotlin"
+    platform = util.get_param_platform(target)
+
     # check
     tool.check_tool_cmake()
 
     if c.dependency_tool == "cpm":
-        ndk_root = tool.check_and_get_env("ANDROID_NDK_ROOT")
+        if platform in ["android", "flutter"]:
+            ndk_root = tool.check_and_get_env("ANDROID_NDK_ROOT")
     elif c.dependency_tool == "conan":
         tool.check_tool_conan()
-
-    # environment
-    target = "kotlin"
 
     # dependency
     if c.dependency_tool == "cpm":
@@ -29,7 +31,7 @@ def run_task_build():
     # configure
     l.i("Configuring...")
 
-    build_type = util.get_param_build_type(target, "cmake")
+    build_type = util.get_param_build_type(target, platform, "cmake")
     l.i(f"Build type: {build_type}")
 
     dry_run = util.get_param_dry()
@@ -41,7 +43,7 @@ def run_task_build():
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
 
-    target_data = get_target_data_for_platform("kotlin")
+    target_data = get_target_data_for_platform(platform)
 
     build_dir = os.path.join(c.proj_path, "build", f"{target}-{platform}")
     conan_build_dir = os.path.join(
@@ -106,33 +108,40 @@ def run_task_build():
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
         ]
 
-        # abi
-        if c.dependency_tool == "cpm":
-            abi = item["arch"]
-            run_args.append(f"-DANDROID_ABI={abi}")
+        if platform in ["android", "flutter"]:
+            # abi
+            if c.dependency_tool == "cpm":
+                abi = item["arch"]
+                run_args.append(f"-DANDROID_ABI={abi}")
 
-        # api level
-        if c.dependency_tool == "cpm":
-            api_level = item["api_level"]
-            run_args.append(f"-DANDROID_PLATFORM={api_level}")
+            # api level
+            if c.dependency_tool == "cpm":
+                api_level = item["api_level"]
+                run_args.append(f"-DANDROID_PLATFORM={api_level}")
 
-        # interface
-        if interface:
-            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
-        else:
-            run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
+            # interface
+            if interface:
+                run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+            else:
+                run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
 
-        # toolchain
-        if c.dependency_tool == "cpm":
-            toolchain_file = os.path.join(
-                ndk_root, "build", "cmake", "android.toolchain.cmake"
-            )
-            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
-        elif c.dependency_tool == "conan":
-            toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
-            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+            # toolchain
+            if c.dependency_tool == "cpm":
+                toolchain_file = os.path.join(
+                    ndk_root, "build", "cmake", "android.toolchain.cmake"
+                )
+                run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+            elif c.dependency_tool == "conan":
+                toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+                run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
 
-        r.run(run_args)
+            r.run(run_args)
+        elif platform == "desktop":
+            if c.dependency_tool == "conan":
+                toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+                run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+
+            r.run(run_args)
 
         # build
         r.run(["cmake", "--build", arch_dir])
@@ -142,8 +151,17 @@ def run_task_build():
 
 # -----------------------------------------------------------------------------
 def run_task_build_sample():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
     # check
-    sample_dir = os.path.join("kotlin", "sample")
+    sample_dir = os.path.join("kotlin", get_project_by_platform(platform), "sample")
     tool.check_tool_gradlew(sample_dir)
 
     # build
@@ -155,19 +173,18 @@ def run_task_build_sample():
 
 # -----------------------------------------------------------------------------
 def run_task_build_aar():
-    # check
-    lib_dir = os.path.join("kotlin", "lib")
-    tool.check_tool_gradlew(lib_dir)
+    # environment
+    target = "kotlin"
 
     # configure
-    target = "kotlin"
     l.i("Configuring...")
-
-    interface = util.get_param_interface(target)
-    l.i(f"Interface: {interface}")
 
     platform = util.get_param_platform(target)
     l.i(f"Platform: {platform}")
+
+    # check
+    lib_dir = os.path.join("kotlin", get_project_by_platform(platform), "lib")
+    tool.check_tool_gradlew(lib_dir)
 
     # build
     l.i("Building...")
@@ -191,19 +208,90 @@ def run_task_build_aar():
 
 
 # -----------------------------------------------------------------------------
-def run_task_test():
+def run_task_build_jar():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
     # check
-    lib_dir = os.path.join("kotlin", "lib")
+    lib_dir = os.path.join("kotlin", get_project_by_platform(platform), "lib")
+    tool.check_tool_gradlew(lib_dir)
+
+    arch_path = util.get_arch_path()
+
+    # build
+    l.i("Building...")
+
+    run_args = ["clean", "jar"]
+    run_args.extend(["-P", f"xplpc_arch={arch_path}"])
+    util.run_gradle(run_args, lib_dir)
+
+    # copy jar
+    jar_dir = os.path.join(c.proj_path, "build", f"kotlin-jar-{platform}")
+    f.recreate_dir(jar_dir)
+
+    output_dir = os.path.join(lib_dir, "build", "libs")
+
+    files = f.find_files(output_dir, "*.jar")
+
+    for file in files:
+        f.copy_file(file, os.path.join(jar_dir, os.path.basename(file)))
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_test():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
+    # check
+    lib_dir = os.path.join("kotlin", get_project_by_platform(platform), "lib")
     tool.check_tool_gradlew(lib_dir)
 
     # test
     l.i("Testing...")
 
-    # unit
+    # unit tests
     util.run_gradle(["test"], lib_dir)
 
-    # integration
-    util.run_gradle(["connectedAndroidTest"], lib_dir)
+    # integration tests
+    if platform == "android":
+        util.run_gradle(["connectedAndroidTest"], lib_dir)
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_run_sample():
+    # environment
+    target = "kotlin"
+
+    # configure
+    l.i("Configuring...")
+
+    platform = util.get_param_platform(target)
+    l.i(f"Platform: {platform}")
+
+    # check
+    sample_dir = os.path.join("kotlin", get_project_by_platform(platform), "sample")
+    tool.check_tool_gradlew(sample_dir)
+
+    # run
+    l.i("Running...")
+
+    util.run_gradle(["run"], sample_dir)
 
     l.ok()
 
@@ -216,11 +304,19 @@ def run_task_format():
     # format
     path_list = [
         {
-            "path": os.path.join(c.proj_path, "kotlin", "lib"),
+            "path": os.path.join(c.proj_path, "kotlin", "android", "lib"),
             "patterns": ["*.kt"],
         },
         {
-            "path": os.path.join(c.proj_path, "kotlin", "sample"),
+            "path": os.path.join(c.proj_path, "kotlin", "desktop", "lib"),
+            "patterns": ["*.kt"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "kotlin", "android", "sample"),
+            "patterns": ["*.kt"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "kotlin", "desktop", "sample"),
             "patterns": ["*.kt"],
         },
     ]
@@ -234,6 +330,7 @@ def run_task_format():
                 [
                     "ktlint",
                     os.path.relpath(file_item),
+                    "--format",
                 ],
                 cwd=c.proj_path,
             ),
@@ -247,10 +344,22 @@ def run_task_format():
 
 # -----------------------------------------------------------------------------
 def get_target_data_for_platform(platform):
-    if platform == "kotlin":
-        return c.targets["kotlin"]
+    if platform == "android":
+        return c.targets["kotlin-android"]
+    elif platform == "desktop":
+        return c.targets["kotlin-desktop"]
+    elif platform == "flutter":
+        return c.targets["kotlin-flutter"]
 
     if platform:
         l.e(f"Invalid platform: {platform}")
     else:
         l.e("Define a valid platform")
+
+
+# -----------------------------------------------------------------------------
+def get_project_by_platform(platform):
+    if platform == "flutter":
+        return "android"
+    else:
+        return platform
