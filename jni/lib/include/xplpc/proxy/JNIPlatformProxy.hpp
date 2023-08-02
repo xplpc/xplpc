@@ -31,7 +31,7 @@ public:
 private:
     static std::shared_ptr<JNIPlatformProxy> instance;
 
-    pthread_key_t threadExitCallbackKey;
+    thread_local static JNIEnv *threadEnv;
     JavaVM *javaVM;
     jobject classLoader;
     jmethodID classLoaderMethodID;
