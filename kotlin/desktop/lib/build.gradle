@@ -55,7 +55,10 @@ processResources {
         println("Architecture of native library: $libsArchPath")
     }
 
-    from("../../../build/kotlin-desktop/${libsArchPath}/lib") {
+    def osName = System.getProperty('os.name').toLowerCase()
+    def libsPath = osName.contains('win') ? 'bin' : 'lib'
+
+    from("../../../build/kotlin-desktop/${libsArchPath}/${libsPath}") {
         into 'native-libs'
     }
 }

@@ -11,16 +11,18 @@ from core import tool, util
 
 # -----------------------------------------------------------------------------
 def run_task_build():
+    # environment
+    target = "kotlin"
+    platform = util.get_param_platform(target)
+
     # check
     tool.check_tool_cmake()
 
     if c.dependency_tool == "cpm":
-        ndk_root = tool.check_and_get_env("ANDROID_NDK_ROOT")
+        if platform in ["android", "flutter"]:
+            ndk_root = tool.check_and_get_env("ANDROID_NDK_ROOT")
     elif c.dependency_tool == "conan":
         tool.check_tool_conan()
-
-    # environment
-    target = "kotlin"
 
     # dependency
     if c.dependency_tool == "cpm":
@@ -29,7 +31,7 @@ def run_task_build():
     # configure
     l.i("Configuring...")
 
-    build_type = util.get_param_build_type(target, "cmake")
+    build_type = util.get_param_build_type(target, platform, "cmake")
     l.i(f"Build type: {build_type}")
 
     dry_run = util.get_param_dry()

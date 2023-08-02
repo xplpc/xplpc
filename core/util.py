@@ -126,12 +126,15 @@ def get_param_arch(target):
 
 
 # -----------------------------------------------------------------------------
-def get_param_build_type(target, format=None):
+def get_param_build_type(target, platform=None, format=None):
     param_build_type = cfg.options["--build"]
 
     if not param_build_type:
         if target == "kotlin":
-            param_build_type = cfg.build_type_kotlin
+            if platform and platform in ["android", "flutter"]:
+                param_build_type = cfg.build_type_kotlin
+            else:
+                param_build_type = cfg.build_type
         else:
             param_build_type = cfg.build_type
 
