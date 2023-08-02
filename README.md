@@ -134,10 +134,10 @@ print(response)
 
 *   C
 *   C++
-*   Kotlin (android, desktop)
-*   Swift (iOS, macOS, tvOS, watchOS, catalyst)
+*   Kotlin (Android, Desktop)
+*   Swift (iOS, macOS, tvOS, watchOS, Catalyst)
 *   WebAssembly
-*   Flutter (iOS, android, desktop)
+*   Flutter (iOS, Android, Desktop)
 *   Python
 
 ## Documentation
