@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import pytest
@@ -53,6 +54,23 @@ def battery_level(m: Message, r: Response):
     r(f"100{suffix}")
 
 
+def battery_level_async(m: Message, r: Response):
+    async def main():
+        # async sleep
+        await asyncio.sleep(0.1)
+
+        # return response
+        suffix = m.get("suffix")
+        r(f"100{suffix}")
+
+    # create and set a new event loop
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # call async function in the new event loop
+    loop.run_until_complete(main())
+
+
 def reverse(m: Message, r: Response):
     r("ok")
 
@@ -87,7 +105,7 @@ def test_battery_level():
 async def test_battery_level_async():
     MappingList().add(
         "platform.battery.level",
-        MappingItem(battery_level),
+        MappingItem(battery_level_async),
     )
 
     request = Request(
@@ -360,6 +378,11 @@ async def test_data_view_async():
 
 
 def test_battery_level_from_string():
+    MappingList().add(
+        "platform.battery.level",
+        MappingItem(battery_level),
+    )
+
     request = Request(
         "platform.battery.level",
         [
@@ -374,6 +397,11 @@ def test_battery_level_from_string():
 
 @pytest.mark.asyncio
 async def test_battery_level_from_string_async():
+    MappingList().add(
+        "platform.battery.level",
+        MappingItem(battery_level_async),
+    )
+
     request = Request(
         "platform.battery.level",
         [
