@@ -15,93 +15,45 @@ class Client:
             self.request = request
             self.class_type = class_type
             self.key = UniqueID().generate()
-            self.loop = asyncio.get_event_loop()
-            self.executor = ThreadPoolExecutor(max_workers=1)
-            self.future = self.loop.create_future()
+            self.response_data = None
             self.__call__()
 
         def __call__(self):
             def callback(response):
                 try:
-                    self.response = (
+                    self.response_data = (
                         XPLPC().config.serializer.decode_function_return_value(
                             response, self.class_type
                         )
                     )
-                    self.loop.call_soon_threadsafe(self.future.set_result, None)
                 except Exception as e:
                     log.error(f"[Client : callback] Error: {e}")
-                    self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
-            try:
-                CallbackList().add(self.key, callback)
-
-                # run the blocking call in a separate thread
-                self.loop.run_in_executor(
-                    self.executor,
-                    PlatformProxy().native_call_proxy,
-                    self.key,
-                    self.request.data(),
-                )
-
-            except Exception as e:
-                log.error(f"[Client : call] Error: {e}")
-                self.loop.call_soon_threadsafe(self.future.set_exception, e)
-
-        def __enter__(self):
-            self.loop.run_until_complete(self.future)
-            return self.response
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            pass
+            CallbackList().add(self.key, callback)
+            PlatformProxy().native_call_proxy(self.key, self.request.data())
 
         def run(self):
-            with self as response:
-                return response
+            return self.response_data
 
     class SyncCallFromString:
         def __init__(self, request_data: str):
             self.request_data = request_data
             self.key = UniqueID().generate()
-            self.loop = asyncio.get_event_loop()
-            self.executor = ThreadPoolExecutor(max_workers=1)
-            self.future = self.loop.create_future()
+            self.response_data = None
             self.__call__()
 
         def __call__(self):
             def callback(response):
                 try:
-                    self.response = response
-                    self.loop.call_soon_threadsafe(self.future.set_result, None)
+                    self.response_data = response
                 except Exception as e:
                     log.error(f"[Client : callback] Error: {e}")
-                    self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
-            try:
-                CallbackList().add(self.key, callback)
-
-                # run the blocking call in a separate thread
-                self.loop.run_in_executor(
-                    self.executor,
-                    PlatformProxy().native_call_proxy,
-                    self.key,
-                    self.request_data,
-                )
-
-            except Exception as e:
-                log.error(f"[Client : call] Error: {e}")
-                self.loop.call_soon_threadsafe(self.future.set_exception, e)
-
-        def __enter__(self):
-            self.loop.run_until_complete(self.future)
-            return self.response
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            pass
+            CallbackList().add(self.key, callback)
+            PlatformProxy().native_call_proxy(self.key, self.request_data)
 
         def run(self):
-            with self as response:
-                return response
+            return self.response_data
 
     class AsyncCall:
         def __init__(self, request: Request, class_type=None):
@@ -136,7 +88,6 @@ class Client:
                     self.key,
                     self.request.data(),
                 )
-
             except Exception as e:
                 log.error(f"[Client : call] Error: {e}")
                 self.loop.call_soon_threadsafe(self.future.set_exception, e)
@@ -176,7 +127,6 @@ class Client:
                     self.key,
                     self.request_data,
                 )
-
             except Exception as e:
                 log.error(f"[Client : call] Error: {e}")
                 self.loop.call_soon_threadsafe(self.future.set_exception, e)
