@@ -10,15 +10,17 @@ from xplpc.util.unique_id import UniqueID
 
 
 class Client:
+    executor = ThreadPoolExecutor(max_workers=4)
+
     class SyncCall:
         def __init__(self, request: Request, class_type=None):
             self.request = request
             self.class_type = class_type
             self.key = UniqueID().generate()
             self.response_data = None
-            self.__call__()
+            self.make_call()
 
-        def __call__(self):
+        def make_call(self):
             def callback(response):
                 try:
                     self.response_data = (
@@ -40,9 +42,9 @@ class Client:
             self.request_data = request_data
             self.key = UniqueID().generate()
             self.response_data = None
-            self.__call__()
+            self.make_call()
 
-        def __call__(self):
+        def make_call(self):
             def callback(response):
                 try:
                     self.response_data = response
@@ -60,12 +62,15 @@ class Client:
             self.request = request
             self.class_type = class_type
             self.key = UniqueID().generate()
-            self.loop = asyncio.get_event_loop()
-            self.executor = ThreadPoolExecutor(max_workers=1)
+            self.loop = (
+                asyncio.get_event_loop()
+                if asyncio.get_event_loop().is_running()
+                else asyncio.new_event_loop()
+            )
             self.future = self.loop.create_future()
-            self.__call__()
+            self.make_call()
 
-        def __call__(self):
+        def make_call(self):
             def callback(response):
                 try:
                     self.response = (
@@ -73,24 +78,27 @@ class Client:
                             response, self.class_type
                         )
                     )
-                    self.loop.call_soon_threadsafe(self.future.set_result, None)
+                    if not self.future.done():
+                        self.loop.call_soon_threadsafe(
+                            self.future.set_result, self.response
+                        )
                 except Exception as e:
                     log.error(f"[Client : async_call] Error: {e}")
-                    self.loop.call_soon_threadsafe(self.future.set_exception, e)
+                    if not self.future.done():
+                        self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
             try:
                 CallbackList().add(self.key, callback)
-
-                # run the blocking call in a separate thread
                 self.loop.run_in_executor(
-                    self.executor,
+                    Client.executor,
                     PlatformProxy().native_call_proxy,
                     self.key,
                     self.request.data(),
                 )
             except Exception as e:
                 log.error(f"[Client : async_call] Error: {e}")
-                self.loop.call_soon_threadsafe(self.future.set_exception, e)
+                if not self.future.done():
+                    self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
         async def __aenter__(self):
             await self.future
@@ -103,33 +111,39 @@ class Client:
         def __init__(self, request_data: str):
             self.request_data = request_data
             self.key = UniqueID().generate()
-            self.loop = asyncio.get_event_loop()
-            self.executor = ThreadPoolExecutor(max_workers=1)
+            self.loop = (
+                asyncio.get_event_loop()
+                if asyncio.get_event_loop().is_running()
+                else asyncio.new_event_loop()
+            )
             self.future = self.loop.create_future()
-            self.__call__()
+            self.make_call()
 
-        def __call__(self):
+        def make_call(self):
             def callback(response):
                 try:
                     self.response = response
-                    self.loop.call_soon_threadsafe(self.future.set_result, None)
+                    if not self.future.done():
+                        self.loop.call_soon_threadsafe(
+                            self.future.set_result, self.response
+                        )
                 except Exception as e:
                     log.error(f"[Client : async_call_from_string] Error: {e}")
-                    self.loop.call_soon_threadsafe(self.future.set_exception, e)
+                    if not self.future.done():
+                        self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
             try:
                 CallbackList().add(self.key, callback)
-
-                # run the blocking call in a separate thread
                 self.loop.run_in_executor(
-                    self.executor,
+                    Client.executor,
                     PlatformProxy().native_call_proxy,
                     self.key,
                     self.request_data,
                 )
             except Exception as e:
                 log.error(f"[Client : async_call_from_string] Error: {e}")
-                self.loop.call_soon_threadsafe(self.future.set_exception, e)
+                if not self.future.done():
+                    self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
         async def __aenter__(self):
             await self.future
