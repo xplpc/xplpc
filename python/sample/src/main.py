@@ -33,18 +33,14 @@ XPLPC().initialize(config)
 def battery_level(m: Message, r: Response):
     async def main():
         # async sleep
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(2)
 
         # return response
         suffix = m.get("suffix")
         battery = psutil.sensors_battery()
         r(f"{battery.percent}{suffix}")
 
-    # create and set a new event loop
     loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    # call async function in the new event loop
     loop.run_until_complete(main())
 
 

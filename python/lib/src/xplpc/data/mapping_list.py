@@ -1,3 +1,4 @@
+import threading
 from typing import Optional
 
 from xplpc.map.mapping_item import MappingItem
@@ -6,11 +7,14 @@ from xplpc.map.mapping_item import MappingItem
 class MappingList:
     # singleton
     _instance = None
+    _lock = threading.Lock()
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(MappingList, cls).__new__(cls)
-            cls._instance._init()
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super(MappingList, cls).__new__(cls)
+                    cls._instance._init()
         return cls._instance
 
     def _init(self):
@@ -19,13 +23,17 @@ class MappingList:
 
     # methods
     def add(self, name: str, item: MappingItem):
-        self.list[name] = item
+        with self._lock:
+            self.list[name] = item
 
     def find(self, name: str) -> Optional[MappingItem]:
-        return self.list.get(name)
+        with self._lock:
+            return self.list.get(name)
 
     def has(self, name: str) -> bool:
-        return name in self.list
+        with self._lock:
+            return name in self.list
 
     def clear(self):
-        self.list.clear()
+        with self._lock:
+            self.list.clear()

@@ -1,6 +1,6 @@
 import asyncio
-import concurrent.futures
 import logging
+import threading
 
 import pytest
 
@@ -165,28 +165,38 @@ def grayscale_image_with_dataView_worker():
 
 @pytest.mark.asyncio
 async def test_battery_level_concurrent():
-    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-        futures = {executor.submit(battery_level_worker) for _ in range(100)}
+    threads = []
 
-        for future in concurrent.futures.as_completed(futures):
-            future.result()
+    for _ in range(100):
+        thread = threading.Thread(target=battery_level_worker)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
 
 
 @pytest.mark.asyncio
 async def test_reverse_concurrent():
-    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-        futures = {executor.submit(reverse_worker) for _ in range(100)}
+    threads = []
 
-        for future in concurrent.futures.as_completed(futures):
-            future.result()
+    for _ in range(100):
+        thread = threading.Thread(target=reverse_worker)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
 
 
 @pytest.mark.asyncio
 async def test_grayscale_image_with_dataView_worker_concurrent():
-    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-        futures = {
-            executor.submit(grayscale_image_with_dataView_worker) for _ in range(100)
-        }
+    threads = []
 
-        for future in concurrent.futures.as_completed(futures):
-            future.result()
+    for _ in range(100):
+        thread = threading.Thread(target=grayscale_image_with_dataView_worker)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()

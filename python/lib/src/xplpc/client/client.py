@@ -27,7 +27,7 @@ class Client:
                         )
                     )
                 except Exception as e:
-                    log.error(f"[Client : callback] Error: {e}")
+                    log.error(f"[Client : call] Error: {e}")
 
             CallbackList().add(self.key, callback)
             PlatformProxy().native_call_proxy(self.key, self.request.data())
@@ -47,7 +47,7 @@ class Client:
                 try:
                     self.response_data = response
                 except Exception as e:
-                    log.error(f"[Client : callback] Error: {e}")
+                    log.error(f"[Client : call_from_string] Error: {e}")
 
             CallbackList().add(self.key, callback)
             PlatformProxy().native_call_proxy(self.key, self.request_data)
@@ -75,7 +75,7 @@ class Client:
                     )
                     self.loop.call_soon_threadsafe(self.future.set_result, None)
                 except Exception as e:
-                    log.error(f"[Client : callback] Error: {e}")
+                    log.error(f"[Client : async_call] Error: {e}")
                     self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
             try:
@@ -89,7 +89,7 @@ class Client:
                     self.request.data(),
                 )
             except Exception as e:
-                log.error(f"[Client : call] Error: {e}")
+                log.error(f"[Client : async_call] Error: {e}")
                 self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
         async def __aenter__(self):
@@ -114,7 +114,7 @@ class Client:
                     self.response = response
                     self.loop.call_soon_threadsafe(self.future.set_result, None)
                 except Exception as e:
-                    log.error(f"[Client : callback] Error: {e}")
+                    log.error(f"[Client : async_call_from_string] Error: {e}")
                     self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
             try:
@@ -128,7 +128,7 @@ class Client:
                     self.request_data,
                 )
             except Exception as e:
-                log.error(f"[Client : call] Error: {e}")
+                log.error(f"[Client : async_call_from_string] Error: {e}")
                 self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
         async def __aenter__(self):
