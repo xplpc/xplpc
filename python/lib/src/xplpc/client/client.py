@@ -1,6 +1,7 @@
 import asyncio
 import logging as log
 from concurrent.futures import ThreadPoolExecutor
+from threading import Thread
 
 from xplpc.core.xplpc import XPLPC
 from xplpc.data.callback_list import CallbackList
@@ -58,15 +59,11 @@ class Client:
             return self.response_data
 
     class AsyncCall:
-        def __init__(self, request: Request, class_type=None):
+        def __init__(self, request: Request, class_type=None, loop=None):
             self.request = request
             self.class_type = class_type
+            self.loop = loop if loop else asyncio.get_event_loop()
             self.key = UniqueID().generate()
-            self.loop = (
-                asyncio.get_event_loop()
-                if asyncio.get_event_loop().is_running()
-                else asyncio.new_event_loop()
-            )
             self.future = self.loop.create_future()
             self.make_call()
 
@@ -108,14 +105,10 @@ class Client:
             pass
 
     class AsyncCallFromString:
-        def __init__(self, request_data: str):
+        def __init__(self, request_data: str, loop=None):
             self.request_data = request_data
+            self.loop = loop if loop else asyncio.get_event_loop()
             self.key = UniqueID().generate()
-            self.loop = (
-                asyncio.get_event_loop()
-                if asyncio.get_event_loop().is_running()
-                else asyncio.new_event_loop()
-            )
             self.future = self.loop.create_future()
             self.make_call()
 
@@ -152,6 +145,50 @@ class Client:
         async def __aexit__(self, exc_type, exc_val, exc_tb):
             pass
 
+    class ThreadCall:
+        def __init__(self, request: Request, class_type=None, callback=None):
+            self.request = request
+            self.class_type = class_type
+            self.key = UniqueID().generate()
+            self.callback = callback
+            Thread(target=self.make_call).start()
+
+        def make_call(self):
+            def internal_callback(response):
+                try:
+                    result = XPLPC().config.serializer.decode_function_return_value(
+                        response, self.class_type
+                    )
+                    if self.callback:
+                        self.callback(result)
+                except Exception as e:
+                    log.error(f"[Client : thread_call] Error: {e}")
+                    if self.callback:
+                        self.callback(None, e)
+
+            CallbackList().add(self.key, internal_callback)
+            PlatformProxy().native_call_proxy(self.key, self.request.data())
+
+    class ThreadCallFromString:
+        def __init__(self, request_data: str, callback=None):
+            self.request_data = request_data
+            self.key = UniqueID().generate()
+            self.callback = callback
+            Thread(target=self.make_call).start()
+
+        def make_call(self):
+            def internal_callback(response):
+                try:
+                    if self.callback:
+                        self.callback(response)
+                except Exception as e:
+                    log.error(f"[Client : thread_call_from_string] Error: {e}")
+                    if self.callback:
+                        self.callback(None, e)
+
+            CallbackList().add(self.key, internal_callback)
+            PlatformProxy().native_call_proxy(self.key, self.request_data)
+
     @staticmethod
     def call(request: Request, class_type=None):
         return Client.SyncCall(request, class_type).run()
@@ -161,13 +198,21 @@ class Client:
         return Client.SyncCallFromString(request_data).run()
 
     @staticmethod
-    async def async_call(request: Request, class_type=None):
-        async_call_instance = Client.AsyncCall(request, class_type)
+    async def async_call(request: Request, class_type=None, loop=None):
+        async_call_instance = Client.AsyncCall(request, class_type, loop)
         async with async_call_instance as response:
             return response
 
     @staticmethod
-    async def async_call_from_string(request_data: str):
-        async_call_instance = Client.AsyncCallFromString(request_data)
+    async def async_call_from_string(request_data: str, loop=None):
+        async_call_instance = Client.AsyncCallFromString(request_data, loop)
         async with async_call_instance as response:
             return response
+
+    @staticmethod
+    def thread_call(request: Request, class_type=None, callback=None):
+        Client.ThreadCall(request, class_type, callback)
+
+    @staticmethod
+    def thread_call_from_string(request_data: str, callback=None):
+        Client.ThreadCallFromString(request_data, callback)
