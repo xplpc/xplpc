@@ -33,17 +33,18 @@ XPLPC().initialize(config)
 global_loop = asyncio.get_event_loop()
 
 
+async def main(m, r):
+    # simulate a long-running task with asyncio.sleep
+    await asyncio.sleep(0.1)
+
+    # return response
+    suffix = m.get("suffix")
+    battery = psutil.sensors_battery()
+    r(f"{battery.percent}{suffix}")
+
+
 def battery_level(m: Message, r: Response):
-    async def main():
-        # async sleep
-        await asyncio.sleep(0.1)
-
-        # return response
-        suffix = m.get("suffix")
-        battery = psutil.sensors_battery()
-        r(f"{battery.percent}{suffix}")
-
-    global_loop.create_task(main())
+    asyncio.run(main(m, r))
 
 
 MappingList().add(
