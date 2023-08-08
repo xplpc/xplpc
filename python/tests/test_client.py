@@ -63,12 +63,13 @@ def battery_level_async(m: Message, r: Response):
         suffix = m.get("suffix")
         r(f"100{suffix}")
 
-    # create and set a new event loop
+    # create a new event loop
     loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
 
-    # call async function in the new event loop
-    loop.run_until_complete(main())
+    try:
+        loop.run_until_complete(main())
+    finally:
+        loop.close()
 
 
 def reverse(m: Message, r: Response):
