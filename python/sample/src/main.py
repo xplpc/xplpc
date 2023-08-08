@@ -30,10 +30,21 @@ config = Config(serializer)
 XPLPC().initialize(config)
 
 
-def battery_level(m: Message, r: Response):
+global_loop = asyncio.get_event_loop()
+
+
+async def main(m, r):
+    # simulate a long-running task with asyncio.sleep
+    await asyncio.sleep(0.1)
+
+    # return response
     suffix = m.get("suffix")
     battery = psutil.sensors_battery()
     r(f"{battery.percent}{suffix}")
+
+
+def battery_level(m: Message, r: Response):
+    asyncio.run(main(m, r))
 
 
 MappingList().add(
@@ -209,5 +220,6 @@ class MyApp(MDApp):
 
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(async_runTouchApp(MyApp().build(), async_lib="asyncio"))
+    global_loop.run_until_complete(
+        async_runTouchApp(MyApp().build(), async_lib="asyncio")
+    )

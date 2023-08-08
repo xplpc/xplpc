@@ -1,4 +1,3 @@
-import json
 import logging as log
 import os
 import platform
@@ -41,21 +40,23 @@ class PlatformProxy:
         self.libc = cdll.LoadLibrary(lib_path)
 
         # declare the prototypes for the functions.
-        OnInitializePlatform = CFUNCTYPE(None)
-        OnFinalizePlatform = CFUNCTYPE(None)
-        OnHasMapping = CFUNCTYPE(c_bool, c_char_p, c_size_t)
-        OnNativeProxyCallback = CFUNCTYPE(None, c_char_p, c_size_t, c_char_p, c_size_t)
-        OnNativeProxyCall = CFUNCTYPE(None, c_char_p, c_size_t, c_char_p, c_size_t)
+        on_initialize_platform_type = CFUNCTYPE(None)
+        on_finalize_platform_type = CFUNCTYPE(None)
+        on_has_mapping_type = CFUNCTYPE(c_bool, c_char_p, c_size_t)
+        on_native_proxy_callback = CFUNCTYPE(
+            None, c_char_p, c_size_t, c_char_p, c_size_t
+        )
+        on_native_proxy_call = CFUNCTYPE(None, c_char_p, c_size_t, c_char_p, c_size_t)
 
         log.debug("Binding xplpc_core_initialize...")
         self.xplpc_core_initialize = self.libc.xplpc_core_initialize
         self.xplpc_core_initialize.argtypes = [
             c_bool,
-            OnInitializePlatform,
-            OnFinalizePlatform,
-            OnHasMapping,
-            OnNativeProxyCall,
-            OnNativeProxyCallback,
+            on_initialize_platform_type,
+            on_finalize_platform_type,
+            on_has_mapping_type,
+            on_native_proxy_call,
+            on_native_proxy_callback,
         ]
 
         log.debug("Binding xplpc_core_finalize...")
@@ -85,12 +86,16 @@ class PlatformProxy:
         ]
 
         log.debug("Binding with Python...")
-        self.initialize_callback = OnInitializePlatform(self.onInitializePlatform)
-        self.finalize_callback = OnFinalizePlatform(self.onFinalizePlatform)
-        self.has_mapping_callback = OnHasMapping(self.onHasMapping)
-        self.native_proxy_call_callback = OnNativeProxyCall(self.onNativeProxyCall)
-        self.native_proxy_callback_callback = OnNativeProxyCallback(
-            self.onNativeProxyCallback
+        self.initialize_callback = on_initialize_platform_type(
+            self.on_initialize_platform
+        )
+        self.finalize_callback = on_finalize_platform_type(self.on_finalize_platform)
+        self.has_mapping_callback = on_has_mapping_type(self.on_has_mapping)
+        self.native_proxy_call_callback = on_native_proxy_call(
+            self.on_native_proxy_call
+        )
+        self.native_proxy_callback_callback = on_native_proxy_callback(
+            self.on_native_proxy_callback
         )
 
         log.debug("Calling xplpc_core_initialize...")
@@ -107,16 +112,16 @@ class PlatformProxy:
         is_init = self.xplpc_core_is_initialized()
         log.debug(f"Is initialized? {is_init}")
 
-    def onInitializePlatform(self):
+    def on_initialize_platform(self):
         pass
 
-    def onFinalizePlatform(self):
+    def on_finalize_platform(self):
         MappingList().clear()
 
-    def onHasMapping(self, name, nameSize):
+    def on_has_mapping(self, name, nameSize):
         return MappingList().has(name[:nameSize].decode())
 
-    def onNativeProxyCall(self, key, keySize, data, dataSize):
+    def on_native_proxy_call(self, key, keySize, data, dataSize):
         from xplpc.core.xplpc import XPLPC
 
         keyStr = key[:keySize].decode()
@@ -170,11 +175,24 @@ class PlatformProxy:
             log.error(f"[PlatformProxy : call] Error: {e}")
             self.native_call_proxy_callback(keyStr, "")
 
-    def onNativeProxyCallback(self, key, keySize, data, dataSize):
-        CallbackList().execute(
-            key[:keySize].decode(),
-            data[:dataSize].decode(),
-        )
+    def on_native_proxy_callback(self, key, keySize, data, dataSize):
+        try:
+            key_decoded = key[:keySize].decode()
+        except UnicodeDecodeError:
+            log.error(
+                f"[PlatformProxy : on_native_proxy_callback] Unable to decode key: {key[:keySize]}"
+            )
+            key_decoded = ""
+
+        try:
+            data_decoded = data[:dataSize].decode()
+        except UnicodeDecodeError:
+            log.error(
+                f"[PlatformProxy : on_native_proxy_callback] Unable to decode data: {data[:dataSize]}"
+            )
+            data_decoded = ""
+
+        CallbackList().execute(key_decoded, data_decoded)
 
     def native_call_proxy_callback(self, key, data):
         # create ctypes string buffer
