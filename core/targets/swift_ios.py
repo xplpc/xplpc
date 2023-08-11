@@ -153,7 +153,7 @@ if has_tvos_simulator_arm64:
                 "supported_platform": "AppleTVSimulator",
                 "sdk": "appletvsimulator",
                 "group": "tvos-simulator",
-                "platform": "SIMULATOR_TVOS",
+                "platform": "SIMULATORARM64_TVOS",
                 "sdk_version": "11.0",
                 "enable_arc": True,
                 "enable_bitcode": False,
