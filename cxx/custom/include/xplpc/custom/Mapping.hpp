@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
+#include <string>
 #include <thread>
 
 #include "xplpc/custom/AllTypes.hpp"
@@ -41,6 +42,7 @@ public:
         MappingList::shared()->add("sample.image.grayscale", Map::create<std::vector<uint8_t>, std::vector<uint8_t>, int, int>({"image", "width", "height"}, &callbackImageToGrayscale));
         MappingList::shared()->add("sample.image.grayscale.dataview", Map::create<std::string, DataView>({"dataView"}, &callbackImageToGrayscaleFromDataView));
         MappingList::shared()->add("sample.dataview", Map::create<DataView>({}, &callbackDataView));
+        MappingList::shared()->add("sample.version", Map::create<std::string>({}, &callbackVersion));
     }
 
     static void callbackLogin(const Message &m, const Response r)
@@ -264,6 +266,23 @@ public:
         auto dataView = DataView{imageData, size};
 
         r(dataView);
+    }
+
+    static void callbackVersion(const Message &m, const Response r)
+    {
+#ifdef XPLPC_VERSION
+#define XPLPC_VERSION_STR XPLPC_VERSION
+#else
+#define XPLPC_VERSION_STR "0.0.0"
+#endif
+
+#ifdef XPLPC_VERSION_CODE
+#define XPLPC_VERSION_CODE_STR XPLPC_VERSION_CODE
+#else
+#define XPLPC_VERSION_CODE_STR "0"
+#endif
+
+        r(std::string(XPLPC_VERSION_STR) + " (" + std::string(XPLPC_VERSION_CODE_STR) + ")");
     }
 };
 

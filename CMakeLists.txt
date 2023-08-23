@@ -184,6 +184,8 @@ else()
             XCODE_ATTRIBUTE_MODULEMAP_FILE "swift/support/module.modulemap"
             XCODE_ATTRIBUTE_BUILD_LIBRARY_FOR_DISTRIBUTION YES
             PUBLIC_HEADER "${XPLPC_PUBLIC_HEADER_FILES}"
+            MACOSX_FRAMEWORK_BUNDLE_VERSION "${XPLPC_VERSION}" # machine readable
+            MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${XPLPC_VERSION}" # user visible
         )
     elseif(XPLPC_TARGET STREQUAL "wasm")
         set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -s \"EXPORTED_FUNCTIONS=['_malloc', '_free']\"")
@@ -310,4 +312,10 @@ if(XPLPC_ENABLE_TESTS)
         include(GoogleTest)
         gtest_add_tests(TARGET ${XPLPC_PROJECT_NAME}-tests)
     endif()
+
+    # compile definitions
+    target_compile_definitions(${XPLPC_PROJECT_NAME}-tests PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
 endif()
+
+# compile definitions
+target_compile_definitions(${XPLPC_PROJECT_NAME} PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
