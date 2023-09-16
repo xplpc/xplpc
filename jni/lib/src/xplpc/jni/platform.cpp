@@ -25,7 +25,7 @@ extern "C"
 
         // initialize jni platform proxy
         auto jniPlatformProxy = JNIPlatformProxy::shared();
-        jniPlatformProxy->setJavaVM(jvm);
+        jniPlatformProxy->setPlatformJavaVM(jvm);
         jniPlatformProxy->initialize();
 
         PlatformProxyList::shared()->insert(0, jniPlatformProxy);
@@ -45,12 +45,7 @@ extern "C"
         // clang-format off
         Client::call(jniUTF8FromString(env, data), [key](const auto &response) {
             auto proxy = JNIPlatformProxy::shared();
-            auto env = proxy->jniGetThreadEnv();
-
-            jclass clazz = proxy->jniFindClass("com/xplpc/proxy/PlatformProxy");
-            jmethodID methodID = env->GetStaticMethodID(clazz, "onNativeProxyCallback", "(Ljava/lang/String;Ljava/lang/String;)V");
-
-            env->CallStaticVoidMethod(clazz, methodID, key, jniStringFromUTF8(env, response));
+            proxy->onNativeProxyCallback(key, response);
         });
         // clang-format on
     }

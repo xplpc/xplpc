@@ -1,5 +1,6 @@
 #pragma once
 
+#include "xplpc/jni/jni_bind_release.h"
 #include "xplpc/jni/support.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
@@ -23,18 +24,24 @@ public:
     virtual void callProxy(const std::string &key, const std::string &data) override;
     virtual bool hasMapping(const std::string &name) override;
 
-    void setJavaVM(JavaVM *jvm);
-    JNIEnv *jniGetThreadEnv();
-    JNIEnv *jniGetOptThreadEnv();
-    jclass jniFindClass(const char *name);
+    void onNativeProxyCallback(const jstring &key, const std::string &data);
+    void setPlatformJavaVM(JavaVM *pjvm);
 
 private:
     static std::shared_ptr<JNIPlatformProxy> instance;
 
-    thread_local static JNIEnv *threadEnv;
-    JavaVM *javaVM;
-    jobject classLoader;
-    jmethodID classLoaderMethodID;
+    static constexpr ::jni::Class kPlatformProxy{
+        "com/xplpc/proxy/PlatformProxy",
+        ::jni::Static{
+            ::jni::Method{"onInitializePlatform", ::jni::Return<void>{}, ::jni::Params{}},
+            ::jni::Method{"onFinalizePlatform", ::jni::Return<void>{}, ::jni::Params{}},
+            ::jni::Method{"onNativeProxyCall", ::jni::Return<void>{}, ::jni::Params<jstring, jstring>{}},
+            ::jni::Method{"onHasMapping", ::jni::Return<jboolean>{}, ::jni::Params<jstring>{}},
+            ::jni::Method{"onNativeProxyCallback", ::jni::Return<void>{}, ::jni::Params<jstring, jstring>{}},
+        },
+    };
+
+    JavaVM *platformJavaVM;
 };
 
 } // namespace proxy

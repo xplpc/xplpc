@@ -2,6 +2,7 @@
 set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/jni/support.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/proxy/JNIPlatformProxy.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/jni/jni_bind_release.h"
     PARENT_SCOPE
 )
 
