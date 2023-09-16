@@ -1,6 +1,4 @@
 #include "xplpc/proxy/JNIPlatformProxy.hpp"
-#include "spdlog/spdlog.h"
-
 #include <cassert>
 
 namespace xplpc
