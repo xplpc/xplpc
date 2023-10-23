@@ -14,6 +14,8 @@ if(XPLPC_ENABLE_TESTS)
     if(${XPLPC_TARGET} MATCHES "^(cxx|c)-(static|shared)$")
         find_package(GTest REQUIRED CONFIG)
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE GTest::gtest GTest::gtest_main)
+
         include(GoogleTest)
+        gtest_add_tests(TARGET ${XPLPC_PROJECT_NAME}-tests)
     endif()
 endif()
