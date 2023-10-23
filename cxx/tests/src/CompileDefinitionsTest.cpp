@@ -66,3 +66,21 @@ TEST_F(GeneralTest, TestVersion)
     });
     // clang-format on
 }
+
+TEST_F(GeneralTest, TestTarget)
+{
+    auto request = Request{"sample.target"};
+
+    // clang-format off
+    Client::call<std::string>(request, [](const auto &response) {
+        EXPECT_NE(response, std::nullopt);
+
+        if (response)
+        {
+            auto target = response.value();
+            EXPECT_NE("", target);
+            EXPECT_NE("unknown", target);
+        }
+    });
+    // clang-format on
+}
