@@ -22,7 +22,7 @@ build_type = "Release"
 build_type_kotlin = "RelWithDebInfo"
 
 # dependency (cpm, conan)
-dependency_tool = "conan"
+dependency_tool = "cpm"
 
 # serializer
 serializer = "json"
