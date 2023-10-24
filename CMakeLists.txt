@@ -66,18 +66,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 
-# download dependency tool
-if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-downloader.cmake)
-endif()
-
-# setup all dependencies
-if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-dependency.cmake)
-elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
-    include(${CMAKE_SOURCE_DIR}/cmake/conan/conan-dependency.cmake)
-endif()
-
 # setup log
 if(XPLPC_ENABLE_LOG)
     add_compile_definitions(XPLPC_ENABLE_LOG)
@@ -142,6 +130,20 @@ else()
 
         set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
         add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
+    elseif(XPLPC_TARGET STREQUAL "c-static")
+        add_compile_definitions(XPLPC_TARGET_C)
+        add_subdirectory(c/lib)
+
+        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+        add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
+        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+    elseif(XPLPC_TARGET STREQUAL "c-shared")
+        add_compile_definitions(XPLPC_TARGET_C)
+        add_subdirectory(c/lib)
+
+        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+        add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
+        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
     elseif(XPLPC_TARGET STREQUAL "kotlin")
         add_compile_definitions(XPLPC_TARGET_KOTLIN)
         add_subdirectory(jni/lib)
@@ -165,9 +167,6 @@ else()
         set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
         add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
         target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC objc/lib/include)
-
-        find_library(FWK_FOUNDATION Foundation)
-        target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${FWK_FOUNDATION})
 
         set_target_properties(${XPLPC_PROJECT_NAME} PROPERTIES
             FRAMEWORK TRUE
@@ -200,20 +199,6 @@ else()
 
         set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
         add_executable(${XPLPC_PROJECT_NAME} "${XPLPC_ALL_FILES}")
-    elseif(XPLPC_TARGET STREQUAL "c-static")
-        add_compile_definitions(XPLPC_TARGET_C)
-        add_subdirectory(c/lib)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
-        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
-    elseif(XPLPC_TARGET STREQUAL "c-shared")
-        add_compile_definitions(XPLPC_TARGET_C)
-        add_subdirectory(c/lib)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
     else()
         message(FATAL_ERROR "Target is invalid: ${XPLPC_TARGET}")
     endif()
@@ -232,31 +217,13 @@ if(XPLPC_ADD_CUSTOM_DATA)
     target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_CUSTOM_DATA_INCLUDE_PATH})
 endif()
 
-# dependencies
-target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
+# compile definitions
+target_compile_definitions(${XPLPC_PROJECT_NAME} PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
 
-# android dependencies
-if(XPLPC_TARGET STREQUAL "kotlin")
-    if (CMAKE_SYSTEM_NAME MATCHES "Android")
-        find_library(ANDROID_LIB android)
-        find_library(ANDROID_LOG_LIB log)
-        target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
-    else()
-        target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include)
-
-        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-            target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include/win32)
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include/darwin)
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-            target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include/linux)
-        endif()
-    endif()
-endif()
-
-# serializers
-if (XPLPC_ENABLE_SERIALIZER_FOR_JSON)
-    target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
+# apple frameworks
+if (APPLE)
+    find_library(FWK_FOUNDATION Foundation REQUIRED)
+    target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE ${FWK_FOUNDATION})
 endif()
 
 # tests
@@ -264,23 +231,27 @@ if(XPLPC_ENABLE_TESTS)
     if(XPLPC_TARGET STREQUAL "cxx-static" OR XPLPC_TARGET STREQUAL "cxx-shared")
         enable_testing()
         add_subdirectory(cxx/tests)
-        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
 
+        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
         add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE GTest::gtest GTest::gtest_main)
         target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE cxx/tests/include)
+    elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
+        enable_testing()
+        add_subdirectory(c/tests)
 
-        include(GoogleTest)
-        gtest_add_tests(TARGET ${XPLPC_PROJECT_NAME}-tests)
+        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
+        add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
+
+        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
+        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE c/tests/include)
     elseif(XPLPC_TARGET STREQUAL "swift")
-        find_library(FOUNDATION_LIBRARY Foundation)
-        target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE ${FOUNDATION_LIBRARY})
+        find_package(XCTest REQUIRED)
 
         enable_testing()
         set_target_properties(${XPLPC_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_ENABLE_TESTABILITY YES)
-        find_package(XCTest REQUIRED)
+
         add_subdirectory(swift/tests)
         set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
 
@@ -296,26 +267,25 @@ if(XPLPC_ENABLE_TESTS)
         )
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${FOUNDATION_LIBRARY})
+        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${FWK_FOUNDATION})
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE "c++")
-    elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
-        enable_testing()
-        add_subdirectory(c/tests)
-        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
-
-        add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
-
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE GTest::gtest GTest::gtest_main)
-        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE c/tests/include)
-
-        include(GoogleTest)
-        gtest_add_tests(TARGET ${XPLPC_PROJECT_NAME}-tests)
     endif()
 
     # compile definitions
     target_compile_definitions(${XPLPC_PROJECT_NAME}-tests PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
 endif()
 
-# compile definitions
-target_compile_definitions(${XPLPC_PROJECT_NAME} PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
+# download dependency tool
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-downloader.cmake)
+endif()
+
+# setup all dependencies
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-dependency.cmake)
+elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
+    include(${CMAKE_SOURCE_DIR}/cmake/conan/conan-dependency.cmake)
+endif()
+
+# java dependencies
+include(${CMAKE_SOURCE_DIR}/cmake/java/java-dependency.cmake)

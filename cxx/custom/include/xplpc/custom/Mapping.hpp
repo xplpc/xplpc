@@ -43,6 +43,7 @@ public:
         MappingList::shared()->add("sample.image.grayscale.dataview", Map::create<std::string, DataView>({"dataView"}, &callbackImageToGrayscaleFromDataView));
         MappingList::shared()->add("sample.dataview", Map::create<DataView>({}, &callbackDataView));
         MappingList::shared()->add("sample.version", Map::create<std::string>({}, &callbackVersion));
+        MappingList::shared()->add("sample.target", Map::create<std::string>({}, &callbackTarget));
     }
 
     static void callbackLogin(const Message &m, const Response r)
@@ -283,6 +284,17 @@ public:
 #endif
 
         r(std::string(XPLPC_VERSION_STR) + " (" + std::string(XPLPC_VERSION_CODE_STR) + ")");
+    }
+
+    static void callbackTarget(const Message &m, const Response r)
+    {
+#ifdef XPLPC_TARGET
+#define XPLPC_TARGET_STR XPLPC_TARGET
+#else
+#define XPLPC_TARGET_STR "unknown"
+#endif
+
+        r(std::string(XPLPC_TARGET_STR));
     }
 };
 
