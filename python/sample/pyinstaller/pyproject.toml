@@ -34,7 +34,7 @@ kivy = "^2.2.1"
 kivymd = "^1.1.1"
 
 [tool.poetry.dev-dependencies]
-pyinstaller = "5.13.0"
+pyinstaller = "^5.13.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
