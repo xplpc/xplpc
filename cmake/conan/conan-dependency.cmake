@@ -10,7 +10,7 @@ if (XPLPC_ENABLE_SERIALIZER_FOR_JSON)
 endif()
 
 # test
-if(XPLPC_ENABLE_TESTS)
+if(XPLPC_BUILD_TESTS)
     if(${XPLPC_TARGET} MATCHES "^(cxx|c)-(static|shared)$")
         find_package(GTest REQUIRED CONFIG)
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE GTest::gtest GTest::gtest_main)

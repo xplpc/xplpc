@@ -16,7 +16,7 @@ if(XPLPC_ENABLE_SERIALIZER_FOR_JSON)
 endif()
 
 # test
-if(XPLPC_ENABLE_TESTS)
+if(XPLPC_BUILD_TESTS)
     if("${XPLPC_TARGET}" MATCHES "^(cxx|c)-(static|shared)$")
         CPMAddPackage("gh:google/googletest@1.13.0")
 
