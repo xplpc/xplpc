@@ -45,7 +45,7 @@ def run_task_build_static():
         target_data=target_data,
         build_folder=target,
         has_tests=False,
-        has_samples=False,
+        has_sample=False,
         has_pic=False,
         has_custom_data=True,
     )
@@ -88,7 +88,7 @@ def run_task_build_shared():
         target_data=target_data,
         build_folder=target,
         has_tests=False,
-        has_samples=False,
+        has_sample=False,
         has_pic=True,
         has_custom_data=True,
     )
@@ -131,7 +131,7 @@ def run_task_build_sample():
         target_data=target_data,
         build_folder="c-sample",
         has_tests=False,
-        has_samples=True,
+        has_sample=True,
         has_pic=False,
         has_custom_data=False,
     )
@@ -147,8 +147,9 @@ def run_task_run_sample():
 
     target_data = get_target_data_for_platform()
     arch = target_data[0]["arch"]
+    bin_dir = os.path.join(build_dir, arch, "c", "sample", "bin")
 
-    r.run([util.run_name("xplpc")], cwd=os.path.join(build_dir, arch, "bin"))
+    r.run([util.run_name("xplpc-sample")], cwd=bin_dir)
 
     l.ok()
 
@@ -187,7 +188,7 @@ def run_task_build_leaks():
         target_data=target_data,
         build_folder="c-leaks",
         has_tests=False,
-        has_samples=True,
+        has_sample=True,
         has_pic=False,
         has_custom_data=False,
     )
@@ -208,8 +209,10 @@ def run_task_build_leaks():
                 "build",
                 "c-leaks",
                 arch,
+                "c",
+                "sample",
                 "bin",
-                util.exec_name("xplpc"),
+                util.exec_name("xplpc-sample"),
             ),
         ]
     )
@@ -252,7 +255,7 @@ def run_task_test():
         target_data=target_data,
         build_folder="c-test",
         has_tests=True,
-        has_samples=False,
+        has_sample=False,
         has_pic=False,
         has_custom_data=True,
     )
@@ -318,7 +321,7 @@ def do_build(
     target_data,
     build_folder,
     has_tests,
-    has_samples,
+    has_sample,
     has_pic,
     has_custom_data,
 ):
@@ -362,7 +365,7 @@ def do_build(
 
             if has_tests:
                 run_args.append("-o:h")
-                run_args.append("xplpc_enable_tests=True")
+                run_args.append("xplpc_build_tests=True")
 
             run_args.append("--build=missing")
             run_args.append("--update")
@@ -396,15 +399,15 @@ def do_build(
 
         # tests
         if has_tests:
-            run_args.append("-DXPLPC_ENABLE_TESTS=ON")
+            run_args.append("-DXPLPC_BUILD_TESTS=ON")
         else:
-            run_args.append("-DXPLPC_ENABLE_TESTS=OFF")
+            run_args.append("-DXPLPC_BUILD_TESTS=OFF")
 
         # sample
-        if has_samples:
-            run_args.append("-DXPLPC_ENABLE_SAMPLES=ON")
+        if has_sample:
+            run_args.append("-DXPLPC_BUILD_SAMPLE=ON")
         else:
-            run_args.append("-DXPLPC_ENABLE_SAMPLES=OFF")
+            run_args.append("-DXPLPC_BUILD_SAMPLE=OFF")
 
         # pic
         if has_pic:
