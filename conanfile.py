@@ -28,7 +28,7 @@ class TargetConan(ConanFile):
         self.requires("spdlog/1.12.0")
 
         if self.options.get_safe("xplpc_enable_serializer_for_json"):
-            self.requires("nlohmann_json/3.11.2")
+            self.requires("nlohmann_json/3.11.3")
 
         if self.options.get_safe("xplpc_build_tests"):
-            self.requires("gtest/1.13.0")
+            self.requires("gtest/1.14.0")
