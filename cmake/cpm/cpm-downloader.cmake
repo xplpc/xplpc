@@ -1,6 +1,6 @@
 # ref: https://github.com/cpm-cmake/CPM.cmake
 
-set(CPM_DOWNLOAD_VERSION 0.38.6)
+set(CPM_DOWNLOAD_VERSION 0.38.7)
 
 if(CPM_SOURCE_CACHE)
   set(CPM_DOWNLOAD_LOCATION "${CPM_SOURCE_CACHE}/cpm/CPM_${CPM_DOWNLOAD_VERSION}.cmake")
