@@ -25,7 +25,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/c-sample -DXPLPC_TARGET=c-static -DXPLPC_ENABLE_SAMPLES=ON
+    cmake -S . -B build/c-sample -DXPLPC_TARGET=c-static -DXPLPC_BUILD_SAMPLE=ON
     cmake --build build/c-sample
     ./build/c-sample/bin/xplpc
 
@@ -37,7 +37,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/c-leaks -DXPLPC_TARGET=c-static -DXPLPC_ENABLE_SAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
+    cmake -S . -B build/c-leaks -DXPLPC_TARGET=c-static -DXPLPC_BUILD_SAMPLE=ON -DCMAKE_BUILD_TYPE=Debug
     MallocStackLogging=1 cmake --build build/c-leaks
     leaks --atExit --list -- ./build/c-leaks/bin/xplpc
 

@@ -256,9 +256,9 @@ def do_build(target, build_type, platform, target_data, has_interface, has_tests
 
         # tests
         if has_tests:
-            run_args.append("-DXPLPC_ENABLE_TESTS=ON")
+            run_args.append("-DXPLPC_BUILD_TESTS=ON")
         else:
-            run_args.append("-DXPLPC_ENABLE_TESTS=OFF")
+            run_args.append("-DXPLPC_BUILD_TESTS=OFF")
 
         # arc
         if "enable_arc" in item:

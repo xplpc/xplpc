@@ -37,8 +37,9 @@ CMakeLists.txt.user
 *.reflectable.dart
 
 # custom
-build
-build-*
+build/
+build-*/
+build_*/
 
 # python
 *.egg-info

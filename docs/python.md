@@ -40,7 +40,7 @@ Install the sample dependencies:
 
 Run the sample executing on terminal:
 
-    python3 xplpc.py python-sample
+    python3 xplpc.py python-run-sample
 
 ## How to run the Python sample with PyInstaller
 

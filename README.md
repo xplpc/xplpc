@@ -2,7 +2,7 @@
     <a href="https://github.com/xplpc/xplpc" target="_blank" rel="noopener noreferrer">
         <img width="250" src="extras/images/logo.png" alt="XPLPC Logo">
     </a>
-    <br>    
+    <br>
     XPLPC - Cross Platform Lite Procedure Call
     <br>
 </p>
@@ -66,7 +66,7 @@ val request = Request(
 )
 
 Client.call<String>(request) { response ->
-    println("Returned Value: $response")    
+    println("Returned Value: $response")
 }
 ```
 

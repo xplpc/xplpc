@@ -6,7 +6,7 @@ It transfer serialized data between platforms using memory.
 
 Because this you need implement method `xplpc::proxy::initializePlatform` to initialize custom things on C++ side.
 
-See the custom data implementation for samples: `cxx/custom/src/xplpc/custom/NativePlatformProxy.cpp`.
+See the custom data implementation for sample: `cxx/custom/src/xplpc/custom/NativePlatformProxy.cpp`.
 
 If you don't implement this method, you will get this error when compile:
 
@@ -33,7 +33,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/cxx-sample -DXPLPC_TARGET=cxx-static -DXPLPC_ENABLE_SAMPLES=ON
+    cmake -S . -B build/cxx-sample -DXPLPC_TARGET=cxx-static -DXPLPC_BUILD_SAMPLE=ON
     cmake --build build/cxx-sample
     ./build/cxx-sample/bin/xplpc
 
@@ -45,7 +45,7 @@ Execute on terminal:
 
 or
 
-    cmake -S . -B build/cxx-leaks -DXPLPC_TARGET=cxx-static -DXPLPC_ENABLE_SAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
+    cmake -S . -B build/cxx-leaks -DXPLPC_TARGET=cxx-static -DXPLPC_BUILD_SAMPLE=ON -DCMAKE_BUILD_TYPE=Debug
     MallocStackLogging=1 cmake --build build/cxx-leaks
     leaks --atExit --list -- ./build/cxx-leaks/bin/xplpc
 

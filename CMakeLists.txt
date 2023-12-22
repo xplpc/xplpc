@@ -28,9 +28,9 @@ set(XPLPC_ADD_CUSTOM_DATA OFF CACHE BOOL "Build Custom Data")
 set(XPLPC_CUSTOM_DATA_PATH "cxx/custom" CACHE STRING "Custom Data Path")
 set(XPLPC_CUSTOM_DATA_INCLUDE_PATH "cxx/custom/include" CACHE STRING "Custom Data Include Path")
 set(XPLPC_ENABLE_SERIALIZER_FOR_JSON ON CACHE BOOL "Enable Serializer For Json")
-set(XPLPC_ENABLE_TESTS OFF CACHE BOOL "Enable Tests")
-set(XPLPC_ENABLE_SAMPLES OFF CACHE BOOL "Enable Samples")
 set(XPLPC_ENABLE_INTERFACE OFF CACHE BOOL "Enable Interface")
+set(XPLPC_BUILD_TESTS OFF CACHE BOOL "Build Tests")
+set(XPLPC_BUILD_SAMPLE OFF CACHE BOOL "Build Sample")
 set(XPLPC_INC_FILES "" CACHE INTERNAL "Include Files")
 set(XPLPC_SRC_FILES "" CACHE INTERNAL "Source Files")
 set(XPLPC_TESTS_INC_FILES "" CACHE INTERNAL "Tests Include Files")
@@ -65,18 +65,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "lib") # .so and .dylib
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
-
-# download dependency tool
-if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-downloader.cmake)
-endif()
-
-# setup all dependencies
-if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-dependency.cmake)
-elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
-    include(${CMAKE_SOURCE_DIR}/cmake/conan/conan-dependency.cmake)
-endif()
 
 # setup log
 if(XPLPC_ENABLE_LOG)
@@ -115,108 +103,87 @@ if(XPLPC_ADD_CUSTOM_DATA)
 endif()
 
 # target data
-if (XPLPC_ENABLE_SAMPLES)
-    if(XPLPC_TARGET STREQUAL "cxx-static" OR XPLPC_TARGET STREQUAL "cxx-shared")
-        add_compile_definitions(XPLPC_TARGET_CXX)
-        add_subdirectory(cxx/sample)
+if(XPLPC_TARGET STREQUAL "cxx-static")
+    add_compile_definitions(XPLPC_TARGET_CXX)
 
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_executable(${XPLPC_PROJECT_NAME} "${XPLPC_ALL_FILES}")
-    elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
-        add_compile_definitions(XPLPC_TARGET_C)
-        add_subdirectory(c/sample)
-        add_subdirectory(c/lib)
+    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+    add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
+elseif(XPLPC_TARGET STREQUAL "cxx-shared")
+    add_compile_definitions(XPLPC_TARGET_CXX)
 
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_executable(${XPLPC_PROJECT_NAME} "${XPLPC_ALL_FILES}")
-        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+    add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
+elseif(XPLPC_TARGET STREQUAL "c-static")
+    add_compile_definitions(XPLPC_TARGET_C)
+    add_subdirectory(c/lib)
+
+    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+    add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+elseif(XPLPC_TARGET STREQUAL "c-shared")
+    add_compile_definitions(XPLPC_TARGET_C)
+    add_subdirectory(c/lib)
+
+    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+    add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+elseif(XPLPC_TARGET STREQUAL "kotlin")
+    add_compile_definitions(XPLPC_TARGET_KOTLIN)
+    add_subdirectory(jni/lib)
+
+    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+    add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC jni/lib/include)
+elseif(XPLPC_TARGET STREQUAL "swift")
+    enable_language(Swift)
+    set(CMAKE_Swift_LANGUAGE_VERSION 5)
+
+    if (XPLPC_ENABLE_LOG)
+        set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -D XPLPC_ENABLE_LOG")
     endif()
+
+    add_compile_definitions(XPLPC_TARGET_SWIFT)
+    add_subdirectory(objc/lib)
+    add_subdirectory(swift/lib)
+    add_subdirectory(swift/support)
+
+    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+    add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC objc/lib/include)
+
+    set_target_properties(${XPLPC_PROJECT_NAME} PROPERTIES
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION A
+        MACOSX_FRAMEWORK_IDENTIFIER "com.xplpc.library"
+        VERSION ${XPLPC_VERSION} # "current version" in semantic format in Mach-O binary file
+        SOVERSION ${XPLPC_VERSION_CODE} # "compatibility version" in semantic format in Mach-O binary file
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+        XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH YES
+        XCODE_ATTRIBUTE_SKIP_INSTALL NO
+        XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.xplpc.library"
+        XCODE_ATTRIBUTE_DEFINES_MODULE YES
+        XCODE_ATTRIBUTE_MODULEMAP_FILE "swift/support/module.modulemap"
+        XCODE_ATTRIBUTE_BUILD_LIBRARY_FOR_DISTRIBUTION YES
+        PUBLIC_HEADER "${XPLPC_PUBLIC_HEADER_FILES}"
+        MACOSX_FRAMEWORK_BUNDLE_VERSION "${XPLPC_VERSION}" # machine readable
+        MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${XPLPC_VERSION}" # user visible
+    )
+elseif(XPLPC_TARGET STREQUAL "wasm")
+    set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -s \"EXPORTED_FUNCTIONS=['_malloc', '_free']\"")
+    set(XPLPC_WASM_COMPILER_FLAGS "-fwasm-exceptions")
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XPLPC_WASM_LINKER_FLAGS}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS}")
+
+    add_compile_definitions(XPLPC_TARGET_WASM)
+    add_subdirectory(wasm/lib)
+
+    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
+    add_executable(${XPLPC_PROJECT_NAME} "${XPLPC_ALL_FILES}")
 else()
-    if(XPLPC_TARGET STREQUAL "cxx-static")
-        add_compile_definitions(XPLPC_TARGET_CXX)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
-    elseif(XPLPC_TARGET STREQUAL "cxx-shared")
-        add_compile_definitions(XPLPC_TARGET_CXX)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-    elseif(XPLPC_TARGET STREQUAL "kotlin")
-        add_compile_definitions(XPLPC_TARGET_KOTLIN)
-        add_subdirectory(jni/lib)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC jni/lib/include)
-    elseif(XPLPC_TARGET STREQUAL "swift")
-        enable_language(Swift)
-        set(CMAKE_Swift_LANGUAGE_VERSION 5)
-
-        if (XPLPC_ENABLE_LOG)
-            set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -D XPLPC_ENABLE_LOG")
-        endif()
-
-        add_compile_definitions(XPLPC_TARGET_SWIFT)
-        add_subdirectory(objc/lib)
-        add_subdirectory(swift/lib)
-        add_subdirectory(swift/support)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC objc/lib/include)
-
-        find_library(FWK_FOUNDATION Foundation)
-        target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${FWK_FOUNDATION})
-
-        set_target_properties(${XPLPC_PROJECT_NAME} PROPERTIES
-            FRAMEWORK TRUE
-            FRAMEWORK_VERSION A
-            MACOSX_FRAMEWORK_IDENTIFIER "com.xplpc.library"
-            VERSION ${XPLPC_VERSION} # "current version" in semantic format in Mach-O binary file
-            SOVERSION ${XPLPC_VERSION_CODE} # "compatibility version" in semantic format in Mach-O binary file
-            XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-            XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH YES
-            XCODE_ATTRIBUTE_SKIP_INSTALL NO
-            XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++"
-            XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.xplpc.library"
-            XCODE_ATTRIBUTE_DEFINES_MODULE YES
-            XCODE_ATTRIBUTE_MODULEMAP_FILE "swift/support/module.modulemap"
-            XCODE_ATTRIBUTE_BUILD_LIBRARY_FOR_DISTRIBUTION YES
-            PUBLIC_HEADER "${XPLPC_PUBLIC_HEADER_FILES}"
-            MACOSX_FRAMEWORK_BUNDLE_VERSION "${XPLPC_VERSION}" # machine readable
-            MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${XPLPC_VERSION}" # user visible
-        )
-    elseif(XPLPC_TARGET STREQUAL "wasm")
-        set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -s \"EXPORTED_FUNCTIONS=['_malloc', '_free']\"")
-        set(XPLPC_WASM_COMPILER_FLAGS "-fwasm-exceptions")
-
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XPLPC_WASM_LINKER_FLAGS}")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS}")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS}")
-
-        add_compile_definitions(XPLPC_TARGET_WASM)
-        add_subdirectory(wasm/lib)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_executable(${XPLPC_PROJECT_NAME} "${XPLPC_ALL_FILES}")
-    elseif(XPLPC_TARGET STREQUAL "c-static")
-        add_compile_definitions(XPLPC_TARGET_C)
-        add_subdirectory(c/lib)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
-        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
-    elseif(XPLPC_TARGET STREQUAL "c-shared")
-        add_compile_definitions(XPLPC_TARGET_C)
-        add_subdirectory(c/lib)
-
-        set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-        add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-        target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
-    else()
-        message(FATAL_ERROR "Target is invalid: ${XPLPC_TARGET}")
-    endif()
+    message(FATAL_ERROR "Target is invalid: ${XPLPC_TARGET}")
 endif()
 
 # xplpc interface include path
@@ -232,55 +199,50 @@ if(XPLPC_ADD_CUSTOM_DATA)
     target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_CUSTOM_DATA_INCLUDE_PATH})
 endif()
 
-# dependencies
-target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
+# compile definitions
+target_compile_definitions(${XPLPC_PROJECT_NAME} PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
 
-# android dependencies
-if(XPLPC_TARGET STREQUAL "kotlin")
-    if (CMAKE_SYSTEM_NAME MATCHES "Android")
-        find_library(ANDROID_LIB android)
-        find_library(ANDROID_LOG_LIB log)
-        target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC ${ANDROID_LIB} ${ANDROID_LOG_LIB})
-    else()
-        target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include)
+# apple frameworks
+if (APPLE)
+    find_library(FWK_FOUNDATION Foundation REQUIRED)
+    target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE ${FWK_FOUNDATION})
+endif()
 
-        if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-            target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include/win32)
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include/darwin)
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-            target_include_directories(${XPLPC_PROJECT_NAME} PRIVATE $ENV{JAVA_HOME}/include/linux)
-        endif()
+# sample
+if (XPLPC_BUILD_SAMPLE)
+    if(XPLPC_TARGET STREQUAL "cxx-static" OR XPLPC_TARGET STREQUAL "cxx-shared")
+        add_subdirectory(cxx/sample)
+    elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
+        add_subdirectory(c/sample)
     endif()
 endif()
 
-# serializers
-if (XPLPC_ENABLE_SERIALIZER_FOR_JSON)
-    target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC nlohmann_json::nlohmann_json)
-endif()
-
 # tests
-if(XPLPC_ENABLE_TESTS)
+if(XPLPC_BUILD_TESTS)
     if(XPLPC_TARGET STREQUAL "cxx-static" OR XPLPC_TARGET STREQUAL "cxx-shared")
         enable_testing()
         add_subdirectory(cxx/tests)
-        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
 
+        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
         add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE GTest::gtest GTest::gtest_main)
         target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE cxx/tests/include)
+    elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
+        enable_testing()
+        add_subdirectory(c/tests)
 
-        include(GoogleTest)
-        gtest_add_tests(TARGET ${XPLPC_PROJECT_NAME}-tests)
+        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
+        add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
+
+        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
+        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE c/tests/include)
     elseif(XPLPC_TARGET STREQUAL "swift")
-        find_library(FOUNDATION_LIBRARY Foundation)
-        target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE ${FOUNDATION_LIBRARY})
+        find_package(XCTest REQUIRED)
 
         enable_testing()
         set_target_properties(${XPLPC_PROJECT_NAME} PROPERTIES XCODE_ATTRIBUTE_ENABLE_TESTABILITY YES)
-        find_package(XCTest REQUIRED)
+
         add_subdirectory(swift/tests)
         set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
 
@@ -296,26 +258,25 @@ if(XPLPC_ENABLE_TESTS)
         )
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${FOUNDATION_LIBRARY})
+        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${FWK_FOUNDATION})
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE "c++")
-    elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
-        enable_testing()
-        add_subdirectory(c/tests)
-        set(XPLPC_TESTS_ALL_FILES ${XPLPC_TESTS_INC_FILES} ${XPLPC_TESTS_SRC_FILES})
-
-        add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
-
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE GTest::gtest GTest::gtest_main)
-        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE c/tests/include)
-
-        include(GoogleTest)
-        gtest_add_tests(TARGET ${XPLPC_PROJECT_NAME}-tests)
     endif()
 
     # compile definitions
     target_compile_definitions(${XPLPC_PROJECT_NAME}-tests PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
 endif()
 
-# compile definitions
-target_compile_definitions(${XPLPC_PROJECT_NAME} PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
+# download dependency tool
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-downloader.cmake)
+endif()
+
+# setup all dependencies
+if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
+    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-dependency.cmake)
+elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
+    include(${CMAKE_SOURCE_DIR}/cmake/conan/conan-dependency.cmake)
+endif()
+
+# java dependencies
+include(${CMAKE_SOURCE_DIR}/cmake/java/java-dependency.cmake)
