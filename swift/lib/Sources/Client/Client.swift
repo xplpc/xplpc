@@ -30,6 +30,7 @@ public class Client {
     }
 
     #if compiler(>=5.5) && canImport(_Concurrency)
+        @available(iOS 13.0, macOS 10.15, macCatalyst 13.0, watchOS 6.0, tvOS 13.0, visionOS 7.0, *)
         public static func callAsync<T: Decodable>(_ request: Request) async -> T? {
             await withCheckedContinuation { continuation in
                 call(request) { (result: T?) in
@@ -38,6 +39,7 @@ public class Client {
             }
         }
 
+        @available(iOS 13.0, macOS 10.15, macCatalyst 13.0, watchOS 6.0, tvOS 13.0, visionOS 7.0, *)
         public static func callAsync(_ requestData: String) async -> String {
             await withCheckedContinuation { continuation in
                 call(requestData) { response in
