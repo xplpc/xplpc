@@ -4,7 +4,10 @@ import com.xplpc.message.Message
 import com.xplpc.message.Response
 
 object Callback {
-    fun batteryLevel(data: Message, r: Response) {
+    fun batteryLevel(
+        data: Message,
+        r: Response
+    ) {
         val level = 100
 
         val suffix = data.value<String>("suffix")

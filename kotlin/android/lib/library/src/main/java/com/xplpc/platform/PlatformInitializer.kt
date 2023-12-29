@@ -41,11 +41,18 @@ class PlatformInitializer : ContentProvider() {
         return null
     }
 
-    override fun insert(uri: Uri, values: ContentValues?): Uri? {
+    override fun insert(
+        uri: Uri,
+        values: ContentValues?
+    ): Uri? {
         return null
     }
 
-    override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
+    override fun delete(
+        uri: Uri,
+        selection: String?,
+        selectionArgs: Array<out String>?
+    ): Int {
         return 0
     }
 

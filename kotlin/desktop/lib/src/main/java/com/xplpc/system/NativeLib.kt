@@ -17,8 +17,9 @@ object NativeLib {
                 libFile.delete()
             }
 
-            val inputStream = NativeLib::class.java.getResourceAsStream("/native-libs/$libFileName")
-                ?: throw UnsatisfiedLinkError("Library '$libFileName' not found in the classpath.")
+            val inputStream =
+                NativeLib::class.java.getResourceAsStream("/native-libs/$libFileName")
+                    ?: throw UnsatisfiedLinkError("Library '$libFileName' not found in the classpath.")
 
             FileOutputStream(libFile).use { output ->
                 inputStream.copyTo(output)

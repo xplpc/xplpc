@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 @Preview
-fun App() {
+fun app() {
     val scope = rememberCoroutineScope()
 
     MaterialTheme {
@@ -61,21 +61,23 @@ fun App() {
         ) {
             Text(
                 text = "BATTERY LEVEL",
-                style = TextStyle(
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                ),
+                style =
+                    TextStyle(
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                    ),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = batteryLevelResponse,
-                style = TextStyle(
-                    color = Color.Black,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp,
-                ),
+                style =
+                    TextStyle(
+                        color = Color.Black,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp,
+                    ),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -100,11 +102,12 @@ fun App() {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "LOGIN",
-                style = TextStyle(
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                ),
+                style =
+                    TextStyle(
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                    ),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -132,20 +135,22 @@ fun App() {
                 )
                 Text(
                     text = "Remember",
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 12.sp,
-                    ),
+                    style =
+                        TextStyle(
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                        ),
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = loginResponse,
-                style = TextStyle(
-                    color = Color.Black,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp,
-                ),
+                style =
+                    TextStyle(
+                        color = Color.Black,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp,
+                    ),
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -154,12 +159,13 @@ fun App() {
                     loginResponse = "Loading..."
 
                     scope.launch(Dispatchers.IO) {
-                        val request = Request(
-                            "sample.login",
-                            Param("username", usernameTextController.text),
-                            Param("password", passwordTextController.text),
-                            Param("remember", rememberMe)
-                        )
+                        val request =
+                            Request(
+                                "sample.login",
+                                Param("username", usernameTextController.text),
+                                Param("password", passwordTextController.text),
+                                Param("remember", rememberMe)
+                            )
 
                         Client.call<String>(request) { response ->
                             loginResponse = response ?: "ERROR"
@@ -175,13 +181,14 @@ fun App() {
     }
 }
 
-fun main() = application {
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Runner",
-    ) {
-        PlatformInitializer.initialize()
-        Mapping.initialize()
-        App()
+fun main() =
+    application {
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "Runner",
+        ) {
+            PlatformInitializer.initialize()
+            Mapping.initialize()
+            app()
+        }
     }
-}

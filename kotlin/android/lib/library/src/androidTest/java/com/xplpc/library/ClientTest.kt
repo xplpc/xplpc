@@ -15,6 +15,7 @@ import com.xplpc.message.Request
 import com.xplpc.message.Response
 import com.xplpc.type.DataView
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -25,11 +26,17 @@ import java.nio.ByteBuffer
 class ClientTest {
     companion object {
         @Suppress("UNUSED_PARAMETER")
-        fun reverseResponse(data: Message, r: Response) {
+        fun reverseResponse(
+            data: Message,
+            r: Response
+        ) {
             r("ok")
         }
 
-        fun batteryLevel(data: Message, r: Response) {
+        fun batteryLevel(
+            data: Message,
+            r: Response
+        ) {
             val appContext = InstrumentationRegistry.getInstrumentation().targetContext
             val bm = appContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
             val level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
@@ -79,6 +86,21 @@ class ClientTest {
     }
 
     @Test
+    fun batteryLevelCallAsync() =
+        runTest {
+            MappingList.add(
+                "platform.battery.level",
+                MappingItem(
+                    ClientTest::batteryLevel
+                )
+            )
+
+            val request = Request("platform.battery.level", Param("suffix", "%"))
+            val response: String? = Client.callAsync<String>(request)
+            assertEquals("100%", response)
+        }
+
+    @Test
     fun batteryLevelInvalidCast() {
         MappingList.add(
             "platform.battery.level",
@@ -96,12 +118,13 @@ class ClientTest {
 
     @Test
     fun login() {
-        val request = Request(
-            "sample.login",
-            Param("username", "paulo"),
-            Param("password", "123456"),
-            Param("remember", true)
-        )
+        val request =
+            Request(
+                "sample.login",
+                Param("username", "paulo"),
+                Param("password", "123456"),
+                Param("remember", true)
+            )
 
         Client.call<String>(request) { response ->
             assertEquals("LOGGED-WITH-REMEMBER", response)
@@ -110,12 +133,13 @@ class ClientTest {
 
     @Test
     fun loginAsync() {
-        val request = Request(
-            "sample.login",
-            Param("username", "paulo"),
-            Param("password", "123456"),
-            Param("remember", true)
-        )
+        val request =
+            Request(
+                "sample.login",
+                Param("username", "paulo"),
+                Param("password", "123456"),
+                Param("remember", true)
+            )
 
         runBlocking {
             Client.call<String>(request) { response ->
@@ -126,12 +150,13 @@ class ClientTest {
 
     @Test
     fun loginInvalidCast() {
-        val request = Request(
-            "sample.login",
-            Param("username", "paulo"),
-            Param("password", "123456"),
-            Param("remember", true)
-        )
+        val request =
+            Request(
+                "sample.login",
+                Param("username", "paulo"),
+                Param("password", "123456"),
+                Param("remember", true)
+            )
 
         Client.call<Boolean>(request) { response ->
             assertEquals(false, response)
@@ -175,16 +200,17 @@ class ClientTest {
     @Test
     fun grayscaleImageWithDataView() {
         // in kotlin the 255 byte value is -1
-        val data = byteArrayOf(
-            // red pixel
-            -1, 0, 0, -1,
-            // green pixel
-            0, -1, 0, -1,
-            // blue pixel
-            0, 0, -1, -1,
-            // transparent pixel
-            0, 0, 0, 0,
-        )
+        val data =
+            byteArrayOf(
+                // red pixel
+                -1, 0, 0, -1,
+                // green pixel
+                0, -1, 0, -1,
+                // blue pixel
+                0, 0, -1, -1,
+                // transparent pixel
+                0, 0, 0, 0,
+            )
 
         val buffer: ByteBuffer = ByteBuffer.allocateDirect(data.size)
         buffer.put(data)
@@ -207,16 +233,17 @@ class ClientTest {
     @Test
     fun grayscaleImageWithDataViewAsync() {
         // in kotlin the 255 byte value is -1
-        val data = byteArrayOf(
-            // red pixel
-            -1, 0, 0, -1,
-            // green pixel
-            0, -1, 0, -1,
-            // blue pixel
-            0, 0, -1, -1,
-            // transparent pixel
-            0, 0, 0, 0,
-        )
+        val data =
+            byteArrayOf(
+                // red pixel
+                -1, 0, 0, -1,
+                // green pixel
+                0, -1, 0, -1,
+                // blue pixel
+                0, 0, -1, -1,
+                // transparent pixel
+                0, 0, 0, 0,
+            )
 
         val buffer: ByteBuffer = ByteBuffer.allocateDirect(data.size)
         buffer.put(data)

@@ -48,10 +48,11 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun onBtSubmitForBatteryLevelClick() {
-        val request = Request(
-            "platform.battery.level",
-            Param("suffix", "%")
-        )
+        val request =
+            Request(
+                "platform.battery.level",
+                Param("suffix", "%")
+            )
 
         Client.call<String>(request) { response ->
             launch {
@@ -62,12 +63,13 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun onBtSubmitForLoginClick() {
-        val request = Request(
-            "sample.login",
-            Param("username", binding.edFormUsername.text.toString()),
-            Param("password", binding.edFormPassword.text.toString()),
-            Param("remember", binding.ckRemember.isChecked),
-        )
+        val request =
+            Request(
+                "sample.login",
+                Param("username", binding.edFormUsername.text.toString()),
+                Param("password", binding.edFormPassword.text.toString()),
+                Param("remember", binding.ckRemember.isChecked),
+            )
 
         Client.call<String>(request) { response ->
             launch {
@@ -77,9 +79,10 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     }
 
     private fun onBtSubmitForCameraClick() {
-        intentForPermission = Intent(this, CameraActivity::class.java).apply {
-            // you can add values(if any) to pass to the next class or avoid using `.apply`
-        }
+        intentForPermission =
+            Intent(this, CameraActivity::class.java).apply {
+                // you can add values(if any) to pass to the next class or avoid using `.apply`
+            }
 
         checkPermissions(permissions)
     }
