@@ -409,4 +409,16 @@ class ClientTest {
             }
         }
     }
+
+    @Test
+    fun batteryLevelCallAsyncFromString() =
+        runTest {
+            setUp()
+
+            MappingList.add("platform.battery.level", MappingItem(ClientTest::batteryLevel))
+
+            val request = Request("platform.battery.level", Param("suffix", "%"))
+            val response = Client.callAsync(request.data)
+            assertEquals("{\"r\":\"100%\"}", response)
+        }
 }
