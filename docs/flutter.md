@@ -68,7 +68,7 @@ Follow these steps to setup your project:
 ```yaml
 dependencies:
   reflectable: ^4.0.0`
-  
+
 dev_dependencies:
   build_runner: ^2.0.0
 ```
@@ -86,6 +86,21 @@ void main() {
 ```
 
 5.  Anotate every class that you will use with XPLPC with `@reflectable` and create a method `fromJson`, like this class: `flutter/plugin/lib/type/dataview.dart`.
+
+## Syntax sugar
+
+You can use `callAsync` to execute the method as async function, example:
+
+```dart
+var request = Request("sample.login", [
+    Param("username", "paulo"),
+    Param("password", "123456"),
+    Param("remember", true),
+]);
+
+String? response = await Client.callAsync<String>(request);
+println("Returned Value: $response")
+```
 
 ## Sample project
 

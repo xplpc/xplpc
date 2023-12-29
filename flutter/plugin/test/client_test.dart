@@ -74,6 +74,23 @@ void main() {
       });
     });
 
+    test('Battery Level Call Async', () async {
+      MappingList.instance.add(
+        "platform.battery.level",
+        MappingItem(batteryLevel),
+      );
+
+      var request = Request(
+        "platform.battery.level",
+        [
+          Param("suffix", "%"),
+        ],
+      );
+
+      String? response = await Client.callAsync<String>(request);
+      expect("100%", response);
+    });
+
     test('Login', () {
       var request = Request("sample.login", [
         Param("username", "paulo"),
@@ -324,6 +341,23 @@ void main() {
       Client.callFromString(request.data(), (response) {
         expect("{\"r\":\"100%\"}", response);
       });
+    });
+
+    test('Battery Level Call Async From String', () async {
+      MappingList.instance.add(
+        "platform.battery.level",
+        MappingItem(batteryLevel),
+      );
+
+      var request = Request(
+        "platform.battery.level",
+        [
+          Param("suffix", "%"),
+        ],
+      );
+
+      String response = await Client.callFromStringAsync(request.data());
+      expect("{\"r\":\"100%\"}", response);
     });
   });
 }
