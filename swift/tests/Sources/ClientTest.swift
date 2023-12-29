@@ -50,6 +50,7 @@ final class ClientTest: XCTestCase {
     }
 
     #if compiler(>=5.5) && canImport(_Concurrency)
+        @available(iOS 13.0, macOS 10.15, macCatalyst 13.0, watchOS 6.0, tvOS 13.0, visionOS 7.0, *)
         func testBatteryLevelCallAsync() async throws {
             MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
 
@@ -222,4 +223,16 @@ final class ClientTest: XCTestCase {
             }
         }
     }
+
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        @available(iOS 13.0, macOS 10.15, macCatalyst 13.0, watchOS 6.0, tvOS 13.0, visionOS 7.0, *)
+        func testBatteryLevelCallAsyncFromString() async throws {
+            MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
+
+            let request = Request("platform.battery.level", Param("suffix", "%"))
+            let response: String = await Client.callAsync(request.data)
+
+            XCTAssertEqual("{\"r\":\"100%\"}", response)
+        }
+    #endif
 }
