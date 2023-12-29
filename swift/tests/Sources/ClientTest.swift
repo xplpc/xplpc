@@ -49,6 +49,18 @@ final class ClientTest: XCTestCase {
         }
     }
 
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        func testBatteryLevelCallAsync() async throws {
+            MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
+
+            let request = Request("platform.battery.level", Param("suffix", "%"))
+
+            if let response: String? = await Client.callAsync(request) {
+                XCTAssertEqual("100%", response)
+            }
+        }
+    #endif
+
     func testBatteryLevelInvalidCast() throws {
         MappingList.shared.add(name: "platform.battery.level", item: MappingItem(target: batteryLevel))
 

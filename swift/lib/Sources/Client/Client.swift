@@ -1,5 +1,5 @@
 public class Client {
-    internal class ClientReturn<T: Decodable>: Decodable {
+    class ClientReturn<T: Decodable>: Decodable {
         var r: T?
     }
 
@@ -28,4 +28,22 @@ public class Client {
 
         PlatformProxy.shared.callNativeProxy(key, requestData)
     }
+
+    #if compiler(>=5.5) && canImport(_Concurrency)
+        public static func callAsync<T: Decodable>(_ request: Request) async -> T? {
+            await withCheckedContinuation { continuation in
+                call(request) { (result: T?) in
+                    continuation.resume(returning: result)
+                }
+            }
+        }
+
+        public static func callAsync(_ requestData: String) async -> String {
+            await withCheckedContinuation { continuation in
+                call(requestData) { response in
+                    continuation.resume(returning: response)
+                }
+            }
+        }
+    #endif
 }

@@ -105,17 +105,15 @@ You can build this target using some parameters to change configuration:
 
 You can use `callAsync` to execute the method as suspend function, example:
 
-```
-val request = Request(
-    "sample.login",
-    Param("username", "paulo"),
-    Param("password", "123456"),
-    Param("remember", true)
-)
+    val request = Request(
+        "sample.login",
+        Param("username", "paulo"),
+        Param("password", "123456"),
+        Param("remember", true)
+    )
 
-val response: String? = Client.callAsync<String>(request)
-println("Returned Value: $response")
-```
+    val response: String? = Client.callAsync<String>(request)
+    println("Returned Value: $response")
 
 ## Sample project
 

@@ -91,7 +91,7 @@ public class JsonSerializer: Serializer {
         return ""
     }
 
-    internal struct JsonRequestData: Encodable {
+    struct JsonRequestData: Encodable {
         let f: String
         var p: [Param]?
 
@@ -101,7 +101,7 @@ public class JsonSerializer: Serializer {
         }
     }
 
-    internal struct JsonFunctionNameData: Decodable {
+    struct JsonFunctionNameData: Decodable {
         let f: String
 
         init(_ f: String) {
@@ -109,7 +109,7 @@ public class JsonSerializer: Serializer {
         }
     }
 
-    internal struct JsonParametersData: Decodable {
+    struct JsonParametersData: Decodable {
         var p: [Param]?
 
         init(_ p: [Param]?) {
@@ -117,7 +117,7 @@ public class JsonSerializer: Serializer {
         }
     }
 
-    internal struct JsonFunctionReturnValueData<T: Encodable>: Encodable {
+    struct JsonFunctionReturnValueData<T: Encodable>: Encodable {
         var r: T?
 
         init(_ r: T?) {
