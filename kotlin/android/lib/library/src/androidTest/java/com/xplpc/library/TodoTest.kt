@@ -21,13 +21,14 @@ class TodoTest {
 
     @Test
     fun singleItem() {
-        val todo = Todo(
-            1,
-            "Title 1",
-            "Body 1",
-            mapOf("data1" to "value1", "data2" to "value2"),
-            true
-        )
+        val todo =
+            Todo(
+                1,
+                "Title 1",
+                "Body 1",
+                mapOf("data1" to "value1", "data2" to "value2"),
+                true
+            )
 
         val request = Request("sample.todo.single", Param("item", todo))
 
@@ -38,13 +39,14 @@ class TodoTest {
 
     @Test
     fun singleItemAsync() {
-        val todo = Todo(
-            1,
-            "Title 1",
-            "Body 1",
-            mapOf("data1" to "value1", "data2" to "value2"),
-            true
-        )
+        val todo =
+            Todo(
+                1,
+                "Title 1",
+                "Body 1",
+                mapOf("data1" to "value1", "data2" to "value2"),
+                true
+            )
 
         val request = Request("sample.todo.single", Param("item", todo))
 
@@ -57,21 +59,23 @@ class TodoTest {
 
     @Test
     fun multipleItems() {
-        val todo1 = Todo(
-            1,
-            "Title 1",
-            "Body 1",
-            mapOf("data1" to "value1", "data2" to "value2"),
-            true
-        )
+        val todo1 =
+            Todo(
+                1,
+                "Title 1",
+                "Body 1",
+                mapOf("data1" to "value1", "data2" to "value2"),
+                true
+            )
 
-        val todo2 = Todo(
-            2,
-            "Title 2",
-            "Body 2",
-            mapOf("data1" to "value1", "data2" to "value2"),
-            true
-        )
+        val todo2 =
+            Todo(
+                2,
+                "Title 2",
+                "Body 2",
+                mapOf("data1" to "value1", "data2" to "value2"),
+                true
+            )
 
         val request = Request("sample.todo.list", Param("items", listOf(todo1, todo2)))
 
@@ -84,21 +88,23 @@ class TodoTest {
 
     @Test
     fun multipleItemsAsync() {
-        val todo1 = Todo(
-            1,
-            "Title 1",
-            "Body 1",
-            mapOf("data1" to "value1", "data2" to "value2"),
-            true
-        )
+        val todo1 =
+            Todo(
+                1,
+                "Title 1",
+                "Body 1",
+                mapOf("data1" to "value1", "data2" to "value2"),
+                true
+            )
 
-        val todo2 = Todo(
-            2,
-            "Title 2",
-            "Body 2",
-            mapOf("data1" to "value1", "data2" to "value2"),
-            true
-        )
+        val todo2 =
+            Todo(
+                2,
+                "Title 2",
+                "Body 2",
+                mapOf("data1" to "value1", "data2" to "value2"),
+                true
+            )
 
         val request = Request("sample.todo.list", Param("items", listOf(todo1, todo2)))
 

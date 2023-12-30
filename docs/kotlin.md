@@ -101,6 +101,20 @@ You can build this target using some parameters to change configuration:
 
     --platform (android or desktop)
 
+## Syntax sugar
+
+You can use `callAsync` to execute the method as suspend function, example:
+
+    val request = Request(
+        "sample.login",
+        Param("username", "paulo"),
+        Param("password", "123456"),
+        Param("remember", true)
+    )
+
+    val response: String? = Client.callAsync<String>(request)
+    println("Returned Value: $response")
+
 ## Sample project
 
 You can see the sample project in directory `kotlin/android/sample` and `kotlin/desktop/sample`.

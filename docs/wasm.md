@@ -104,6 +104,22 @@ You can see the online demo on URL:
 
 <https://xplpc.github.io/wasm-demo/>
 
+## Syntax sugar
+
+You can use `await` to execute the method as async function, example:
+
+```typescript
+const request = new XRequest(
+    "sample.login",
+    new XParam("username", "paulo"),
+    new XParam("password", "123456"),
+    new XParam("remember", true),
+);
+
+const response = await XClient.call<string>(request);
+console.log("Returned Value: " + response);
+```
+
 ## Sample project
 
 You can see the sample project in directory `wasm/sample`.

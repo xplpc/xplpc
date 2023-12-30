@@ -72,6 +72,21 @@ Platforms available: `ios`, `macos`, `ios-flutter`, `macos-flutter`, `test`
 
     --no-deps
 
+## Syntax sugar
+
+You can use `callAsync` to execute the method as async function, example:
+
+    let request = Request(
+        "sample.login",
+        Param("username", "paulo"),
+        Param("password", "123456"),
+        Param("remember", true)
+    )
+
+    if let response: String? = await Client.callAsync(request) {
+        print("Returned Value: \(response)")
+    }
+
 ## Sample project
 
 You can see the sample project in directory `swift/sample`.

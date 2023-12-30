@@ -5,7 +5,7 @@ import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.platform.PlatformInitializer
 import kotlinx.coroutines.runBlocking
-import java.util.*
+import java.util.Date
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

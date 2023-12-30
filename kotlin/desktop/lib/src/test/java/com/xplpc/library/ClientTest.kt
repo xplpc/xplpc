@@ -12,6 +12,7 @@ import com.xplpc.message.Response
 import com.xplpc.platform.PlatformInitializer
 import com.xplpc.type.DataView
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import java.nio.ByteBuffer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -20,11 +21,17 @@ import kotlin.test.assertNotNull
 class ClientTest {
     companion object {
         @Suppress("UNUSED_PARAMETER")
-        fun reverseResponse(data: Message, r: Response) {
+        fun reverseResponse(
+            data: Message,
+            r: Response
+        ) {
             r("ok")
         }
 
-        fun batteryLevel(data: Message, r: Response) {
+        fun batteryLevel(
+            data: Message,
+            r: Response
+        ) {
             val level = 100
             val suffix = data.value<String>("suffix")
 
@@ -79,6 +86,21 @@ class ClientTest {
     }
 
     @Test
+    fun batteryLevelCallAsync() =
+        runTest {
+            MappingList.add(
+                "platform.battery.level",
+                MappingItem(
+                    ClientTest::batteryLevel
+                )
+            )
+
+            val request = Request("platform.battery.level", Param("suffix", "%"))
+            val response: String? = Client.callAsync<String>(request)
+            assertEquals("100%", response)
+        }
+
+    @Test
     fun batteryLevelInvalidCast() {
         setUp()
 
@@ -100,12 +122,13 @@ class ClientTest {
     fun login() {
         setUp()
 
-        val request = Request(
-            "sample.login",
-            Param("username", "paulo"),
-            Param("password", "123456"),
-            Param("remember", true)
-        )
+        val request =
+            Request(
+                "sample.login",
+                Param("username", "paulo"),
+                Param("password", "123456"),
+                Param("remember", true)
+            )
 
         Client.call<String>(request) { response ->
             assertEquals("LOGGED-WITH-REMEMBER", response)
@@ -116,12 +139,13 @@ class ClientTest {
     fun loginAsync() {
         setUp()
 
-        val request = Request(
-            "sample.login",
-            Param("username", "paulo"),
-            Param("password", "123456"),
-            Param("remember", true)
-        )
+        val request =
+            Request(
+                "sample.login",
+                Param("username", "paulo"),
+                Param("password", "123456"),
+                Param("remember", true)
+            )
 
         runBlocking {
             Client.call<String>(request) { response ->
@@ -134,12 +158,13 @@ class ClientTest {
     fun loginInvalidCast() {
         setUp()
 
-        val request = Request(
-            "sample.login",
-            Param("username", "paulo"),
-            Param("password", "123456"),
-            Param("remember", true)
-        )
+        val request =
+            Request(
+                "sample.login",
+                Param("username", "paulo"),
+                Param("password", "123456"),
+                Param("remember", true)
+            )
 
         Client.call<Boolean>(request) { response ->
             assertEquals(false, response)
@@ -189,16 +214,17 @@ class ClientTest {
         setUp()
 
         // in kotlin the 255 byte value is -1
-        val data = byteArrayOf(
-            // red pixel
-            -1, 0, 0, -1,
-            // green pixel
-            0, -1, 0, -1,
-            // blue pixel
-            0, 0, -1, -1,
-            // transparent pixel
-            0, 0, 0, 0,
-        )
+        val data =
+            byteArrayOf(
+                // red pixel
+                -1, 0, 0, -1,
+                // green pixel
+                0, -1, 0, -1,
+                // blue pixel
+                0, 0, -1, -1,
+                // transparent pixel
+                0, 0, 0, 0,
+            )
 
         val buffer: ByteBuffer = ByteBuffer.allocateDirect(data.size)
         buffer.put(data)
@@ -223,16 +249,17 @@ class ClientTest {
         setUp()
 
         // in kotlin the 255 byte value is -1
-        val data = byteArrayOf(
-            // red pixel
-            -1, 0, 0, -1,
-            // green pixel
-            0, -1, 0, -1,
-            // blue pixel
-            0, 0, -1, -1,
-            // transparent pixel
-            0, 0, 0, 0,
-        )
+        val data =
+            byteArrayOf(
+                // red pixel
+                -1, 0, 0, -1,
+                // green pixel
+                0, -1, 0, -1,
+                // blue pixel
+                0, 0, -1, -1,
+                // transparent pixel
+                0, 0, 0, 0,
+            )
 
         val buffer: ByteBuffer = ByteBuffer.allocateDirect(data.size)
         buffer.put(data)
@@ -382,4 +409,16 @@ class ClientTest {
             }
         }
     }
+
+    @Test
+    fun batteryLevelCallAsyncFromString() =
+        runTest {
+            setUp()
+
+            MappingList.add("platform.battery.level", MappingItem(ClientTest::batteryLevel))
+
+            val request = Request("platform.battery.level", Param("suffix", "%"))
+            val response = Client.callAsync(request.data)
+            assertEquals("{\"r\":\"100%\"}", response)
+        }
 }

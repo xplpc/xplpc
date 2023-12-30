@@ -63,18 +63,20 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
         val cameraSelector = CameraSelector.Builder().build()
 
         // image analysis use case
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .build()
+        val imageAnalysis =
+            ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
 
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), this)
 
         // use group
-        val useCaseGroup = UseCaseGroup.Builder()
-            .addUseCase(preview)
-            .addUseCase(imageAnalysis)
-            .setViewPort(binding.vPreview.viewPort!!)
-            .build()
+        val useCaseGroup =
+            UseCaseGroup.Builder()
+                .addUseCase(preview)
+                .addUseCase(imageAnalysis)
+                .setViewPort(binding.vPreview.viewPort!!)
+                .build()
 
         // bind to lifecycle
         cameraProvider.unbindAll()
@@ -107,10 +109,11 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
         // process image for current frame
         val startTime = System.currentTimeMillis()
 
-        val request = Request(
-            "sample.image.grayscale.dataview",
-            Param("dataView", dataView)
-        )
+        val request =
+            Request(
+                "sample.image.grayscale.dataview",
+                Param("dataView", dataView)
+            )
 
         Client.call<String>(request) { response ->
             if (response == null) {
@@ -124,9 +127,10 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
 
             runOnUiThread {
                 binding.vProcessedPreview.setImageBitmap(processedPreview)
-                binding.tvOverlay.text = getString(
-                    R.string.process_info, duration, (bitmap.byteCount / 1024)
-                )
+                binding.tvOverlay.text =
+                    getString(
+                        R.string.process_info, duration, (bitmap.byteCount / 1024)
+                    )
             }
         }
     }
@@ -155,7 +159,11 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
         return bytes
     }
 
-    private fun bitmapFromRgba(width: Int, height: Int, bytes: ByteArray): Bitmap {
+    private fun bitmapFromRgba(
+        width: Int,
+        height: Int,
+        bytes: ByteArray
+    ): Bitmap {
         val pixels = IntArray(bytes.size / 4)
         var j = 0
 
