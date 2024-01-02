@@ -356,7 +356,7 @@ void main() {
         ],
       );
 
-      String response = await Client.callFromStringAsync(request.data());
+      String response = await Client.callAsyncFromString(request.data());
       expect("{\"r\":\"100%\"}", response);
     });
   });

@@ -116,7 +116,7 @@ async def test_battery_level_async():
         ],
     )
 
-    response = await Client.async_call(request)
+    response = await Client.call_async(request)
     assert response == "100%"
 
 
@@ -145,7 +145,7 @@ async def test_login_async():
         ],
     )
 
-    response = await Client.async_call(request)
+    response = await Client.call_async(request)
     assert response == "LOGGED-WITH-REMEMBER"
 
 
@@ -184,7 +184,7 @@ async def test_reverse_async():
 
     request = Request("sample.reverse")
 
-    response = await Client.async_call(request)
+    response = await Client.call_async(request)
     assert response == "response-is-ok"
 
 
@@ -271,7 +271,7 @@ async def test_grayscale_image_with_dataView_async():
         ],
     )
 
-    response = await Client.async_call(request)
+    response = await Client.call_async(request)
     assert response == "OK"
 
     data = ByteArrayHelper.create_from_data_view(data_view)
@@ -334,7 +334,7 @@ def test_data_view():
 async def test_data_view_async():
     # get data view
     request = Request("sample.dataview")
-    data_view = await Client.async_call(request, DataView)
+    data_view = await Client.call_async(request, DataView)
 
     # check that data view is not None
     assert data_view is not None
@@ -358,7 +358,7 @@ async def test_data_view_async():
         ],
     )
 
-    response2 = await Client.async_call(request2)
+    response2 = await Client.call_async(request2)
     assert response2 == "OK"
 
     processed_data = ByteArrayHelper.create_from_data_view(data_view2)
@@ -410,6 +410,6 @@ async def test_battery_level_from_string_async():
         ],
     )
 
-    response = await Client.async_call_from_string(request.data())
+    response = await Client.call_async_from_string(request.data())
 
     assert '{"r": "100%"}' == response

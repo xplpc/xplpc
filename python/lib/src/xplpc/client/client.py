@@ -30,7 +30,7 @@ class Client:
                         )
                     )
                 except Exception as e:
-                    log.error(f"[Client : call] Error: {e}")
+                    log.error(f"[Client : SyncCall] Error: {e}")
 
             CallbackList().add(self.key, callback)
             PlatformProxy().native_call_proxy(self.key, self.request.data())
@@ -50,7 +50,7 @@ class Client:
                 try:
                     self.response_data = response
                 except Exception as e:
-                    log.error(f"[Client : call_from_string] Error: {e}")
+                    log.error(f"[Client : SyncCallFromString] Error: {e}")
 
             CallbackList().add(self.key, callback)
             PlatformProxy().native_call_proxy(self.key, self.request_data)
@@ -80,7 +80,7 @@ class Client:
                             self.future.set_result, self.response
                         )
                 except Exception as e:
-                    log.error(f"[Client : async_call] Error: {e}")
+                    log.error(f"[Client : AsyncCall] Error: {e}")
                     if not self.future.done():
                         self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
@@ -93,7 +93,7 @@ class Client:
                     self.request.data(),
                 )
             except Exception as e:
-                log.error(f"[Client : async_call] Error: {e}")
+                log.error(f"[Client : AsyncCall] Error: {e}")
                 if not self.future.done():
                     self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
@@ -121,7 +121,7 @@ class Client:
                             self.future.set_result, self.response
                         )
                 except Exception as e:
-                    log.error(f"[Client : async_call_from_string] Error: {e}")
+                    log.error(f"[Client : AsyncCallFromString] Error: {e}")
                     if not self.future.done():
                         self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
@@ -134,7 +134,7 @@ class Client:
                     self.request_data,
                 )
             except Exception as e:
-                log.error(f"[Client : async_call_from_string] Error: {e}")
+                log.error(f"[Client : AsyncCallFromString] Error: {e}")
                 if not self.future.done():
                     self.loop.call_soon_threadsafe(self.future.set_exception, e)
 
@@ -162,7 +162,7 @@ class Client:
                     if self.callback:
                         self.callback(result)
                 except Exception as e:
-                    log.error(f"[Client : thread_call] Error: {e}")
+                    log.error(f"[Client : ThreadCall] Error: {e}")
                     if self.callback:
                         self.callback(None, e)
 
@@ -182,7 +182,7 @@ class Client:
                     if self.callback:
                         self.callback(response)
                 except Exception as e:
-                    log.error(f"[Client : thread_call_from_string] Error: {e}")
+                    log.error(f"[Client : ThreadCallFromString] Error: {e}")
                     if self.callback:
                         self.callback(None, e)
 
@@ -198,13 +198,13 @@ class Client:
         return Client.SyncCallFromString(request_data).run()
 
     @staticmethod
-    async def async_call(request: Request, class_type=None, loop=None):
+    async def call_async(request: Request, class_type=None, loop=None):
         async_call_instance = Client.AsyncCall(request, class_type, loop)
         async with async_call_instance as response:
             return response
 
     @staticmethod
-    async def async_call_from_string(request_data: str, loop=None):
+    async def call_async_from_string(request_data: str, loop=None):
         async_call_instance = Client.AsyncCallFromString(request_data, loop)
         async with async_call_instance as response:
             return response

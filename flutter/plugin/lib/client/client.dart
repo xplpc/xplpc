@@ -61,7 +61,7 @@ class Client {
         );
       });
     } catch (e) {
-      Log.e("[Client : call] Error: $e");
+      Log.e("[Client : callFromString] Error: $e");
       callback?.call("");
     }
   }
@@ -104,7 +104,7 @@ class Client {
     return completer.future;
   }
 
-  static Future<String> callFromStringAsync(
+  static Future<String> callAsyncFromString(
     String requestData,
   ) async {
     Completer<String> completer = Completer();
@@ -128,7 +128,7 @@ class Client {
         nativeData.length,
       );
     } catch (e) {
-      Log.e("[Client : callFromStringAsync] Error: $e");
+      Log.e("[Client : callAsyncFromString] Error: $e");
 
       if (!completer.isCompleted) {
         completer.completeError(e);
