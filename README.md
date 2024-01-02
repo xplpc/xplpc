@@ -132,7 +132,7 @@ response = Client.call(request)
 print(response)
 ```
 
-Obs: There are syntax suggar for async/await/future calls, see the docs about each language/platform.
+Obs: There are syntax suggar for async/await/future calls, see the documentation about each language/platform.
 
 ## Supported languages and platforms
 
