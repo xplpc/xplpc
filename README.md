@@ -134,7 +134,7 @@ print(response)
 
 Obs: There are syntax suggar for async/await/future calls, see the docs about each language/platform.
 
-## Supported platforms
+## Supported languages and platforms
 
 *   C
 *   C++
