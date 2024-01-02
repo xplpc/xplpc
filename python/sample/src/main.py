@@ -196,7 +196,7 @@ class MyApp(MDApp):
                 Param("suffix", "%"),
             ],
         )
-        response = await Client.async_call(request)
+        response = await Client.call_async(request)
         self.battery_response.text = f"Response: {response}"
 
     def on_login_button_clicked(self, instance):
@@ -215,7 +215,7 @@ class MyApp(MDApp):
                 Param("remember", remember),
             ],
         )
-        response = await Client.async_call(request)
+        response = await Client.call_async(request)
         self.login_response.text = f"Response: {response}"
 
 

@@ -74,7 +74,7 @@ Execute on terminal:
 
     python3 xplpc.py python-format
 
-## Synchronous and Asynchronous call
+## Syntax sugar
 
 You can use synchronous call:
 
@@ -104,25 +104,7 @@ request = Request(
     ],
 )
 
-response = await Client.async_call(request)
-print(response)
-```
-
-## Syntax sugar
-
-You can use `async_call` to execute the method as async function, example:
-
-```python
-request = Request(
-    "sample.login",
-    [
-        Param("username", "paulo"),
-        Param("password", "123456"),
-        Param("remember", True),
-    ],
-)
-
-response = await Client.async_call(request)
+response = await Client.call_async(request)
 print(response)
 ```
 
