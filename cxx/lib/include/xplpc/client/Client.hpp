@@ -13,6 +13,10 @@
 
 #include "spdlog/spdlog.h"
 
+#ifndef __EMSCRIPTEN__
+#include <future>
+#endif
+
 #if defined(__EMSCRIPTEN__)
 #include <emscripten/bind.h>
 using namespace emscripten;
@@ -125,15 +129,14 @@ public:
         });
         // clang-format on
 
+        // clang-format off
         // find the mapped function in proxy list
         auto functionName = Serializer::decodeFunctionName(requestData);
 
-        auto proxyIt = std::find_if(PlatformProxyList::shared()->list.begin(),
-                                    PlatformProxyList::shared()->list.end(),
-                                    [&](const auto &proxy)
-                                    {
-                                        return proxy->hasMapping(functionName);
-                                    });
+        auto proxyIt = std::find_if(PlatformProxyList::shared()->list.begin(), PlatformProxyList::shared()->list.end(), [&](const auto &proxy) {
+            return proxy->hasMapping(functionName);
+        });
+        // clang-format on
 
         if (proxyIt != PlatformProxyList::shared()->list.end())
         {
@@ -146,6 +149,26 @@ public:
             callback("");
         }
     }
+
+#ifndef __EMSCRIPTEN__
+    template <typename T>
+    static std::future<std::optional<T>> callAsync(const Request &request)
+    {
+        // creating a promise to store the result
+        auto promise = std::make_shared<std::promise<std::optional<T>>>();
+
+        // clang-format off
+        // calling the existing 'call' method with a lambda as callback
+        call<T>(request, [promise](const std::optional<T> &result) {
+            // setting the value of the promise
+            promise->set_value(result);
+        });
+        // clang-format on
+
+        // returning the future associated with the promise
+        return promise->get_future();
+    }
+#endif
 
 #if defined(__EMSCRIPTEN__)
     static void call(const std::string &requestData, emscripten::val callback)

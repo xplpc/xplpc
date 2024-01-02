@@ -46,8 +46,10 @@ Using C++ code:
 
 ```cpp
 auto request = Request{
-    "platform.battery.level",
-    Param<std::string>{"suffix", "%"},
+    "sample.login",
+    Param<std::string>{"username", "paulo"},
+    Param<std::string>{"password", "123456"},
+    Param<bool>{"remember", true},
 };
 
 Client::call<std::string>(request, [](const auto &response) {

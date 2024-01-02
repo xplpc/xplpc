@@ -74,3 +74,20 @@ You can build this target using some parameters to change configuration:
 **No dependencies:**
 
     --no-deps
+
+## Syntax sugar
+
+You can use `callAsync` to execute the method as future function, example:
+
+```cxx
+auto request = Request{
+    "sample.login",
+    Param<std::string>{"username", "paulo"},
+    Param<std::string>{"password", "123456"},
+    Param<bool>{"remember", true},
+};
+
+auto future = Client::callAsync<std::string>(request);
+auto response = future.get();
+std::cout << "Returned Value: " << (response ? response.value() : "Empty") << std::endl;
+```
