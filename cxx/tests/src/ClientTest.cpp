@@ -37,6 +37,20 @@ TEST_F(GeneralTest, ClientTestLoginAsync)
         Param<bool>{"remember", true},
     };
 
+    auto future = Client::callAsync<std::string>(request);
+    auto response = future.get();
+    EXPECT_EQ("LOGGED-WITH-REMEMBER", response);
+}
+
+TEST_F(GeneralTest, ClientTestLoginAsyncWithThread)
+{
+    auto request = Request{
+        "sample.login",
+        Param<std::string>{"username", "paulo"},
+        Param<std::string>{"password", "123456"},
+        Param<bool>{"remember", true},
+    };
+
     // clang-format off
     std::thread([=] {
         Client::call<std::string>(request, [](const auto &response) {
@@ -353,7 +367,7 @@ TEST_F(GeneralTest, ClientTestLoginFromString)
     // clang-format on
 }
 
-TEST_F(GeneralTest, ClientTestLoginAsyncFromString)
+TEST_F(GeneralTest, ClientTestLoginAsyncFromStringWithThread)
 {
     auto request = R"({"f":"sample.login","p":[{"n":"username","v":"paulo"},{"n":"password","v":"123456"},{"n":"remember","v":true}]})";
 
@@ -388,7 +402,7 @@ TEST_F(GeneralTest, ClientTestAsyncFromString)
     // clang-format on
 }
 
-TEST_F(GeneralTest, ClientTestAsyncWithThreadFromString)
+TEST_F(GeneralTest, ClientTestAsyncFromStringWithThread)
 {
     auto request = R"({"f":"sample.async","p":[]})";
 
