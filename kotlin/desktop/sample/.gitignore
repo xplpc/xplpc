@@ -44,3 +44,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Android ###
+*.log
