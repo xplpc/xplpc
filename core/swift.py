@@ -339,9 +339,10 @@ def do_build_xcframework(target, platform, target_data):
         framework_dir = os.path.join(arch_dir, "lib", "xplpc.framework")
         group_framework_dir = os.path.join(build_dir, group, "xplpc.framework")
 
-        f.copy_all(
+        f.copy_dir(
             framework_dir,
             group_framework_dir,
+            symlinks=True,
         )
 
         # copy swift modules
@@ -369,9 +370,10 @@ def do_build_xcframework(target, platform, target_data):
                     )
 
                     if f.dir_exists(framework_module_dir):
-                        f.copy_all(
+                        f.copy_dir(
                             framework_module_dir,
                             group_framework_module_dir,
+                            symlinks=True,
                         )
 
         # generate single framework for group
@@ -383,9 +385,18 @@ def do_build_xcframework(target, platform, target_data):
                     c.proj_path, "build", build_dir_prefix, item["group"], item["arch"]
                 )
 
-                lipo_archs_args.append(
-                    os.path.join(arch_dir, "lib", "xplpc.framework", "xplpc")
-                )
+                if f.dir_exists(
+                    os.path.join(arch_dir, "lib", "xplpc.framework", "Versions")
+                ):
+                    lipo_archs_args.append(
+                        os.path.join(
+                            arch_dir, "lib", "xplpc.framework", "Versions", "A", "xplpc"
+                        )
+                    )
+                else:
+                    lipo_archs_args.append(
+                        os.path.join(arch_dir, "lib", "xplpc.framework", "xplpc")
+                    )
 
         lipo_args = [
             "lipo",
