@@ -24,6 +24,7 @@ if (NOT XCODE AND NOT MSVC AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 # options
+set(XPLPC_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "Root Directory")
 set(XPLPC_ADD_CUSTOM_DATA OFF CACHE BOOL "Build Custom Data")
 set(XPLPC_CUSTOM_DATA_PATH "cxx/custom" CACHE STRING "Custom Data Path")
 set(XPLPC_CUSTOM_DATA_INCLUDE_PATH "cxx/custom/include" CACHE STRING "Custom Data Include Path")
@@ -86,7 +87,7 @@ else()
 endif()
 
 # xplpc files
-add_subdirectory(cxx/lib)
+add_subdirectory(${XPLPC_ROOT_DIR}/cxx/lib)
 
 # xplpc interface
 if(XPLPC_ENABLE_INTERFACE)
@@ -119,21 +120,21 @@ elseif(XPLPC_TARGET STREQUAL "c-static")
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
-    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/c/lib/include)
 elseif(XPLPC_TARGET STREQUAL "c-shared")
     add_compile_definitions(XPLPC_TARGET_C)
     add_subdirectory(c/lib)
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/c/lib/include)
 elseif(XPLPC_TARGET STREQUAL "kotlin")
     add_compile_definitions(XPLPC_TARGET_KOTLIN)
     add_subdirectory(jni/lib)
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC jni/lib/include)
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/jni/lib/include)
 elseif(XPLPC_TARGET STREQUAL "swift")
     enable_language(Swift)
     set(CMAKE_Swift_LANGUAGE_VERSION 5)
@@ -143,13 +144,13 @@ elseif(XPLPC_TARGET STREQUAL "swift")
     endif()
 
     add_compile_definitions(XPLPC_TARGET_SWIFT)
-    add_subdirectory(objc/lib)
-    add_subdirectory(swift/lib)
-    add_subdirectory(swift/support)
+    add_subdirectory(${XPLPC_ROOT_DIR}/objc/lib)
+    add_subdirectory(${XPLPC_ROOT_DIR}/swift/lib)
+    add_subdirectory(${XPLPC_ROOT_DIR}/swift/support)
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
-    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC objc/lib/include)
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/objc/lib/include)
 
     set_target_properties(${XPLPC_PROJECT_NAME} PROPERTIES
         FRAMEWORK TRUE
@@ -188,11 +189,11 @@ endif()
 
 # xplpc interface include path
 if(XPLPC_ENABLE_INTERFACE)
-    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC c/lib/include)
+    target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/c/lib/include)
 endif()
 
 # cxx include path
-target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC cxx/lib/include)
+target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/cxx/lib/include)
 
 # custom data
 if(XPLPC_ADD_CUSTOM_DATA)
@@ -227,7 +228,7 @@ if(XPLPC_BUILD_TESTS)
         add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE cxx/tests/include)
+        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_ROOT_DIR}/cxx/tests/include)
     elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
         enable_testing()
         add_subdirectory(c/tests)
@@ -236,7 +237,7 @@ if(XPLPC_BUILD_TESTS)
         add_executable(${XPLPC_PROJECT_NAME}-tests "${XPLPC_TESTS_ALL_FILES}")
 
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
-        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE c/tests/include)
+        target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_ROOT_DIR}/c/tests/include)
     elseif(XPLPC_TARGET STREQUAL "swift")
         find_package(XCTest REQUIRED)
 
@@ -268,15 +269,15 @@ endif()
 
 # download dependency tool
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-downloader.cmake)
+    include(${XPLPC_ROOT_DIR}/cmake/cpm/cpm-downloader.cmake)
 endif()
 
 # setup all dependencies
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
-    include(${CMAKE_SOURCE_DIR}/cmake/cpm/cpm-dependency.cmake)
+    include(${XPLPC_ROOT_DIR}/cmake/cpm/cpm-dependency.cmake)
 elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
-    include(${CMAKE_SOURCE_DIR}/cmake/conan/conan-dependency.cmake)
+    include(${XPLPC_ROOT_DIR}/cmake/conan/conan-dependency.cmake)
 endif()
 
 # java dependencies
-include(${CMAKE_SOURCE_DIR}/cmake/java/java-dependency.cmake)
+include(${XPLPC_ROOT_DIR}/cmake/java/java-dependency.cmake)
