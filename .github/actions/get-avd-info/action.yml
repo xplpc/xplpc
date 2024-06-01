@@ -16,7 +16,7 @@ runs:
           shell: bash
         - id: get-avd-arch
           run: |
-            if [ ${{ steps.get-host-arch.outputs['host-arch'] }} = "aarch64" ]; then
+            if [ ${{ steps.get-host-arch.outputs['host-arch'] }} = "arm64" ]; then
               if [ ${{ inputs.api-level }} -ge 30 ]; then
                 echo "::set-output name=arch::arm64-v8a"
               else
