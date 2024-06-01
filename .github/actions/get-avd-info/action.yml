@@ -16,19 +16,24 @@ runs:
           shell: bash
         - id: get-avd-arch
           run: |
-            if [ ${{ steps.get-host-arch.outputs['host-arch'] }} = "arm64" ]; then
-              if [ ${{ inputs.api-level }} -ge 30 ]; then
-                echo "::set-output name=arch::arm64-v8a"
+            host_arch=${{ steps.get-host-arch.outputs['host-arch'] }}
+            api_level=${{ inputs.api-level }}
+
+            if [ "$host_arch" = "arm64" ]; then
+              if [ "$api_level" -ge 30 ]; then
+                avd_arch="arm64-v8a"
               else
-                echo "::set-output name=arch::armeabi-v7a"
+                avd_arch="armeabi-v7a"
               fi
             else
-              if [ ${{ inputs.api-level }} -ge 30 ]; then
-                echo "::set-output name=arch::x86_64"
+              if [ "$api_level" -ge 30 ]; then
+                avd_arch="x86_64"
               else
-                echo "::set-output name=arch::x86"
+                avd_arch="x86"
               fi
             fi
+
+            echo "::set-output name=arch::$avd_arch"
           shell: bash
         - id: get-avd-target
           run: echo "::set-output name=target::$(echo default)"
