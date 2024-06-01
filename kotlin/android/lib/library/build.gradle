@@ -7,7 +7,7 @@ android {
     namespace 'com.xplpc.library'
 
     defaultConfig {
-        buildToolsVersion = '33.0.1'
+        buildToolsVersion = '34.0.0'
 
         minSdk 16
         targetSdk 34
@@ -77,12 +77,12 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0'
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1'
     implementation 'com.google.code.gson:gson:2.10.1'
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
