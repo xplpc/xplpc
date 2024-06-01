@@ -1,9 +1,11 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose")
+    id("org.jetbrains.compose") version "1.6.20-dev1646"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 
 group = "com.xplpc.runner.compose"
@@ -39,7 +41,9 @@ compose.desktop {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+    }
 }
 
 tasks.withType<JavaCompile> {
