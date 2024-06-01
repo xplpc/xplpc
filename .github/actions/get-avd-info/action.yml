@@ -1,5 +1,5 @@
 name: 'Get AVD Info'
-description: 'Get the AVD info based on its API level.'
+description: 'Get the AVD info based on its API level and host architecture.'
 inputs:
     api-level:
         required: true
@@ -11,8 +11,29 @@ outputs:
 runs:
     using: "composite"
     steps:
+        - id: get-host-arch
+          run: echo "::set-output name=host-arch::$(uname -m)"
+          shell: bash
         - id: get-avd-arch
-          run: echo "::set-output name=arch::$(if [ ${{ inputs.api-level }} -ge 30 ]; then echo x86_64; else echo x86; fi)"
+          run: |
+            host_arch=${{ steps.get-host-arch.outputs['host-arch'] }}
+            api_level=${{ inputs.api-level }}
+
+            if [ "$host_arch" = "arm64" ]; then
+              if [ "$api_level" -ge 30 ]; then
+                avd_arch="arm64-v8a"
+              else
+                avd_arch="armeabi-v7a"
+              fi
+            else
+              if [ "$api_level" -ge 30 ]; then
+                avd_arch="x86_64"
+              else
+                avd_arch="x86"
+              fi
+            fi
+
+            echo "::set-output name=arch::$avd_arch"
           shell: bash
         - id: get-avd-target
           run: echo "::set-output name=target::$(echo default)"

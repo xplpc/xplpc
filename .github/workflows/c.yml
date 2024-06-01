@@ -84,7 +84,7 @@ jobs:
         uses: codacy/codacy-analysis-cli-action@master
 
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
@@ -92,6 +92,7 @@ jobs:
         run: |
           python3 -m pip install -r requirements.txt --user
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "$HOME/Library/Python/3.9/bin" >> $GITHUB_PATH
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v1.8
