@@ -6,6 +6,7 @@ namespace data
 {
 
 std::shared_ptr<PlatformProxyList> PlatformProxyList::instance = nullptr;
+std::once_flag PlatformProxyList::initInstanceFlag;
 
 void PlatformProxyList::append(const std::shared_ptr<PlatformProxy> &item)
 {
@@ -34,10 +35,8 @@ size_t PlatformProxyList::count() const noexcept
 
 std::shared_ptr<PlatformProxyList> PlatformProxyList::shared()
 {
-    if (instance == nullptr)
-    {
-        instance = std::make_shared<PlatformProxyList>();
-    }
+    std::call_once(initInstanceFlag, []()
+                   { instance = std::shared_ptr<PlatformProxyList>(new PlatformProxyList()); });
 
     return instance;
 }

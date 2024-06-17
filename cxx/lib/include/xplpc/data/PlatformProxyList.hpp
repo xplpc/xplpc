@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 namespace xplpc
@@ -16,7 +17,6 @@ using namespace xplpc::proxy;
 class PlatformProxyList
 {
 public:
-    PlatformProxyList() = default;
     void append(const std::shared_ptr<PlatformProxy> &item);
     void appendFromPtr(PlatformProxy *item);
     void insert(size_t index, const std::shared_ptr<PlatformProxy> &item);
@@ -32,6 +32,9 @@ public:
 
 private:
     static std::shared_ptr<PlatformProxyList> instance;
+    static std::once_flag initInstanceFlag;
+
+    PlatformProxyList() = default;
 };
 
 } // namespace data

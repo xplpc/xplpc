@@ -6,6 +6,7 @@ namespace data
 {
 
 std::shared_ptr<CallbackList> CallbackList::instance = nullptr;
+std::once_flag CallbackList::initInstanceFlag;
 
 void CallbackList::add(const std::string &key, const std::function<void(const std::string &)> callback)
 {
@@ -30,10 +31,8 @@ size_t CallbackList::count() const noexcept
 
 std::shared_ptr<CallbackList> CallbackList::shared()
 {
-    if (instance == nullptr)
-    {
-        instance = std::make_shared<CallbackList>();
-    }
+    std::call_once(initInstanceFlag, []()
+                   { instance = std::shared_ptr<CallbackList>(new CallbackList()); });
 
     return instance;
 }

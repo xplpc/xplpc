@@ -5,6 +5,7 @@
 #import "xplpc/proxy/PlatformProxy.hpp"
 
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace xplpc
@@ -29,6 +30,9 @@ public:
 private:
     ObjCPlatformProxyImpl *proxyImpl;
     static std::shared_ptr<ObjCPlatformProxy> instance;
+    static std::once_flag initInstanceFlag;
+
+    ObjCPlatformProxy() = default;
 };
 
 } // namespace proxy

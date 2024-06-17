@@ -7,13 +7,12 @@ namespace proxy
 {
 
 std::shared_ptr<ObjCPlatformProxy> ObjCPlatformProxy::instance = nullptr;
+std::once_flag ObjCPlatformProxy::initInstanceFlag;
 
 std::shared_ptr<ObjCPlatformProxy> ObjCPlatformProxy::shared()
 {
-    if (instance == nullptr)
-    {
-        instance = std::make_shared<ObjCPlatformProxy>();
-    }
+    std::call_once(initInstanceFlag, []()
+                   { instance = std::shared_ptr<ObjCPlatformProxy>(new ObjCPlatformProxy()); });
 
     return instance;
 }

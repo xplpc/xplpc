@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -18,7 +19,6 @@ using namespace xplpc::map;
 class MappingList
 {
 public:
-    MappingList() = default;
     void add(const std::string &name, const MappingItem &item);
     std::optional<MappingItem> find(const std::string &name);
     size_t count() const noexcept;
@@ -27,7 +27,10 @@ public:
 
 private:
     static std::shared_ptr<MappingList> instance;
+    static std::once_flag initInstanceFlag;
     std::map<std::string, MappingItem> list;
+
+    MappingList() = default;
 };
 
 } // namespace data
