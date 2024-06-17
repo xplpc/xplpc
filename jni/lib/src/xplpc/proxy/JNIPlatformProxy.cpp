@@ -12,8 +12,11 @@ thread_local JNIEnv *JNIPlatformProxy::threadEnv = nullptr;
 
 std::shared_ptr<JNIPlatformProxy> JNIPlatformProxy::shared()
 {
-    std::call_once(initInstanceFlag, []()
-                   { instance = std::shared_ptr<JNIPlatformProxy>(new JNIPlatformProxy()); });
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<JNIPlatformProxy>(new JNIPlatformProxy());
+    });
+    // clang-format on
 
     return instance;
 }

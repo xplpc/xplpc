@@ -39,6 +39,8 @@ private:
     jmethodID classLoaderMethodID;
 
     JNIPlatformProxy() = default;
+    JNIPlatformProxy(const JNIPlatformProxy &) = delete;
+    JNIPlatformProxy &operator=(const JNIPlatformProxy &) = delete;
 };
 
 } // namespace proxy

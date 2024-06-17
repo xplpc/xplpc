@@ -36,8 +36,11 @@ void MappingList::clear() noexcept
 
 std::shared_ptr<MappingList> MappingList::shared()
 {
-    std::call_once(initInstanceFlag, []()
-                   { instance = std::shared_ptr<MappingList>(new MappingList()); });
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<MappingList>(new MappingList());
+    });
+    // clang-format on
 
     return instance;
 }

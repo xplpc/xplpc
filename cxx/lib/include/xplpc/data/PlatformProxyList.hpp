@@ -35,6 +35,8 @@ private:
     static std::once_flag initInstanceFlag;
 
     PlatformProxyList() = default;
+    PlatformProxyList(const PlatformProxyList &) = delete;
+    PlatformProxyList &operator=(const PlatformProxyList &) = delete;
 };
 
 } // namespace data

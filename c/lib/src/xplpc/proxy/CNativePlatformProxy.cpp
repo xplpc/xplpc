@@ -10,8 +10,11 @@ std::once_flag CNativePlatformProxy::initInstanceFlag;
 
 std::shared_ptr<CNativePlatformProxy> CNativePlatformProxy::shared()
 {
-    std::call_once(initInstanceFlag, []()
-                   { instance = std::shared_ptr<CNativePlatformProxy>(new CNativePlatformProxy()); });
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<CNativePlatformProxy>(new CNativePlatformProxy());
+    });
+    // clang-format on
 
     return instance;
 }

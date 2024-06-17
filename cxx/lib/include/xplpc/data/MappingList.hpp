@@ -31,6 +31,8 @@ private:
     std::map<std::string, MappingItem> list;
 
     MappingList() = default;
+    MappingList(const MappingList &) = delete;
+    MappingList &operator=(const MappingList &) = delete;
 };
 
 } // namespace data

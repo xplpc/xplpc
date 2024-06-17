@@ -32,6 +32,7 @@ BraceWrapping:
   AfterExternBlock: true
   BeforeCatch: true
   BeforeElse: true
+  BeforeLambdaBody: false
   IndentBraces: false
   SplitEmptyFunction: true
   SplitEmptyRecord: true
@@ -151,6 +152,7 @@ BraceWrapping:
   AfterExternBlock: true
   BeforeCatch: true
   BeforeElse: true
+  BeforeLambdaBody: false
   IndentBraces: false
   SplitEmptyFunction: true
   SplitEmptyRecord: true

@@ -33,6 +33,8 @@ private:
     TSMap<std::string, std::function<void(const std::string &)>> list;
 
     CallbackList() = default;
+    CallbackList(const CallbackList &) = delete;
+    CallbackList &operator=(const CallbackList &) = delete;
 };
 
 } // namespace data

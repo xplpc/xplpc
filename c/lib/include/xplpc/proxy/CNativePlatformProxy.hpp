@@ -48,6 +48,8 @@ private:
     FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback;
 
     CNativePlatformProxy() = default;
+    CNativePlatformProxy(const CNativePlatformProxy &) = delete;
+    CNativePlatformProxy &operator=(const CNativePlatformProxy &) = delete;
 };
 
 } // namespace proxy

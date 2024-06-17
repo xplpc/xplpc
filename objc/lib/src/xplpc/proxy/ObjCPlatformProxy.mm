@@ -11,8 +11,11 @@ std::once_flag ObjCPlatformProxy::initInstanceFlag;
 
 std::shared_ptr<ObjCPlatformProxy> ObjCPlatformProxy::shared()
 {
-    std::call_once(initInstanceFlag, []()
-                   { instance = std::shared_ptr<ObjCPlatformProxy>(new ObjCPlatformProxy()); });
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<ObjCPlatformProxy>(new ObjCPlatformProxy());
+    });
+    // clang-format on
 
     return instance;
 }

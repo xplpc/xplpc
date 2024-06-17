@@ -33,6 +33,8 @@ private:
     static std::once_flag initInstanceFlag;
 
     ObjCPlatformProxy() = default;
+    ObjCPlatformProxy(const ObjCPlatformProxy &) = delete;
+    ObjCPlatformProxy &operator=(const ObjCPlatformProxy &) = delete;
 };
 
 } // namespace proxy

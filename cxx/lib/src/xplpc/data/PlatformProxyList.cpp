@@ -35,8 +35,11 @@ size_t PlatformProxyList::count() const noexcept
 
 std::shared_ptr<PlatformProxyList> PlatformProxyList::shared()
 {
-    std::call_once(initInstanceFlag, []()
-                   { instance = std::shared_ptr<PlatformProxyList>(new PlatformProxyList()); });
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<PlatformProxyList>(new PlatformProxyList());
+    });
+    // clang-format on
 
     return instance;
 }

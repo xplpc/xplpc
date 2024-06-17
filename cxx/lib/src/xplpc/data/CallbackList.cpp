@@ -31,8 +31,11 @@ size_t CallbackList::count() const noexcept
 
 std::shared_ptr<CallbackList> CallbackList::shared()
 {
-    std::call_once(initInstanceFlag, []()
-                   { instance = std::shared_ptr<CallbackList>(new CallbackList()); });
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<CallbackList>(new CallbackList());
+    });
+    // clang-format on
 
     return instance;
 }
