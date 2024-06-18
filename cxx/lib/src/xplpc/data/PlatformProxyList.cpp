@@ -23,19 +23,13 @@ void PlatformProxyList::appendFromPtr(PlatformProxy *item)
 void PlatformProxyList::insert(size_t index, const std::shared_ptr<PlatformProxy> &item)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    if (index < list.size())
-    {
-        list.insert(list.begin() + index, item);
-    }
+    list.insert(list.begin() + index, item);
 }
 
 void PlatformProxyList::insertFromPtr(size_t index, PlatformProxy *item)
 {
     std::unique_lock<std::shared_mutex> lock(mutex);
-    if (index < list.size())
-    {
-        list.insert(list.begin() + index, std::shared_ptr<PlatformProxy>(item));
-    }
+    list.insert(list.begin() + index, std::shared_ptr<PlatformProxy>(item));
 }
 
 size_t PlatformProxyList::count() const noexcept
