@@ -4,7 +4,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
-    id("org.jetbrains.compose") version "1.6.20-dev1646"
+
+    // https://plugins.gradle.org/plugin/org.jetbrains.compose
+    id("org.jetbrains.compose") version "1.6.20-dev1673"
+
+    // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.plugin.compose
     id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 
@@ -23,8 +27,8 @@ dependencies {
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    implementation("com.google.code.gson:gson:2.11.0")
     implementation(files("../../../build/kotlin-jar-desktop/xplpc.jar"))
 }
 
