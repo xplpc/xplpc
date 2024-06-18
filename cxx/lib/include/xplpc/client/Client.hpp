@@ -84,12 +84,11 @@ public:
         auto found = false;
 
         // clang-format off
-        PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
+        found = PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
             if (proxy->hasMapping(functionName))
             {
                 // call the platform proxy mapped function
                 proxy->callProxy(key, request.data());
-                found = true;
                 return true;
             }
 
@@ -132,17 +131,16 @@ public:
         });
         // clang-format on
 
-        // clang-format off
         // find the mapped function in proxy list
         auto functionName = Serializer::decodeFunctionName(requestData);
-
         bool found = false;
-        PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
+
+        // clang-format off
+        found = PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
             if (proxy->hasMapping(functionName))
             {
                 // call the platform proxy mapped function
                 proxy->callProxy(key, requestData);
-                found = true;
                 return true;
             }
 
@@ -198,17 +196,16 @@ public:
         });
         // clang-format on
 
-        // clang-format off
         // find the mapped function in proxy list
         auto functionName = Serializer::decodeFunctionName(requestData);
         auto found = false;
 
-        PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy> &proxy) {
+        // clang-format off
+        found = PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy> &proxy) {
             if (proxy->hasMapping(functionName))
             {
                 // call the platform proxy mapped function
                 proxy->callProxy(key, requestData);
-                found = true;
                 return true;
             }
 

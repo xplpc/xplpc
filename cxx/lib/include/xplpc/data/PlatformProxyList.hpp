@@ -26,7 +26,7 @@ public:
     static std::shared_ptr<PlatformProxyList> shared();
 
     std::shared_ptr<PlatformProxy> get(size_t index) const;
-    void forEach(const std::function<bool(const std::shared_ptr<PlatformProxy> &)> &func) const;
+    bool forEach(const std::function<bool(const std::shared_ptr<PlatformProxy> &)> &func) const;
 
 #if defined(__EMSCRIPTEN__)
     static void appendFromJavascript(PlatformProxy *item);

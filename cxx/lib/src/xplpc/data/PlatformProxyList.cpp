@@ -54,16 +54,18 @@ std::shared_ptr<PlatformProxy> PlatformProxyList::get(size_t index) const
     return nullptr;
 }
 
-void PlatformProxyList::forEach(const std::function<bool(const std::shared_ptr<PlatformProxy> &)> &func) const
+bool PlatformProxyList::forEach(const std::function<bool(const std::shared_ptr<PlatformProxy> &)> &func) const
 {
     std::shared_lock<std::shared_mutex> lock(mutex);
     for (const auto &proxy : list)
     {
         if (func(proxy))
         {
-            break;
+            return true;
         }
     }
+
+    return false;
 }
 
 std::shared_ptr<PlatformProxyList> PlatformProxyList::shared()
