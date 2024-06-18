@@ -4,6 +4,7 @@
 #include "xplpc/proxy/PlatformProxy.hpp"
 
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace xplpc
@@ -30,11 +31,16 @@ public:
 
 private:
     static std::shared_ptr<JNIPlatformProxy> instance;
+    static std::once_flag initInstanceFlag;
 
     thread_local static JNIEnv *threadEnv;
     JavaVM *javaVM;
     jobject classLoader;
     jmethodID classLoaderMethodID;
+
+    JNIPlatformProxy() = default;
+    JNIPlatformProxy(const JNIPlatformProxy &) = delete;
+    JNIPlatformProxy &operator=(const JNIPlatformProxy &) = delete;
 };
 
 } // namespace proxy

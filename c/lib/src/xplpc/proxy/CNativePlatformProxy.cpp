@@ -6,13 +6,15 @@ namespace proxy
 {
 
 std::shared_ptr<CNativePlatformProxy> CNativePlatformProxy::instance = nullptr;
+std::once_flag CNativePlatformProxy::initInstanceFlag;
 
 std::shared_ptr<CNativePlatformProxy> CNativePlatformProxy::shared()
 {
-    if (instance == nullptr)
-    {
-        instance = std::make_shared<CNativePlatformProxy>();
-    }
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<CNativePlatformProxy>(new CNativePlatformProxy());
+    });
+    // clang-format on
 
     return instance;
 }

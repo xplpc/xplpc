@@ -7,14 +7,16 @@ namespace proxy
 {
 
 std::shared_ptr<JNIPlatformProxy> JNIPlatformProxy::instance = nullptr;
+std::once_flag JNIPlatformProxy::initInstanceFlag;
 thread_local JNIEnv *JNIPlatformProxy::threadEnv = nullptr;
 
 std::shared_ptr<JNIPlatformProxy> JNIPlatformProxy::shared()
 {
-    if (instance == nullptr)
-    {
-        instance = std::make_shared<JNIPlatformProxy>();
-    }
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<JNIPlatformProxy>(new JNIPlatformProxy());
+    });
+    // clang-format on
 
     return instance;
 }

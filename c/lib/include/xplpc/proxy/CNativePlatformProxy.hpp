@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace xplpc
@@ -38,12 +39,17 @@ public:
 
 private:
     static std::shared_ptr<CNativePlatformProxy> instance;
+    static std::once_flag initInstanceFlag;
 
     FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform;
     FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform;
     FuncPtrToOnHasMapping funcPtrToOnHasMapping;
     FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall;
     FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback;
+
+    CNativePlatformProxy() = default;
+    CNativePlatformProxy(const CNativePlatformProxy &) = delete;
+    CNativePlatformProxy &operator=(const CNativePlatformProxy &) = delete;
 };
 
 } // namespace proxy

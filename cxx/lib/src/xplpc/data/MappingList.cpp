@@ -6,6 +6,7 @@ namespace data
 {
 
 std::shared_ptr<MappingList> MappingList::instance = nullptr;
+std::once_flag MappingList::initInstanceFlag;
 
 void MappingList::add(const std::string &name, const MappingItem &item)
 {
@@ -35,10 +36,11 @@ void MappingList::clear() noexcept
 
 std::shared_ptr<MappingList> MappingList::shared()
 {
-    if (instance == nullptr)
-    {
-        instance = std::make_shared<MappingList>();
-    }
+    // clang-format off
+    std::call_once(initInstanceFlag, []() {
+        instance = std::shared_ptr<MappingList>(new MappingList());
+    });
+    // clang-format on
 
     return instance;
 }
