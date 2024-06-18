@@ -83,20 +83,23 @@ public:
         auto functionName = request.functionName();
         auto found = false;
 
-        for (auto const &proxy : PlatformProxyList::shared()->list)
-        {
+        // clang-format off
+        PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
             if (proxy->hasMapping(functionName))
             {
                 // call the platform proxy mapped function
                 proxy->callProxy(key, request.data());
                 found = true;
-                break;
+                return true;
             }
-        }
+
+            return false;
+        });
+        // clang-format on
 
         if (!found)
         {
-            spdlog::error("[Client : call] Function not found: {0}", functionName);
+            spdlog::error("[Client : call] Function not found: {}", functionName);
             callback(std::nullopt);
         }
     }
@@ -133,19 +136,23 @@ public:
         // find the mapped function in proxy list
         auto functionName = Serializer::decodeFunctionName(requestData);
 
-        auto proxyIt = std::find_if(PlatformProxyList::shared()->list.begin(), PlatformProxyList::shared()->list.end(), [&](const auto &proxy) {
-            return proxy->hasMapping(functionName);
+        bool found = false;
+        PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
+            if (proxy->hasMapping(functionName))
+            {
+                // call the platform proxy mapped function
+                proxy->callProxy(key, requestData);
+                found = true;
+                return true;
+            }
+
+            return false;
         });
         // clang-format on
 
-        if (proxyIt != PlatformProxyList::shared()->list.end())
+        if (!found)
         {
-            // call the platform proxy mapped function
-            (*proxyIt)->callProxy(key, requestData);
-        }
-        else
-        {
-            spdlog::error("[Client : call] Function not found: {0}", functionName);
+            spdlog::error("[Client : call] Function not found: {}", functionName);
             callback("");
         }
     }
@@ -191,24 +198,27 @@ public:
         });
         // clang-format on
 
+        // clang-format off
         // find the mapped function in proxy list
         auto functionName = Serializer::decodeFunctionName(requestData);
         auto found = false;
 
-        for (auto const &proxy : PlatformProxyList::shared()->list)
-        {
+        PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy> &proxy) {
             if (proxy->hasMapping(functionName))
             {
                 // call the platform proxy mapped function
                 proxy->callProxy(key, requestData);
                 found = true;
-                break;
+                return true;
             }
-        }
+
+            return false;
+        });
+        // clang-format on
 
         if (!found)
         {
-            spdlog::error("[Client : call] Function not found: {0}", functionName);
+            spdlog::error("[Client : call] Function not found: {}", functionName);
             callback(std::string{});
         }
     }

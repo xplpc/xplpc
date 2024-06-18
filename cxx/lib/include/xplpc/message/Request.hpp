@@ -18,16 +18,15 @@ public:
     Request(const std::string &functionName, Args &&...paramValues)
         : rawFunctionName(functionName)
         , rawData(Serializer::encodeRequest(functionName, std::forward<Args>(paramValues)...))
-
     {
     }
 
-    const std::string &functionName() const { return this->rawFunctionName; }
-    const std::string &data() const { return this->rawData; }
+    const std::string &functionName() const noexcept { return rawFunctionName; }
+    const std::string &data() const noexcept { return rawData; }
 
 private:
-    std::string rawData;
-    std::string rawFunctionName;
+    const std::string rawData;
+    const std::string rawFunctionName;
 };
 
 } // namespace message
