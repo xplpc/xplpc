@@ -113,7 +113,7 @@ class _MyAppState extends State<MyApp> {
                 const SizedBox(height: 16),
                 TextButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(
+                    foregroundColor: WidgetStateProperty.all<Color>(
                       Colors.blue,
                     ),
                   ),
@@ -190,7 +190,7 @@ class _MyAppState extends State<MyApp> {
                 const SizedBox(height: 16),
                 TextButton(
                   style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(
+                    foregroundColor: WidgetStateProperty.all<Color>(
                       Colors.blue,
                     ),
                   ),
