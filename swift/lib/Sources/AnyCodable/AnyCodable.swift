@@ -1,4 +1,5 @@
 import Foundation
+
 /**
  A type-erased `Codable` value.
 
