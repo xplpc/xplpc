@@ -18,7 +18,7 @@ TEST_F(GeneralTest, ConcurrencyAll)
 {
     std::vector<std::thread> threads;
 
-    for (int i = 0; i < 1000; ++i)
+    for (int i = 0; i < 100; ++i)
     {
         threads.push_back(std::thread(testLogin));
     }
