@@ -1,7 +1,7 @@
 name: xplpc
 description: XPLPC Dart Plugin.
 version: 1.0.0
-homepage:
+homepage: "https://github.com/xplpc/xplpc"
 
 environment:
   sdk: '>=2.19.2 <3.0.0'
