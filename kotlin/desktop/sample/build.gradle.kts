@@ -6,10 +6,10 @@ plugins {
     kotlin("jvm")
 
     // https://plugins.gradle.org/plugin/org.jetbrains.compose
-    id("org.jetbrains.compose") version "1.6.20-dev1673"
+    id("org.jetbrains.compose") version "1.7.0-beta01"
 
     // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.plugin.compose
-    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20"
 }
 
 group = "com.xplpc.runner.compose"

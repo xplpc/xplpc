@@ -1,7 +1,7 @@
 # log
 CPMAddPackage(
     NAME "spdlog"
-    VERSION "1.13.0"
+    VERSION "1.14.1"
     GITHUB_REPOSITORY "gabime/spdlog"
     OPTIONS
         "SPDLOG_BUILD_PIC ON"
@@ -18,7 +18,7 @@ endif()
 # test
 if(XPLPC_BUILD_TESTS)
     if("${XPLPC_TARGET}" MATCHES "^(cxx|c)-(static|shared)$")
-        CPMAddPackage("gh:google/googletest@1.14.0")
+        CPMAddPackage("gh:google/googletest@1.15.2")
 
         find_package(googletest REQUIRED)
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE GTest::gtest GTest::gtest_main)
