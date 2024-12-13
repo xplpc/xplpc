@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <string>
+#include <cstdint>
 
 namespace xplpc
 {
@@ -14,7 +15,7 @@ public:
     static std::string generate();
 
 private:
-    static std::atomic<std::uint64_t> uid;
+    static std::atomic<uint64_t> uid;
 };
 
 } // namespace util
