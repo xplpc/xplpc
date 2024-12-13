@@ -17,7 +17,7 @@ jobs:
         config:
         - {
             name: "macOS Latest Clang",
-            os: macos-12,
+            os: macos-13,
             library-task: "swift-build --interface --platform macos-flutter",
             xcframework-task: "swift-build-xcframework --platform macos-flutter"
           }
@@ -39,7 +39,7 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v1.8
         with:
-          cmake-version: "3.24.0"
+          cmake-version: "3.30.0"
 
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master

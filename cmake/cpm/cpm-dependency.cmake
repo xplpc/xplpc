@@ -1,7 +1,7 @@
 # log
 CPMAddPackage(
     NAME "spdlog"
-    VERSION "1.14.1"
+    VERSION "1.15.0"
     GITHUB_REPOSITORY "gabime/spdlog"
     OPTIONS
         "SPDLOG_BUILD_PIC ON"
