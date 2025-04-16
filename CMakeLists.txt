@@ -171,12 +171,36 @@ elseif(XPLPC_TARGET STREQUAL "swift")
         MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${XPLPC_VERSION}" # user visible
     )
 elseif(XPLPC_TARGET STREQUAL "wasm")
-    set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -s \"EXPORTED_FUNCTIONS=['_malloc', '_free']\"")
-    set(XPLPC_WASM_COMPILER_FLAGS "-fwasm-exceptions")
+    # wasm linker flags
+    set(XPLPC_WASM_LINKER_FLAGS
+        # core functionality
+        "--bind"
+        "-fwasm-exceptions"
+        # memory options
+        "-sMALLOC=emmalloc"
+        "-sWASM_BIGINT=1"
+        "-sALLOW_MEMORY_GROWTH=1"
+        # module options
+        "-sMODULARIZE=1"
+        "-sEXPORT_ES6=1"
+        # exported functions and methods
+        "-sEXPORTED_FUNCTIONS=_malloc,_free"
+        "-sEXPORTED_RUNTIME_METHODS=HEAPU8"
+    )
 
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XPLPC_WASM_LINKER_FLAGS}")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS}")
+    # wasm compiler flags
+    set(XPLPC_WASM_COMPILER_FLAGS
+        # core functionality
+        "-fwasm-exceptions"
+    )
+
+    # apply flags
+    string(JOIN " " XPLPC_WASM_LINKER_FLAGS_STR "${XPLPC_WASM_LINKER_FLAGS}")
+    string(JOIN " " XPLPC_WASM_COMPILER_FLAGS_STR "${XPLPC_WASM_COMPILER_FLAGS}")
+
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XPLPC_WASM_LINKER_FLAGS_STR}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS_STR}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${XPLPC_WASM_COMPILER_FLAGS_STR}")
 
     add_compile_definitions(XPLPC_TARGET_WASM)
     add_subdirectory(wasm/lib)
