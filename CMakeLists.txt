@@ -186,8 +186,6 @@ elseif(XPLPC_TARGET STREQUAL "wasm")
         # exported functions and methods
         "-sEXPORTED_FUNCTIONS=_malloc,_free"
         "-sEXPORTED_RUNTIME_METHODS=HEAPU8"
-        # explicitly link embind library
-        "-lembind"
     )
 
     # wasm compiler flags
