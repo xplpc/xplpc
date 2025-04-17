@@ -15,6 +15,13 @@ cmake_policy(SET CMP0076 NEW) # target_sources() command converts relative paths
 set(CMAKE_POLICY_DEFAULT_CMP0091 NEW) # msvc runtime library flags are selected by an abstraction
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # set the timestamps of all extracted contents to the time of the extraction
 
+# thread
+set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+set(CMAKE_HAVE_THREADS_LIBRARY 1)
+set(CMAKE_USE_WIN32_THREADS_INIT 0)
+set(CMAKE_USE_PTHREADS_INIT 1)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+
 # settings
 set(XPLPC_DEPENDENCY_TOOL_VALUES "cpm" "conan")
 
@@ -192,8 +199,6 @@ elseif(XPLPC_TARGET STREQUAL "wasm")
     set(XPLPC_WASM_COMPILER_FLAGS
         # core functionality
         "-fwasm-exceptions"
-        # ensure embind is available during compilation
-        "--bind"
     )
 
     # apply flags
@@ -209,6 +214,8 @@ elseif(XPLPC_TARGET STREQUAL "wasm")
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_executable(${XPLPC_PROJECT_NAME} "${XPLPC_ALL_FILES}")
+
+    target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE embind)
 else()
     message(FATAL_ERROR "Target is invalid: ${XPLPC_TARGET}")
 endif()
