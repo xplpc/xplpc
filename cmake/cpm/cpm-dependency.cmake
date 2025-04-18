@@ -1,16 +1,10 @@
 # log
-set(SPDLOG_OPTIONS "SPDLOG_BUILD_PIC ON")
-
-if(APPLE)
-    list(APPEND SPDLOG_OPTIONS "SPDLOG_FWRITE_UNLOCKED OFF")
-endif()
-
 CPMAddPackage(
     NAME "spdlog"
     VERSION "1.15.2"
     GITHUB_REPOSITORY "gabime/spdlog"
     OPTIONS
-        ${SPDLOG_OPTIONS}
+        "SPDLOG_BUILD_PIC ON"
 )
 
 target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
