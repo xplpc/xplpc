@@ -5,6 +5,7 @@ CPMAddPackage(
     GITHUB_REPOSITORY "gabime/spdlog"
     OPTIONS
         "SPDLOG_BUILD_PIC ON"
+        $<$<BOOL:${APPLE}>:"SPDLOG_FWRITE_UNLOCKED OFF">
 )
 
 target_link_libraries(${XPLPC_PROJECT_NAME} PUBLIC spdlog::spdlog)
