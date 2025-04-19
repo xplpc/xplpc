@@ -17,11 +17,11 @@ jobs:
         config:
         - {
             name: "macOS Latest Clang",
-            os: macos-13
+            os: macos-latest
           }
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -35,7 +35,7 @@ jobs:
           echo "$HOME/Library/Python/3.9/bin" >> $GITHUB_PATH
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v1.8
+        uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: "3.30.0"
 

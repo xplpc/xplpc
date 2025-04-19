@@ -171,7 +171,7 @@ elseif(XPLPC_TARGET STREQUAL "swift")
         MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${XPLPC_VERSION}" # user visible
     )
 elseif(XPLPC_TARGET STREQUAL "wasm")
-    set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT=1 -sALLOW_MEMORY_GROWTH=1 -fwasm-exceptions -sMODULARIZE=1 -sEXPORT_ES6=1 -s \"EXPORTED_FUNCTIONS=['_malloc', '_free']\"")
+    set(XPLPC_WASM_LINKER_FLAGS "--bind -sMALLOC=emmalloc -sWASM_BIGINT -sALLOW_MEMORY_GROWTH -fwasm-exceptions -sMODULARIZE -sEXPORT_ES6 -sEXPORT_NAME=Module -sEXPORTED_FUNCTIONS=_malloc,_free -sEXPORTED_RUNTIME_METHODS=HEAPU8 -sASSERTIONS")
     set(XPLPC_WASM_COMPILER_FLAGS "-fwasm-exceptions")
 
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${XPLPC_WASM_LINKER_FLAGS}")
@@ -183,6 +183,8 @@ elseif(XPLPC_TARGET STREQUAL "wasm")
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_executable(${XPLPC_PROJECT_NAME} "${XPLPC_ALL_FILES}")
+
+    target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE embind)
 else()
     message(FATAL_ERROR "Target is invalid: ${XPLPC_TARGET}")
 endif()

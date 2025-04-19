@@ -1,52 +1,52 @@
 {
-    "compilerOptions": {
-        "allowJs": true,
-        "target": "esnext",
-        "module": "esnext",
-        "importHelpers": true,
-        "skipLibCheck": true,
-        "esModuleInterop": true,
-        "allowSyntheticDefaultImports": true,
-        "moduleResolution": "node",
-        "isolatedModules": true,
-        "strict": true,
-        "jsx": "preserve",
-        "sourceMap": true,
-        "baseUrl": ".",
-        "lib": [
-            "esnext",
-            "dom",
-            "dom.iterable",
-            "scripthost"
-        ],
-        "types": [
-            "vite/client",
-            "vitest/globals",
-            "@types/emscripten",
-            "@types/node"
-        ],
-        "plugins": [
-            {
-                "name": "@vuedx/typescript-plugin-vue"
-            }
-        ],
-        "paths": {
-            "@/*": [
-                "src/*"
-            ],
-            "@xplpc/*": [
-                "../../*"
-            ]
-        }
-    },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.d.ts",
-        "src/**/*.tsx",
-        "src/**/*.vue",
-        "tests/**/*.ts",
+  "compilerOptions": {
+    "allowJs": true,
+    "target": "esnext",
+    "module": "esnext",
+    "importHelpers": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "baseUrl": ".",
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "scripthost"
     ],
-    "exclude": [
-        "node_modules"
-    ]
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "@types/emscripten",
+      "@types/node"
+    ],
+    "plugins": [
+      {
+        "name": "@vuedx/typescript-plugin-vue"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@xplpc/*": [
+        "../../*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

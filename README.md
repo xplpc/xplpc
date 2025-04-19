@@ -162,4 +162,4 @@ Obs: There are syntax suggar for async/await/future calls, see the documentation
 
 [MIT](http://opensource.org/licenses/MIT)
 
-Copyright (c) 2022-2024, Paulo Coutinho
+Copyright (c) 2022-2025, Paulo Coutinho
