@@ -22,9 +22,10 @@
     ],
     "types": [
       "vite/client",
-      "globals",
+      "vitest/globals",
       "emscripten",
-      "node"
+      "node",
+      "xplpc"
     ],
     "plugins": [
       {
@@ -40,9 +41,10 @@
       ]
     },
     "typeRoots": [
-      "node_modules/@types",
-      "node_modules/vitest",
-      "types"
+      "./node_modules",
+      "./node_modules/@types",
+      "./node_modules/vitest",
+      "./types"
     ]
   },
   "include": [
