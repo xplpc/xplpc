@@ -9,8 +9,9 @@ export class XDataView {
         this.size = size;
     }
 
-    static createFromArrayBuffer(data: ArrayBufferLike): XDataView {
-        const size = data.byteLength;
+    static createFromArrayBuffer(buffer: ArrayBufferLike): XDataView {
+        const view = new Uint8Array(buffer);
+        const size = view.byteLength;
 
         // eslint-disable-next-line
         // @ts-ignore:next-line
@@ -18,7 +19,21 @@ export class XDataView {
 
         // eslint-disable-next-line
         // @ts-ignore:next-line
-        XPLPC.shared().module.HEAPU8.set(data, ptr);
+        XPLPC.shared().module.HEAPU8.set(view, ptr);
+
+        return new XDataView(ptr, size);
+    }
+
+    static createFromArrayBufferView(view: ArrayBufferView): XDataView {
+        const size = view.byteLength;
+
+        // eslint-disable-next-line
+        // @ts-ignore:next-line
+        const ptr = XPLPC.shared().module._malloc(size);
+
+        // eslint-disable-next-line
+        // @ts-ignore:next-line
+        XPLPC.shared().module.HEAPU8.set(view, ptr);
 
         return new XDataView(ptr, size);
     }

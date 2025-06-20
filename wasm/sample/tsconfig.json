@@ -13,6 +13,7 @@
     "jsx": "preserve",
     "sourceMap": true,
     "baseUrl": ".",
+    "outDir": "dist",
     "lib": [
       "esnext",
       "dom",
@@ -47,6 +48,7 @@
     "tests/**/*.ts",
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

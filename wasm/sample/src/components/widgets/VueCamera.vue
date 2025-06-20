@@ -241,7 +241,7 @@ export default {
                 this.getCanvas();
 
                 const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-                const dataView = XDataView.createFromArrayBuffer(imgData.data);
+                const dataView = XDataView.createFromArrayBufferView(imgData.data);
 
                 const startTime = performance.now();
 
