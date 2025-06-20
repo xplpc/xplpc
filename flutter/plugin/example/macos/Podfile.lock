@@ -19,10 +19,10 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/xplpc/macos
 
 SPEC CHECKSUMS:
-  battery_plus: 906cd081df7f2274f5235581515b59a628dcaec7
+  battery_plus: f51ad29136e025b714b96f7d096f44f604615da7
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  xplpc: 6b1fced480639717a7a1c5a051909435b50d5ce6
+  xplpc: ba45f3221b0c6cbfc27e5111224c53bed3e477d7
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.16.2

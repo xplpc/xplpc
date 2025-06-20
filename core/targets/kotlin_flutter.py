@@ -14,7 +14,7 @@ if has_arm32:
                 "arch": "armeabi-v7a",
                 "conan_arch": "armv7",
                 "conan_profile": "xplpc_android_profile",
-                "api_level": 19,
+                "api_level": 21,
             },
         ]
     )
@@ -40,7 +40,7 @@ if has_x32:
                 "arch": "x86",
                 "conan_arch": "x86",
                 "conan_profile": "xplpc_android_profile",
-                "api_level": 19,
+                "api_level": 21,
             },
         ]
     )

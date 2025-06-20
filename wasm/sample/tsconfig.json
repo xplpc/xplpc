@@ -13,6 +13,7 @@
     "jsx": "preserve",
     "sourceMap": true,
     "baseUrl": ".",
+    "outDir": "dist",
     "lib": [
       "esnext",
       "dom",
@@ -22,8 +23,9 @@
     "types": [
       "vite/client",
       "vitest/globals",
-      "@types/emscripten",
-      "@types/node"
+      "emscripten",
+      "node",
+      "xplpc"
     ],
     "plugins": [
       {
@@ -37,16 +39,23 @@
       "@xplpc/*": [
         "../../*"
       ]
-    }
+    },
+    "typeRoots": [
+      "./node_modules",
+      "./node_modules/@types",
+      "./node_modules/vitest",
+      "./types"
+    ]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
+    "tests/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist"
   ]
 }

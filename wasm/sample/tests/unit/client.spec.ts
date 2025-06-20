@@ -102,7 +102,7 @@ describe("Client", () => {
     });
 
     test("transfer data view", () => {
-        const dataView = XDataView.createFromArrayBuffer(new Uint8Array([
+        const dataView = XDataView.createFromArrayBufferView(new Uint8Array([
             255, 0, 0, 255, // red pixel
             0, 255, 0, 255, // green pixel
             0, 0, 255, 255, // blue pixel
@@ -129,7 +129,7 @@ describe("Client", () => {
     });
 
     test("transfer data view with await", async () => {
-        const dataView = XDataView.createFromArrayBuffer(new Uint8Array([
+        const dataView = XDataView.createFromArrayBufferView(new Uint8Array([
             255, 0, 0, 255, // red pixel
             0, 255, 0, 255, // green pixel
             0, 0, 255, 255, // blue pixel
