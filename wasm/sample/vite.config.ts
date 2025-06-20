@@ -6,8 +6,6 @@ import { resolve } from 'path'
 import { fileURLToPath, URL } from "url"
 import EnvironmentPlugin from "vite-plugin-environment"
 import eslintPLugin from "vite-plugin-eslint"
-import topLevelAwait from "vite-plugin-top-level-await"
-import wasm from "vite-plugin-wasm"
 
 const BASE_URL = (process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$|$/, '/') : '/');
 
@@ -38,7 +36,6 @@ export default defineConfig({
                 defineOn: "import.meta.env",
             }
         ),
-        [!process.env.VITEST && wasm()],
         {
             name: "keep-import-meta-url",
             enforce: "pre",
@@ -51,8 +48,7 @@ export default defineConfig({
                     return code.replace(/\bimport\.meta\.url\b/g, `String(import.meta.url)`);
                 }
             },
-        },
-        topLevelAwait()
+        }
     ],
     server: {
         host: true,
