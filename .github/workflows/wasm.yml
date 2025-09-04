@@ -34,7 +34,7 @@ jobs:
       - name: Install Python
         uses: getsentry/action-setup-venv@v2.2.0
         with:
-          python-version: 3.10
+          python-version: "3.10"
           cache-dependency-path: requirements.txt
           install-cmd: pip install -r requirements.txt
 
