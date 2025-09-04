@@ -2,11 +2,25 @@
 
 The scripts that execute the tasks are written in Python.
 
-You need install Python requirements with:
+## Installation
+
+### Using Virtual Environment (Recommended)
+
+It's recommended to use a virtual environment to avoid conflicts with system packages:
+
+    python3 -m venv .venv
+    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+    python3 -m pip install -r requirements.txt
+
+### System Installation
+
+You can also install Python requirements directly to your system:
 
     python3 -m pip install -r requirements.txt
 
-And you can test if everything is fine with:
+## Testing Installation
+
+You can test if everything is fine with the help command:
 
     python3 xplpc.py -h
 
