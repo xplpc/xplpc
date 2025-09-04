@@ -36,18 +36,21 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Python Requirements
+      - name: Python Requirements (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -m venv .venv
+          .venv\Scripts\activate
+          python -m pip install -r requirements.txt
+          echo "$PWD\.venv\Scripts" >> $GITHUB_PATH
+
+      - name: Python Requirements (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
           python3 -m venv .venv
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            .venv\Scripts\activate
-            python -m pip install -r requirements.txt
-            echo "$PWD\.venv\Scripts" >> $GITHUB_PATH
-          else
-            source .venv/bin/activate
-            python3 -m pip install -r requirements.txt
-            echo "$PWD/.venv/bin" >> $GITHUB_PATH
-          fi
+          source .venv/bin/activate
+          python3 -m pip install -r requirements.txt
+          echo "$PWD/.venv/bin" >> $GITHUB_PATH
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
