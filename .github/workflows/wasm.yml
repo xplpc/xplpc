@@ -55,7 +55,7 @@ jobs:
       - name: Install EMSDK
         uses: mymindstorm/setup-emsdk@v14
         with:
-          version: "4.0.10"
+          version: "4.0.14"
 
       - name: Install Node
         uses: actions/setup-node@v4
