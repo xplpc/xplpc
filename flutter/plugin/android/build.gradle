@@ -12,7 +12,7 @@ buildscript {
 
     dependencies {
         // The Android Gradle Plugin knows how to build native code with the NDK.
-        classpath "com.android.tools.build:gradle:8.11.1"
+        classpath "com.android.tools.build:gradle:8.13.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
     }
 }
@@ -22,12 +22,12 @@ apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace 'com.xplpc.library.flutter'
-    compileSdk 35
-    buildToolsVersion = '35.0.0'
 
     defaultConfig {
-        minSdk 16
-        targetSdk 35
+        minSdk = 16
+        targetSdk = 36
+        compileSdk = 36
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
