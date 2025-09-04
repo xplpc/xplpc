@@ -83,12 +83,15 @@ jobs:
         if: matrix.config.codacy == true
         uses: codacy/codacy-analysis-cli-action@master
 
-      - name: Install Python
-        uses: getsentry/action-setup-venv@v2.2.0
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
-          cache-dependency-path: requirements.txt
-          install-cmd: pip install -r requirements.txt
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
