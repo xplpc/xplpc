@@ -17,7 +17,7 @@ jobs:
         config:
         - {
             name: "macOS Latest Clang",
-            os: macos-15
+            os: macos-latest-large
           }
 
     steps:
