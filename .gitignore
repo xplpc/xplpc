@@ -29,6 +29,7 @@ CMakeLists.txt.user
 
 # java/kotlin
 .gradle
+.kotlin
 
 # cxx
 .cxx

@@ -18,25 +18,20 @@ jobs:
           - { name: "Linux", os: ubuntu-latest }
           - { name: "macOS", os: macos-latest }
           - { name: "Windows", os: windows-latest }
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Upgrade PIP
-        run: python3 -m pip install --upgrade pip setuptools wheel
-
-      - name: Python Requirements
+      - name: Install Python Dependencies
         run: |
-          python3 -m pip install -r requirements.txt --user
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          echo "$HOME/Library/Python/3.9/bin" >> $GITHUB_PATH
-          echo "$HOME/Library/Python/${{ matrix.python-version }}/bin" >> $GITHUB_PATH
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
