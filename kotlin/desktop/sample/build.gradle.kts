@@ -47,13 +47,6 @@ compose.desktop {
     }
 }
 
-tasks.withType<KotlinCompile> {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
-    }
-}
-
-tasks.withType<JavaCompile> {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
+kotlin {
+    jvmToolchain(17)
 }
