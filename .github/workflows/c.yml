@@ -84,25 +84,11 @@ jobs:
         uses: codacy/codacy-analysis-cli-action@master
 
       - name: Install Python
-        uses: actions/setup-python@v5
+        uses: getsentry/action-setup-venv@v2.2.0
         with:
-          python-version: "3.10"
-
-      - name: Python Requirements (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          python -m venv .venv
-          .venv\Scripts\activate
-          python -m pip install -r requirements.txt
-          echo "$PWD\.venv\Scripts" >> $GITHUB_PATH
-
-      - name: Python Requirements (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          python3 -m venv .venv
-          source .venv/bin/activate
-          python3 -m pip install -r requirements.txt
-          echo "$PWD/.venv/bin" >> $GITHUB_PATH
+          python-version: 3.10
+          cache-dependency-path: requirements.txt
+          install-cmd: pip install -r requirements.txt
 
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
