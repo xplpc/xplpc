@@ -9,7 +9,7 @@ has_tvos_simulator_arm64 = True
 has_watchos_arm32 = True
 has_watchos_arm64 = True
 has_watchos_simulator_x64 = True
-has_watchos_simulator_arm64 = True
+has_watchos_simulator_arm64 = False
 has_mac_catalyst_x64 = True
 has_mac_catalyst_arm64 = True
 
