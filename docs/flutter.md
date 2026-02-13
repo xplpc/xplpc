@@ -67,14 +67,15 @@ Follow these steps to setup your project:
 
 ```yaml
 dependencies:
-  reflectable: ^4.0.0`
+  reflectable: ^5.2.1
 
 dev_dependencies:
-  build_runner: ^2.0.0
+  build_runner: ^2.4.11
+  reflectable_builder: ^1.2.1
 ```
 
 2.  Add your Dart file that contains the `main` method in the `build.yaml` file, like this: `flutter/plugin/example/build.yaml`. Create or copy the `build.yaml` file to your project root.
-3.  Run `build_runner` to generate `reflectable` files ignored for git with this command in your project root folder: `flutter pub run build_runner build --delete-conflicting-outputs`.
+3.  Run `build_runner` to generate `reflectable` files ignored for git with this command in your project root folder: `dart run build_runner build`.
 4.  Initialize reflectable library in your `main` method like this:
 
 ```dart
@@ -111,7 +112,7 @@ Before using the sample you need:
 
         cd flutter/plugin/example
         flutter pub get
-        flutter pub run build_runner build --delete-conflicting-outputs
+        dart run build_runner build
 
 You can see the sample project in directory `flutter/plugin/example`.
 

@@ -6,6 +6,8 @@ Thumbs.db
 .idea
 .vscode
 .iml
+.claude
+.cursor
 
 # auto generated
 **/*.pyc
@@ -46,3 +48,13 @@ build_*/
 *.egg-info
 .pytest_cache
 poetry.lock
+
+# environments
+.env
+.venv
+env/
+venv/
+.venv*/
+ENV/
+env.bak/
+venv.bak/

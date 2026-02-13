@@ -6,7 +6,7 @@ endif()
 
 CPMAddPackage(
     NAME "spdlog"
-    VERSION "1.15.3"
+    VERSION "1.17.0"
     GITHUB_REPOSITORY "gabime/spdlog"
     OPTIONS ${SPDLOG_OPTIONS}
 )

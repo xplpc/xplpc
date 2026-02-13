@@ -1,15 +1,13 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
 
     // https://plugins.gradle.org/plugin/org.jetbrains.compose
-    id("org.jetbrains.compose") version "1.8.2"
+    id("org.jetbrains.compose") version "1.10.1"
 
     // https://plugins.gradle.org/plugin/org.jetbrains.kotlin.plugin.compose
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.3.10"
 }
 
 group = "com.xplpc.runner.compose"
