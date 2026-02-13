@@ -81,6 +81,13 @@ jobs:
       - name: Build AAR
         run: python3 xplpc.py kotlin-build-aar --platform android
 
+      - name: Start ADB
+        run: |
+          export ANDROID_SDK_ROOT=$HOME/Library/Android/sdk
+          $ANDROID_SDK_ROOT/platform-tools/adb kill-server || true
+          $ANDROID_SDK_ROOT/platform-tools/adb start-server
+          $ANDROID_SDK_ROOT/platform-tools/adb devices
+
       - name: Test
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -88,7 +95,9 @@ jobs:
           arch: ${{ steps.avd-info.outputs.arch }}
           target: ${{ steps.avd-info.outputs.target }}
           disable-animations: true
-          force-avd-creation: false
+          force-avd-creation: true
           ram-size: 4096M
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
-          script: python3 xplpc.py kotlin-test --platform android
+          script: |
+            adb devices
+            python3 xplpc.py kotlin-test --platform android
