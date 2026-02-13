@@ -16,8 +16,8 @@ jobs:
       matrix:
         config:
         - {
-            name: "macOS Latest Clang",
-            os: macos-15
+            name: "Ubuntu Latest",
+            os: ubuntu-latest
           }
 
     steps:
@@ -44,7 +44,7 @@ jobs:
           version: "1.12.1"
 
       - name: Install Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: "corretto"
           java-version: "17"
@@ -70,6 +70,12 @@ jobs:
         with:
             api-level: 34
 
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Conan (only when use conan)
         run: python3 xplpc.py conan-setup
 
@@ -81,17 +87,8 @@ jobs:
       - name: Build AAR
         run: python3 xplpc.py kotlin-build-aar --platform android
 
-      - name: Start ADB
-        run: |
-          export ANDROID_SDK_ROOT=$HOME/Library/Android/sdk
-          $ANDROID_SDK_ROOT/platform-tools/adb kill-server || true
-          $ANDROID_SDK_ROOT/platform-tools/adb start-server
-          $ANDROID_SDK_ROOT/platform-tools/adb devices
-
       - name: Test
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 120
         with:
           api-level: 34
           arch: ${{ steps.avd-info.outputs.arch }}
