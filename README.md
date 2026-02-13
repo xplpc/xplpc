@@ -18,10 +18,6 @@
     <a href="https://github.com/xplpc/xplpc/actions/workflows/python.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/python.yml/badge.svg"></a>
 </p>
 
-<p align="center">
-    <a href="https://www.codacy.com/gh/xplpc/xplpc/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=xplpc/xplpc&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/aaff32bd69594525a289545c56324801"></a>
-</p>
-
 ## Project
 
 The XPLPC project connects languages and platforms, allowing for the transfer of serialized data between them. This is achieved without the need for a server, but instead by utilizing device memory. This approach is known as Lite Procedure Call.

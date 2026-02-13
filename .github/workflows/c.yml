@@ -23,7 +23,6 @@ jobs:
             cc: "cl",
             cxx: "cl",
             generators: "Visual Studio 17 2022",
-            codacy: false,
             leaks: false
           }
         - {
@@ -34,7 +33,6 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "MinGW Makefiles",
-            codacy: false,
             leaks: false
           }
         - {
@@ -45,7 +43,6 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "Ninja",
-            codacy: true,
             leaks: false
           }
         - {
@@ -56,7 +53,6 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "Ninja",
-            codacy: true,
             leaks: false
           }
         - {
@@ -67,16 +63,11 @@ jobs:
             cc: "clang",
             cxx: "clang++",
             generators: "Ninja",
-            codacy: false,
             leaks: true
           }
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check Code Quality
-        if: matrix.config.codacy == true
-        uses: codacy/codacy-analysis-cli-action@master
 
       - name: Set up Python
         uses: actions/setup-python@v5
