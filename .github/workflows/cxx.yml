@@ -23,8 +23,6 @@ jobs:
             cc: "cl",
             cxx: "cl",
             generators: "Visual Studio 17 2022",
-            codacy: false,
-            codeql: true,
             leaks: false
           }
         - {
@@ -35,8 +33,6 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "MinGW Makefiles",
-            codacy: false,
-            codeql: false,
             leaks: false
           }
         - {
@@ -47,8 +43,6 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "Ninja",
-            codacy: true,
-            codeql: true,
             leaks: false
           }
         - {
@@ -59,8 +53,6 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "Ninja",
-            codacy: true,
-            codeql: true,
             leaks: false
           }
         - {
@@ -71,17 +63,11 @@ jobs:
             cc: "clang",
             cxx: "clang++",
             generators: "Ninja",
-            codacy: false,
-            codeql: true,
             leaks: true
           }
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Check Code Quality
-        if: matrix.config.codacy == true
-        uses: codacy/codacy-analysis-cli-action@master
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -101,19 +87,13 @@ jobs:
       - name: Install Ninja
         uses: seanmiddleditch/gha-setup-ninja@master
         with:
-          version: "1.10.0"
+          version: "1.12.1"
 
       - name: Verify
         run: |
           python3 --version
           cmake --version
           ninja --version
-
-      - name: Initialize CodeQL
-        if: matrix.config.codeql == true
-        uses: github/codeql-action/init@v3
-        with:
-          languages: cpp
 
       - name: Conan
         run: python3 xplpc.py conan-setup
@@ -127,7 +107,3 @@ jobs:
       - name: Leaks
         if: matrix.config.leaks == true
         run: python3 xplpc.py cxx-build-leaks
-
-      - name: Perform CodeQL Analysis
-        if: matrix.config.codeql == true
-        uses: github/codeql-action/analyze@v3

@@ -25,10 +25,10 @@ class TargetConan(ConanFile):
 
     # -----------------------------------------------------------------------------
     def requirements(self):
-        self.requires("spdlog/1.15.1")
+        self.requires("spdlog/1.17.0")
 
         if self.options.get_safe("xplpc_enable_serializer_for_json"):
-            self.requires("nlohmann_json/3.11.3")
+            self.requires("nlohmann_json/3.12.0")
 
         if self.options.get_safe("xplpc_build_tests"):
-            self.requires("gtest/1.16.0")
+            self.requires("gtest/1.17.0")

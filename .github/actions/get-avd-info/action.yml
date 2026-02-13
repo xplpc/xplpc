@@ -12,7 +12,7 @@ runs:
     using: "composite"
     steps:
         - id: get-host-arch
-          run: echo "::set-output name=host-arch::$(uname -m)"
+          run: echo "host-arch=$(uname -m)" >> $GITHUB_OUTPUT
           shell: bash
         - id: get-avd-arch
           run: |
@@ -33,8 +33,8 @@ runs:
               fi
             fi
 
-            echo "::set-output name=arch::$avd_arch"
+            echo "arch=$avd_arch" >> $GITHUB_OUTPUT
           shell: bash
         - id: get-avd-target
-          run: echo "::set-output name=target::$(echo default)"
+          run: echo "target=default" >> $GITHUB_OUTPUT
           shell: bash

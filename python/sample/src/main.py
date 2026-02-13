@@ -1,13 +1,29 @@
 import asyncio
 import logging
+import sys
+import types
 
 import psutil
+
+# KivyMD 2.0.1 unconditionally imports kivy.core.window.window_sdl2 (for a type hint),
+# which fails when Kivy is built without SDL2 (e.g. pygame backend on Python 3.14).
+# Provide a stub so the import chain does not break.
+if "kivy.core.window._window_sdl2" not in sys.modules:
+    _stub = types.ModuleType("kivy.core.window._window_sdl2")
+    _stub._WindowSDL2Storage = type("_WindowSDL2Storage", (), {})
+    sys.modules["kivy.core.window._window_sdl2"] = _stub
+
+if "kivy.core.window.window_sdl2" not in sys.modules:
+    _stub_sdl2 = types.ModuleType("kivy.core.window.window_sdl2")
+    _stub_sdl2.WindowSDL = type("WindowSDL", (), {})
+    sys.modules["kivy.core.window.window_sdl2"] = _stub_sdl2
+
 from kivy.app import async_runTouchApp
 from kivy.core.window import Window
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFlatButton
+from kivymd.uix.button import MDButton, MDButtonText
 from kivymd.uix.label import MDLabel
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
@@ -30,7 +46,7 @@ config = Config(serializer)
 XPLPC().initialize(config)
 
 
-global_loop = asyncio.get_event_loop()
+global_loop = asyncio.new_event_loop()
 
 
 async def main(m, r):
@@ -67,7 +83,7 @@ class MyApp(MDApp):
 
         # battery level
         battery_label = MDLabel(
-            text="BATTERY LEVEL", font_style="H5", halign="center", bold=True
+            text="BATTERY LEVEL", font_style="Headline", halign="center", bold=True
         )
         main_box.add_widget(battery_label)
 
@@ -86,14 +102,16 @@ class MyApp(MDApp):
             spacing="10dp",
         )
 
-        self.battery_button = MDFlatButton(
-            text="SUBMIT",
-            halign="center",
+        self.battery_button = MDButton(
+            MDButtonText(
+                text="SUBMIT",
+                theme_text_color="Custom",
+                text_color=(1, 1, 1, 1),
+            ),
+            style="filled",
             size_hint_x=None,
-            theme_text_color="Custom",
-            text_color=(1, 1, 1, 1),
+            theme_bg_color="Custom",
             md_bg_color=(0, 0.447, 0.741, 1),
-            padding=(50, 0, 50, 0),
         )
 
         self.battery_button.bind(on_release=self.on_battery_button_clicked)
@@ -103,7 +121,9 @@ class MyApp(MDApp):
         main_box.add_widget(battery_button_box)
 
         # login form
-        login_label = MDLabel(text="LOGIN", font_style="H5", halign="center", bold=True)
+        login_label = MDLabel(
+            text="LOGIN", font_style="Headline", halign="center", bold=True
+        )
         main_box.add_widget(login_label)
 
         self.username_text = MDTextField(
@@ -165,14 +185,16 @@ class MyApp(MDApp):
             spacing="10dp",
         )
 
-        self.login_button = MDFlatButton(
-            text="SUBMIT",
-            halign="center",
+        self.login_button = MDButton(
+            MDButtonText(
+                text="SUBMIT",
+                theme_text_color="Custom",
+                text_color=(1, 1, 1, 1),
+            ),
+            style="filled",
             size_hint_x=None,
-            theme_text_color="Custom",
-            text_color=(1, 1, 1, 1),
+            theme_bg_color="Custom",
             md_bg_color=(0, 0.447, 0.741, 1),
-            padding=(50, 0, 50, 0),
         )
 
         self.login_button.bind(on_release=self.on_login_button_clicked)

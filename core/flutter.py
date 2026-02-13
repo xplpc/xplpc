@@ -22,12 +22,10 @@ def run_task_test():
     # build runner
     r.run(
         [
-            "flutter",
-            "pub",
+            "dart",
             "run",
             "build_runner",
             "build",
-            "--delete-conflicting-outputs",
         ],
         cwd=project_dir,
     )
