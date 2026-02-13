@@ -90,6 +90,8 @@ jobs:
 
       - name: Test
         uses: reactivecircus/android-emulator-runner@v2
+        env:
+          ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 120
         with:
           api-level: 34
           arch: ${{ steps.avd-info.outputs.arch }}

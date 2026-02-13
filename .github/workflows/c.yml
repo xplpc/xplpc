@@ -24,7 +24,6 @@ jobs:
             cxx: "cl",
             generators: "Visual Studio 17 2022",
             codacy: false,
-            codeql: true,
             leaks: false
           }
         - {
@@ -36,7 +35,6 @@ jobs:
             cxx: "g++",
             generators: "MinGW Makefiles",
             codacy: false,
-            codeql: false,
             leaks: false
           }
         - {
@@ -48,7 +46,6 @@ jobs:
             cxx: "g++",
             generators: "Ninja",
             codacy: true,
-            codeql: true,
             leaks: false
           }
         - {
@@ -60,7 +57,6 @@ jobs:
             cxx: "g++",
             generators: "Ninja",
             codacy: true,
-            codeql: true,
             leaks: false
           }
         - {
@@ -72,7 +68,6 @@ jobs:
             cxx: "clang++",
             generators: "Ninja",
             codacy: false,
-            codeql: true,
             leaks: true
           }
 
@@ -109,12 +104,6 @@ jobs:
           cmake --version
           ninja --version
 
-      - name: Initialize CodeQL
-        if: matrix.config.codeql == true
-        uses: github/codeql-action/init@v4
-        with:
-          languages: cpp
-
       - name: Conan
         run: python3 xplpc.py conan-setup
 
@@ -127,7 +116,3 @@ jobs:
       - name: Leaks
         if: matrix.config.leaks == true
         run: python3 xplpc.py c-build-leaks
-
-      - name: Perform CodeQL Analysis
-        if: matrix.config.codeql == true
-        uses: github/codeql-action/analyze@v4
