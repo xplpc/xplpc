@@ -4,26 +4,28 @@ import com.xplpc.system.NativeLib
 import com.xplpc.util.Log
 
 object XPLPC {
+    // A mapping may answer from a thread that never synchronized on this object, so both are published rather than merely assigned.
+    @Volatile
     var initialized: Boolean = false
         private set
 
+    @Volatile
     lateinit var config: Config
         private set
 
     @Synchronized
     fun initialize(config: Config) {
-        Log.isEnabled = config.debug
-
-        Log.d("[XPLPC : initialize]")
-
         if (initialized) {
             return
         }
 
-        initialized = true
+        Log.d("[XPLPC : initialize]")
+
         this.config = config
 
-        // load native library
         NativeLib.initialize()
+
+        // This is only set once the native library is loaded, since a failure above must not leave a half built singleton.
+        initialized = true
     }
 }

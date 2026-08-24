@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '2.2.10'
+    id 'org.jetbrains.kotlin.jvm' version '2.4.10'
     id 'java-library'
 }
 
@@ -14,10 +14,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
-    implementation 'com.google.code.gson:gson:2.13.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
+    implementation 'com.google.code.gson:gson:2.14.0'
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
 }
 
 java {
@@ -37,6 +37,12 @@ sourceSets {
     main {
         java {
             srcDirs 'src/main/java', '../../shared/src'
+        }
+    }
+
+    test {
+        java {
+            srcDirs 'src/test/java', '../../shared/tests'
         }
     }
 }

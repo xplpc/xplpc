@@ -18,6 +18,12 @@ public:
     {
     }
 
+    Param(const std::string &name, std::nullopt_t)
+        : n(name)
+        , v(std::nullopt)
+    {
+    }
+
     std::string n;
     std::optional<T> v;
 };

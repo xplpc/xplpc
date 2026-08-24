@@ -1,6 +1,7 @@
 #include "fixtures/GeneralTest.hpp"
-#include "spdlog/spdlog.h"
+#include "fixtures/VerifiedCall.hpp"
 #include "xplpc/custom/Todo.hpp"
+#include "xplpc/util/Log.hpp"
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
@@ -9,6 +10,7 @@
 #include <vector>
 
 using namespace xplpc::message;
+using namespace xplpc::util;
 using namespace xplpc::client;
 using namespace xplpc::custom;
 using namespace xplpc::proxy;
@@ -23,8 +25,8 @@ void testLogin()
     };
 
     // clang-format off
-    Client::call<std::string>(request, [](const auto &response) {
-        spdlog::debug("[testLogin] Returned Value: {}", response.value());
+    VerifiedCall::run<std::string>(request, [](const auto &response) {
+        Log::d("[testLogin] Returned Value: {}", response.value());
     });
     // clang-format on
 }
@@ -35,8 +37,8 @@ void testTodoSingle()
     auto request = Request{"sample.todo.single", Param<Todo>{"item", item}};
 
     // clang-format off
-    Client::call<Todo>(request, [](const auto &response) {
-        spdlog::debug("[testTodoSingle] Returned Value: {}, {}", response.value().id, response.value().title);
+    VerifiedCall::run<Todo>(request, [](const auto &response) {
+        Log::d("[testTodoSingle] Returned Value: {}, {}", response.value().id, response.value().title);
     });
     // clang-format on
 }
@@ -50,13 +52,13 @@ void testTodoList()
     auto request = Request{"sample.todo.list", Param<std::vector<Todo>>{"items", items}};
 
     // clang-format off
-    Client::call<std::vector<Todo>>(request, [](const auto &response) {
+    VerifiedCall::run<std::vector<Todo>>(request, [](const auto &response) {
         if (response)
         {
             auto list = response.value();
 
-            spdlog::debug("[testTodoList] Returned Value 1: {}, {}", list[0].id, list[0].title);
-            spdlog::debug("[testTodoList] Returned Value 2: {}, {}", list[1].id, list[1].title);
+            Log::d("[testTodoList] Returned Value 1: {}, {}", list[0].id, list[0].title);
+            Log::d("[testTodoList] Returned Value 2: {}, {}", list[1].id, list[1].title);
         }
     });
     // clang-format on
@@ -67,14 +69,14 @@ void testEcho()
     auto request = Request{"sample.echo", Param<std::string>{"value", "test echo value"}};
 
     // clang-format off
-    Client::call<std::string>(request, [](const auto &response) {
+    VerifiedCall::run<std::string>(request, [](const auto &response) {
         if (response)
         {
-            spdlog::debug("[testEcho] Returned Value: {}", response.value());
+            Log::d("[testEcho] Returned Value: {}", response.value());
         }
         else
         {
-            spdlog::debug("[testEcho] Returned Value Is Null");
+            Log::d("[testEcho] Returned Value Is Null");
         }
     });
     // clang-format on
@@ -100,7 +102,7 @@ void testImageToGrayscale()
     };
 
     // clang-format off
-    Client::call<std::vector<uint8_t>>(request, [](const auto &response) {
+    VerifiedCall::run<std::vector<uint8_t>>(request, [](const auto &response) {
         EXPECT_EQ(16, response.value().size());
     });
     // clang-format on
@@ -123,7 +125,7 @@ void testImageToGrayscaleFromDataView()
     };
 
     // clang-format off
-    Client::call<std::string>(request, [&dataView](const auto &response) {
+    VerifiedCall::run<std::string>(request, [&dataView](const auto &response) {
         EXPECT_EQ("OK", response.value());
 
         std::vector<uint8_t> originalVector(dataView.size());
@@ -144,10 +146,9 @@ void testDataView()
     auto request = Request{"sample.dataview"};
 
     // clang-format off
-    Client::call<DataView>(request, [](const auto &response) {
+    VerifiedCall::run<DataView>(request, [](const auto &response) {
         auto dataView = response.value();
 
-        // check current values
         EXPECT_EQ(16, dataView.size());
         EXPECT_EQ(dataView.ptr()[0], 255);
         EXPECT_EQ(dataView.ptr()[5], 255);
@@ -159,20 +160,18 @@ void testDataView()
             Param{"dataView", dataView},
         };
 
-        Client::call<std::string>(request, [&dataView](const auto &response) {
+        VerifiedCall::run<std::string>(request, [&dataView](const auto &response) {
             EXPECT_EQ("OK", response.value());
 
             std::vector<uint8_t> originalVector(dataView.size());
             dataView.copy(originalVector.data());
 
-            // check copied values
             EXPECT_EQ(16, originalVector.size());
             EXPECT_EQ(originalVector[0], 85);
             EXPECT_EQ(originalVector[4], 85);
             EXPECT_EQ(originalVector[8], 85);
             EXPECT_EQ(originalVector[12], 0);
 
-            // current original values again
             EXPECT_EQ(16, dataView.size());
             EXPECT_EQ(dataView.ptr()[0], 85);
             EXPECT_EQ(dataView.ptr()[5], 85);
@@ -188,8 +187,8 @@ void testLoginFromString()
     auto request = R"({"f":"sample.login","p":[{"n":"username","v":"paulo"},{"n":"password","v":"123456"},{"n":"remember","v":true}]})";
 
     // clang-format off
-    Client::call(request, [](auto const &response) {
-        spdlog::debug("[testLoginFromString] Returned Value: {}", response);
+    VerifiedCall::run(request, [](auto const &response) {
+        Log::d("[testLoginFromString] Returned Value: {}", response);
     });
     // clang-format on
 }
@@ -199,8 +198,8 @@ void testTodoSingleFromString()
     auto request = R"({"f":"sample.todo.single","p":[{"n":"item","v":{"body":"Body 1","data":{"data1":"value1","data2":"value2"},"done":true,"id":1,"title":"Title 1"}}]})";
 
     // clang-format off
-    Client::call(request, [](auto const &response) {
-        spdlog::debug("[testTodoSingleFromString] Returned Value: {}", response);
+    VerifiedCall::run(request, [](auto const &response) {
+        Log::d("[testTodoSingleFromString] Returned Value: {}", response);
     });
     // clang-format on
 }

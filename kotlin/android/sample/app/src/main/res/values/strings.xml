@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">XPLPC</string>
+    <string name="processed_preview_description">The camera frame after the mapping turned it to grayscale</string>
     <string name="button_submit">SUBMIT</string>
     <string name="button_open">OPEN</string>
     <string name="battery_level_result">Battery Level: %s</string>
@@ -11,7 +12,6 @@
     <string name="title_battery_level">BATTERY LEVEL</string>
     <string name="title_login">LOGIN</string>
     <string name="title_camera">CAMERA</string>
-    <string name="permission_required_text">Test camera processing image in realtime</string>
     <string name="process_info">Time to process: %1$.3f seconds\nImage size: %2$d kb</string>
     <string name="process_loading">Loading…</string>
 </resources>

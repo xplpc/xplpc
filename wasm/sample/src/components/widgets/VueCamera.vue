@@ -2,8 +2,13 @@
     <div class="text-center">
         <div class="camera-container text-center">
             <video
-ref="video" :src="source" :autoplay="autoplay" :playsinline="playsinline" style="display: none;"
-                @canplay="canPlay"></video>
+                ref="video"
+                :src="source"
+                :autoplay="autoplay"
+                :playsinline="playsinline"
+                style="display: none"
+                @canplay="canPlay"
+            ></video>
 
             <img v-if="visible" ref="preview" class="camera-image" />
         </div>
@@ -12,383 +17,475 @@ ref="video" :src="source" :autoplay="autoplay" :playsinline="playsinline" style=
             <p>{{ cameraInfo }}</p>
         </div>
 
-        <canvas ref="canvas" style="display: none;"></canvas>
+        <canvas ref="canvas" style="display: none"></canvas>
     </div>
 </template>
 
-<script lang="js">
-import { XClient } from '@/xplpc/client/client';
-import { XParam } from '@/xplpc/message/param';
-import { XRequest } from '@/xplpc/message/request';
-import { XDataView } from '@/xplpc/type/data-view';
-import { Log } from '@/xplpc/util/log';
+<script lang="ts">
+    import { defineComponent, type PropType } from "vue";
 
-export default {
-    name: "VueCamera",
-    props: {
-        width: {
-            type: [Number, String],
-            default: "100%"
-        },
-        height: {
-            type: [Number, String],
-            default: 500
-        },
-        autoplay: {
-            type: Boolean,
-            default: true
-        },
-        screenshotFormat: {
-            type: String,
-            default: "image/jpeg"
-        },
-        selectFirstDevice: {
-            type: Boolean,
-            default: true
-        },
-        playsinline: {
-            type: Boolean,
-            default: true
-        },
-        resolution: {
-            type: Object,
-            default: null,
-            validator: value => {
-                return value.height && value.width;
-            }
-        }
-    },
-    emits: ['xplpc-camera-list', 'xplpc-camera-not-supported', 'xplpc-camera-changed', 'xplpc-camera-stopped', 'xplpc-camera-video-live', 'xplpc-camera-started', 'xplpc-camera-error'],
-    data() {
-        return {
-            source: null,
-            canvas: null,
-            camerasListEmitted: false,
-            cameraList: [],
-            deviceId: "",
-            visible: false,
-            ctx: null,
-            cameraInfo: "XPLPC",
-            destWidth: 0,
-            destHeight: 0
-        };
-    },
-    watch: {
-        deviceId: function (id) {
-            Log.d("[Camera : watch] Device is changed: " + id);
-            this.changeCamera(id);
-        }
-    },
-    beforeUnmount() {
-        Log.d("[Camera : beforeUnmount]");
-        this.stop();
-    },
-    methods: {
-        // get user media
-        legacyGetUserMediaSupport() {
-            Log.d("[Camera : legacyGetUserMediaSupport]");
+    import { Client } from "@/xplpc/client/client";
+    import { Param } from "@/xplpc/message/param";
+    import { Request } from "@/xplpc/message/request";
+    import { DataView } from "@/xplpc/type/data-view";
+    import { Log } from "@/xplpc/util/log";
 
-            return constraints => {
-                // first get ahold of the legacy getUserMedia if present
-                const getUserMedia =
-                    navigator.getUserMedia ||
-                    navigator.webkitGetUserMedia ||
-                    navigator.mozGetUserMedia ||
-                    navigator.msGetUserMedia ||
-                    navigator.oGetUserMedia;
+    interface CameraResolution {
+        width: number;
+        height: number;
+    }
 
-                // some browsers just don't implement it, so return a rejected promise with an error to keep a consistent interface
-                if (!getUserMedia) {
-                    Log.d("[Camera : legacyGetUserMediaSupport] The method getUserMedia is not implemented in this browser");
+    interface CameraSurface {
+        canvas: HTMLCanvasElement;
+        ctx: CanvasRenderingContext2D;
+    }
 
-                    return Promise.reject(
-                        new Error("[Camera : legacyGetUserMediaSupport] The method getUserMedia is not implemented in this browser")
+    export default defineComponent({
+        name: "VueCamera",
+        props: {
+            width: {
+                type: [Number, String],
+                default: "100%",
+            },
+            height: {
+                type: [Number, String],
+                default: 500,
+            },
+            autoplay: {
+                type: Boolean,
+                default: true,
+            },
+            screenshotFormat: {
+                type: String,
+                default: "image/jpeg",
+            },
+            selectFirstDevice: {
+                type: Boolean,
+                default: true,
+            },
+            playsinline: {
+                type: Boolean,
+                default: true,
+            },
+            resolution: {
+                type: Object as PropType<CameraResolution | null>,
+                default: null,
+                validator: (value: CameraResolution | null) => {
+                    return (
+                        value === null || Boolean(value.height && value.width)
                     );
-                }
-
-                // otherwise, wrap the call to the old navigator.getUserMedia with a promise
-                return new Promise(function (resolve, reject) {
-                    getUserMedia.call(navigator, constraints, resolve, reject);
-                });
+                },
+            },
+        },
+        emits: [
+            "xplpc-camera-list",
+            "xplpc-camera-not-supported",
+            "xplpc-camera-changed",
+            "xplpc-camera-stopped",
+            "xplpc-camera-video-live",
+            "xplpc-camera-started",
+            "xplpc-camera-error",
+        ],
+        data() {
+            return {
+                source: undefined as string | undefined,
+                canvas: null as HTMLCanvasElement | null,
+                ctx: null as CanvasRenderingContext2D | null,
+                camerasListEmitted: false,
+                cameraList: [] as MediaDeviceInfo[],
+                deviceId: "",
+                visible: false,
+                cameraInfo: "XPLPC",
+                destWidth: 0,
+                destHeight: 0,
+                processTimer: undefined as
+                    ReturnType<typeof setInterval> | undefined,
             };
         },
-        // setup media
-        setupMedia() {
-            Log.d("[Camera : setupMedia]");
-
-            if (navigator.mediaDevices === undefined) {
-                navigator.mediaDevices = {};
-            }
-
-            if (navigator.mediaDevices.getUserMedia === undefined) {
-                navigator.mediaDevices.getUserMedia = this.legacyGetUserMediaSupport();
-            }
-
-            this.testMediaAccess();
+        watch: {
+            deviceId: function (id: string) {
+                Log.d("[Camera : watch] Device is changed: " + id);
+                this.changeCamera(id);
+            },
         },
-        // load available cameras
-        loadCameraList() {
-            Log.d("[Camera : loadCameras]");
+        beforeUnmount() {
+            Log.d("[Camera : beforeUnmount]");
 
-            navigator.mediaDevices
-                .enumerateDevices()
-                .then(deviceInfos => {
-                    for (let i = 0; i !== deviceInfos.length; ++i) {
-                        const deviceInfo = deviceInfos[i];
+            if (this.processTimer !== undefined) {
+                clearInterval(this.processTimer);
+                this.processTimer = undefined;
+            }
 
-                        if (deviceInfo.kind === "videoinput") {
-                            this.cameraList.push(deviceInfo);
+            this.stop();
+        },
+        methods: {
+            setupMedia() {
+                Log.d("[Camera : setupMedia]");
+
+                if (!navigator.mediaDevices?.getUserMedia) {
+                    Log.e(
+                        "[Camera : setupMedia] The method getUserMedia is not available in this browser",
+                    );
+                    this.$emit(
+                        "xplpc-camera-not-supported",
+                        new Error(
+                            "The method getUserMedia is not available in this browser",
+                        ),
+                    );
+                    return;
+                }
+
+                this.testMediaAccess();
+            },
+            loadCameraList() {
+                Log.d("[Camera : loadCameras]");
+
+                navigator.mediaDevices
+                    .enumerateDevices()
+                    .then((deviceInfos) => {
+                        for (const deviceInfo of deviceInfos) {
+                            if (deviceInfo.kind === "videoinput") {
+                                this.cameraList.push(deviceInfo);
+                            }
                         }
-                    }
-                })
-                .then(() => {
-                    if (!this.camerasListEmitted) {
-                        if (this.selectFirstDevice && this.cameraList.length > 0) {
+                    })
+                    .then(() => {
+                        if (this.camerasListEmitted) {
+                            return;
+                        }
+
+                        if (
+                            this.selectFirstDevice &&
+                            this.cameraList.length > 0
+                        ) {
                             this.setDeviceId(this.cameraList[0].deviceId);
                         }
 
                         this.$emit("xplpc-camera-list", this.cameraList);
                         this.camerasListEmitted = true;
+                    })
+                    .catch((error) =>
+                        this.$emit("xplpc-camera-not-supported", error),
+                    );
+            },
+            // Change to a different camera stream, like front and back camera on phones.
+            changeCamera(deviceId: string) {
+                Log.d("[Camera : changeCamera] Device: " + deviceId);
+
+                this.stop();
+                this.$emit("xplpc-camera-changed", deviceId);
+                this.loadCamera(deviceId);
+            },
+            loadSrcStream(stream: MediaStream) {
+                Log.d("[Camera : loadSrcStream]");
+
+                const video = this.videoElement();
+
+                if (!video) {
+                    return;
+                }
+
+                video.srcObject = stream;
+
+                video.onloadedmetadata = () => {
+                    this.$emit("xplpc-camera-video-live", stream);
+                };
+
+                this.$emit("xplpc-camera-started", stream);
+            },
+            stopStreamedVideo(videoElem: HTMLVideoElement) {
+                Log.d("[Camera : stopStreamedVideo]");
+
+                const stream = videoElem.srcObject;
+
+                if (!(stream instanceof MediaStream)) {
+                    return;
+                }
+
+                for (const track of stream.getTracks()) {
+                    track.stop();
+
+                    this.$emit("xplpc-camera-stopped", stream);
+                    videoElem.srcObject = null;
+                    this.source = undefined;
+                }
+            },
+            stop() {
+                Log.d("[Camera : stop]");
+
+                const video = this.videoElement();
+
+                if (video?.srcObject) {
+                    this.stopStreamedVideo(video);
+                }
+            },
+            async start() {
+                Log.d("[Camera : start]");
+
+                await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: true,
+                });
+
+                if (!this.deviceId) {
+                    this.loadCameraList();
+                }
+
+                if (this.deviceId) {
+                    this.setupMedia();
+                    this.loadCamera(this.deviceId);
+                }
+            },
+            pause() {
+                Log.d("[Camera : pause]");
+
+                const video = this.videoElement();
+
+                if (video?.srcObject) {
+                    video.pause();
+                }
+            },
+            resume() {
+                Log.d("[Camera : resume]");
+
+                const video = this.videoElement();
+
+                if (video?.srcObject) {
+                    video.play();
+                }
+            },
+            processImage() {
+                this.processTimer = setInterval(async () => {
+                    const surface = this.drawFrame();
+
+                    if (!surface) {
+                        return;
                     }
-                })
-                .catch(error => this.$emit("xplpc-camera-not-supported", error));
-        },
-        // change to a different camera stream, like front and back camera on phones
-        changeCamera(deviceId) {
-            Log.d("[Camera : changeCamera] Device: " + deviceId);
 
-            this.stop();
-            this.$emit("xplpc-camera-changed", deviceId);
-            this.loadCamera(deviceId);
-        },
-        // load the stream
-        loadSrcStream(stream) {
-            Log.d("[Camera : loadSrcStream]");
+                    const { canvas, ctx } = surface;
 
-            if ("srcObject" in this.$refs.video) {
-                // new browsers api
-                this.$refs.video.srcObject = stream;
-            } else {
-                // old broswers
-                this.source = window.HTMLMediaElement.srcObject(stream);
-            }
+                    const imgData = ctx.getImageData(
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height,
+                    );
+                    const dataView = DataView.createFromArrayBufferView(
+                        imgData.data,
+                    );
 
-            // emit video start/live event
-            this.$refs.video.onloadedmetadata = () => {
-                this.$emit("xplpc-camera-video-live", stream);
-            };
+                    const imageSize = dataView.size;
+                    const startTime = performance.now();
 
-            this.$emit("xplpc-camera-started", stream);
-        },
-        // stop the selected streamed video to change camera
-        stopStreamedVideo(videoElem) {
-            Log.d("[Camera : stopStreamedVideo]");
+                    // A frame arrives every few milliseconds, so a block kept on a failed one leaks fast.
+                    try {
+                        const request = new Request(
+                            "sample.image.grayscale.dataview",
+                            new Param("dataView", dataView),
+                        );
 
-            const stream = videoElem.srcObject;
-            const tracks = stream.getTracks();
+                        await Client.call(request);
 
-            tracks.forEach(track => {
-                // stops the video track
-                track.stop();
+                        DataView.withUint8ClampedArray(
+                            dataView,
+                            (processedData) => {
+                                ctx.putImageData(
+                                    new ImageData(
+                                        processedData,
+                                        canvas.width,
+                                        canvas.height,
+                                    ),
+                                    0,
+                                    0,
+                                );
+                            },
+                        );
 
-                this.$emit("xplpc-camera-stopped", stream);
-                this.$refs.video.srcObject = null;
-                this.source = null;
-            });
-        },
-        // stop the video
-        stop() {
-            Log.d("[Camera : stop]");
+                        const preview = this.$refs.preview;
 
-            if (this.$refs.video && this.$refs.video.srcObject) {
-                this.stopStreamedVideo(this.$refs.video);
-            }
-        },
-        // start the video
-        async start() {
-            Log.d("[Camera : start]");
+                        if (preview instanceof HTMLImageElement) {
+                            preview.src = canvas.toDataURL();
+                        }
+                    } finally {
+                        DataView.free(dataView);
+                    }
 
-            await navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+                    const duration = performance.now() - startTime;
 
-            if (!this.deviceId) {
-                this.loadCameraList();
-            }
+                    this.cameraInfo =
+                        "Time to process: " +
+                        (duration / 1000).toFixed(3) +
+                        " seconds\nImage size: " +
+                        imageSize / 1024 +
+                        " kb";
+                }, 16);
+            },
+            testMediaAccess() {
+                Log.d("[Camera : testMediaAccess]");
 
-            if (this.deviceId) {
-                this.setupMedia();
-                this.loadCamera(this.deviceId);
-            }
-        },
-        // pause the video
-        pause() {
-            Log.d("[Camera : pause]");
+                navigator.mediaDevices
+                    .getUserMedia({ video: this.videoConstraints() })
+                    .then((stream) => {
+                        for (const track of stream.getTracks()) {
+                            track.stop();
+                        }
 
-            if (this.$refs.video && this.$refs.video.srcObject) {
-                this.$refs.video.pause();
-            }
-        },
-        // resume the video
-        resume() {
-            Log.d("[Camera : resume]");
+                        this.loadCameraList();
+                    })
+                    .catch((error) => this.$emit("xplpc-camera-error", error));
+            },
+            loadCamera(device: string) {
+                Log.d("[Camera : loadCamera]");
 
-            if (this.$refs.video && this.$refs.video.srcObject) {
-                this.$refs.video.play();
-            }
-        },
-        // process image
-        processImage() {
-            setInterval(async () => {
-                this.getCanvas();
+                const video = {
+                    ...this.videoConstraints(),
+                    deviceId: { exact: device },
+                };
 
-                const imgData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-                const dataView = XDataView.createFromArrayBufferView(imgData.data);
+                navigator.mediaDevices
+                    .getUserMedia({ video })
+                    .then((stream) => this.loadSrcStream(stream))
+                    .catch((error) => this.$emit("xplpc-camera-error", error));
+            },
+            // The screenshot is empty while the surface is not ready.
+            capture(): string {
+                Log.d("[Camera : capture]");
 
-                const startTime = performance.now();
+                const surface = this.drawFrame();
 
-                const request = new XRequest(
-                    "sample.image.grayscale.dataview",
-                    new XParam("dataView", dataView),
+                if (!surface) {
+                    return "";
+                }
+
+                return surface.canvas.toDataURL(this.screenshotFormat);
+            },
+            // The current video frame is drawn and the surface holding it is returned.
+            drawFrame(): CameraSurface | null {
+                const video = this.videoElement();
+
+                if (!video) {
+                    return null;
+                }
+
+                const surface = this.surface(video);
+
+                if (!surface) {
+                    return null;
+                }
+
+                surface.ctx.drawImage(
+                    video,
+                    0,
+                    0,
+                    this.destWidth,
+                    this.destHeight,
                 );
 
-                await XClient.call(request);
+                return surface;
+            },
+            // The canvas and its context are created on the first frame, sized to keep the video proportion.
+            surface(video: HTMLVideoElement): CameraSurface | null {
+                if (this.canvas && this.ctx) {
+                    return { canvas: this.canvas, ctx: this.ctx };
+                }
 
-                const elapsedTime = performance.now();
-                const duration = elapsedTime - startTime;
+                const canvas = this.$refs.canvas;
 
-                const processedData = XDataView.createUint8ClampedArrayFromPtr(dataView.ptr, dataView.size);
-                this.ctx.putImageData(new ImageData(processedData, this.canvas.width, this.canvas.height), 0, 0);
+                if (
+                    !(canvas instanceof HTMLCanvasElement) ||
+                    !video.videoWidth ||
+                    !video.videoHeight
+                ) {
+                    return null;
+                }
 
-                const preview = this.$refs.preview;
-                preview.src = this.canvas.toDataURL();
-
-                XDataView.free(dataView);
-
-                this.cameraInfo = "Time to process: " + (duration / 1000).toFixed(3) + " seconds\nImage size: " + (dataView.size / 1024) + " kb";
-            }, 16);
-        },
-        // test access
-        testMediaAccess() {
-            Log.d("[Camera : testMediaAccess]");
-
-            const constraints = { video: true };
-
-            if (this.resolution) {
-                constraints.video = {};
-                constraints.video.width = this.resolution.width;
-                constraints.video.height = this.resolution.height;
-            }
-
-            navigator.mediaDevices
-                .getUserMedia(constraints)
-                .then(stream => {
-                    // make sure to stop this media-stream
-                    const tracks = stream.getTracks();
-
-                    tracks.forEach(track => {
-                        track.stop();
-                    });
-
-                    this.loadCameraList();
-                })
-                .catch(error => this.$emit("xplpc-camera-error", error));
-        },
-        // load the camera passed as index
-        loadCamera(device) {
-            Log.d("[Camera : loadCamera]");
-            const constraints = { video: { deviceId: { exact: device } } };
-
-            if (this.resolution) {
-                constraints.video.width = this.resolution.width;
-                constraints.video.height = this.resolution.height;
-            }
-
-            navigator.mediaDevices
-                .getUserMedia(constraints)
-                .then(stream => this.loadSrcStream(stream))
-                .catch(error => this.$emit("xplpc-camera-error", error));
-        },
-        // capture screenshot
-        capture() {
-            Log.d("[Camera : capture]");
-            return this.getCanvas().toDataURL(this.screenshotFormat);
-        },
-        // get canvas
-        getCanvas() {
-            // remove comment below for debug only
-            // Log.d("[Camera : getCanvas]");
-
-            const video = this.$refs.video;
-
-            if (!this.ctx) {
-                // calculate proportion
                 this.destWidth = 240;
-                this.destHeight = this.destWidth * video.videoHeight / video.videoWidth;
+                this.destHeight =
+                    (this.destWidth * video.videoHeight) / video.videoWidth;
 
                 if (this.destHeight > 320) {
                     this.destHeight = 320;
-                    this.destWidth = this.destHeight * video.videoWidth / video.videoHeight;
+                    this.destWidth =
+                        (this.destHeight * video.videoWidth) /
+                        video.videoHeight;
                 }
 
-                // create canvas
-                const canvas = this.$refs.canvas;
+                const ctx = canvas.getContext("2d", {
+                    willReadFrequently: true,
+                });
+
+                if (!ctx) {
+                    Log.e(
+                        "[Camera : surface] Unable to create the 2d rendering context",
+                    );
+                    return null;
+                }
+
                 canvas.width = this.destWidth;
                 canvas.height = this.destHeight;
-                this.canvas = canvas;
 
                 video.width = this.destWidth;
                 video.height = this.destHeight;
 
-                // create context
-                this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
-            }
+                this.canvas = canvas;
+                this.ctx = ctx;
 
-            const { ctx, canvas } = this;
+                return { canvas, ctx };
+            },
+            // The template ref is only populated once the component is mounted.
+            videoElement(): HTMLVideoElement | null {
+                const video = this.$refs.video;
 
-            // draw video frame
-            ctx.drawImage(video, 0, 0, this.destWidth, this.destHeight);
+                return video instanceof HTMLVideoElement ? video : null;
+            },
+            videoConstraints(): MediaTrackConstraints {
+                if (!this.resolution) {
+                    return {};
+                }
 
-            return canvas;
+                return {
+                    width: this.resolution.width,
+                    height: this.resolution.height,
+                };
+            },
+            setDeviceId(deviceId: string) {
+                Log.d("[Camera : setDeviceId] Device: " + deviceId);
+                this.deviceId = deviceId;
+            },
+            canPlay() {
+                Log.d("[Camera : canPlay]");
+                this.drawFrame();
+                this.processImage();
+                this.visible = true;
+            },
         },
-        // set device id
-        setDeviceId(deviceId) {
-            Log.d("[Camera : setDeviceId] Device: " + deviceId);
-            this.deviceId = deviceId;
-        },
-        // on can play media
-        canPlay() {
-            Log.d("[Camera : canPlay]");
-            this.getCanvas();
-            this.processImage();
-            this.visible = true;
-        }
-    }
-};
+    });
 </script>
 
 <style>
-.camera-container {
-    max-width: 240px;
-    max-height: 320px;
-    margin: 0 auto;
-    background-color: #000000;
-}
+    .camera-container {
+        max-width: 240px;
+        max-height: 320px;
+        margin: 0 auto;
+        background-color: #000000;
+    }
 
-.camera-image {
-    max-width: 240px;
-    max-height: 320px;
-}
+    .camera-image {
+        max-width: 240px;
+        max-height: 320px;
+    }
 
-.camera-info {
-    background: #000000;
-    color: #ffffff;
-    padding: 6px;
-    vertical-align: middle;
-    border-radius: 30px;
-    margin-top: 20px;
-}
+    .camera-info {
+        background: #000000;
+        color: #ffffff;
+        padding: 6px;
+        vertical-align: middle;
+        border-radius: 30px;
+        margin-top: 20px;
+    }
 
-.camera-info p {
-    margin: 0;
-    white-space: pre-line;
-}
+    .camera-info p {
+        margin: 0;
+        white-space: pre-line;
+    }
 </style>

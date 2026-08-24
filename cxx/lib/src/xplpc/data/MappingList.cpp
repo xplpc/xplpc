@@ -10,28 +10,27 @@ std::once_flag MappingList::initInstanceFlag;
 
 void MappingList::add(const std::string &name, const MappingItem &item)
 {
-    list[name] = item;
+    list.set(name, item);
 }
 
-std::optional<MappingItem> MappingList::find(const std::string &name)
+std::optional<MappingItem> MappingList::find(const std::string &name) const
 {
-    if (list.find(name) == list.end())
-    {
-        return std::nullopt;
-    }
-
-    return list[name];
+    return list.get(name);
 }
 
-size_t MappingList::count() const noexcept
+bool MappingList::has(const std::string &name) const
 {
-    return list.size();
+    return list.contains(name);
 }
 
-void MappingList::clear() noexcept
+size_t MappingList::count() const
+{
+    return list.count();
+}
+
+void MappingList::clear()
 {
     list.clear();
-    instance = nullptr;
 }
 
 std::shared_ptr<MappingList> MappingList::shared()

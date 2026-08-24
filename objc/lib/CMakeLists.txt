@@ -1,4 +1,3 @@
-# files
 set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/objc/support.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/proxy/ObjCPlatformProxy.h"

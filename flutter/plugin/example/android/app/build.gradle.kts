@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.xplpc.runner.flutter"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -20,12 +20,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.xplpc.runner.flutter"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 37
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
@@ -36,8 +33,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // the release variant is signed with the debug keys so the example runs, a real application replaces this
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -48,5 +44,5 @@ flutter {
 }
 
 dependencies {
-    implementation(files("$rootProject/../../../../../../build/kotlin-aar-flutter/library-release.aar"))
+    implementation(files("${rootProject.projectDir}/../../../../build/kotlin-aar-flutter/library-release.aar"))
 }

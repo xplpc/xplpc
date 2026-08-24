@@ -6,7 +6,7 @@ import com.xplpc.data.MappingList
 import com.xplpc.message.Message
 import com.xplpc.util.Log
 
-class PlatformProxy {
+class PlatformProxy private constructor() {
     companion object {
         @JvmStatic
         external fun callNativeProxy(key: String, data: String)
@@ -21,53 +21,34 @@ class PlatformProxy {
 
         @JvmStatic
         fun onNativeProxyCall(key: String, data: String) {
-            // function name
-            val functionName = XPLPC.config.serializer.decodeFunctionName(data)
-
-            if (functionName.isEmpty()) {
-                Log.e("[PlatformProxy : call] Function name is empty")
-                callNativeProxyCallback(key, data)
+            if (!XPLPC.initialized) {
+                Log.e("[PlatformProxy : call] XPLPC was not initialized")
+                callNativeProxyCallback(key, "")
                 return
             }
 
-            // mapping item
-            val mappingItem = MappingList.find(functionName)
+            val request = XPLPC.config.serializer.decodeRequest(data)
+
+            if (request == null) {
+                callNativeProxyCallback(key, "")
+                return
+            }
+
+            if (request.functionName.isEmpty()) {
+                Log.e("[PlatformProxy : call] Function name is empty")
+                callNativeProxyCallback(key, "")
+                return
+            }
+
+            val mappingItem = MappingList.find(request.functionName)
 
             if (mappingItem == null) {
-                Log.e("[PlatformProxy : call] Mapping not found for function: $functionName")
-                callNativeProxyCallback(key, data)
+                Log.e("[PlatformProxy : call] Mapping not found for function: ${request.functionName}")
+                callNativeProxyCallback(key, "")
                 return
             }
 
-            // message
-            var message: Message? = null
-
-            try {
-                message = XPLPC.config.serializer.decodeMessage(data)
-            } catch (e: Exception) {
-                Log.e("[PlatformProxy : call] Error when decode message: ${e.message}")
-            }
-
-            if (message == null) {
-                Log.e("[PlatformProxy : call] Error when decode message for function: $functionName")
-                callNativeProxyCallback(key, data)
-                return
-            }
-
-            // execute
-            mappingItem.target(message) { response ->
-                val encodedData: String?
-
-                try {
-                    encodedData = XPLPC.config.serializer.encodeFunctionReturnValue(response)
-                } catch (e: Exception) {
-                    Log.e("[PlatformProxy : call] Error when encode data: ${e.message}")
-                    callNativeProxyCallback(key, data)
-                    return@target
-                }
-
-                callNativeProxyCallback(key, encodedData)
-            }
+            execute(key, request.functionName, mappingItem.target, request.message)
         }
 
         @JvmStatic
@@ -77,12 +58,37 @@ class PlatformProxy {
 
         @JvmStatic
         fun onInitializePlatform() {
-            // ignore
         }
 
         @JvmStatic
         fun onFinalizePlatform() {
             MappingList.clear()
+        }
+
+        private fun execute(
+            key: String,
+            functionName: String,
+            target: (Message, (Any?) -> Unit) -> Unit,
+            message: Message,
+        ) {
+            try {
+                target(message) { response ->
+                    val encodedData = try {
+                        XPLPC.config.serializer.encodeFunctionReturnValue(response)
+                    } catch (e: Exception) {
+                        Log.e("[PlatformProxy : call] Error when encode data")
+                        Log.d("[PlatformProxy : call] Error when encode data: ${e.message}")
+                        ""
+                    }
+
+                    callNativeProxyCallback(key, encodedData)
+                }
+            } catch (e: Throwable) {
+                // An error is not an exception here, and letting one leave this frame makes it a pending exception at the jni boundary with the caller never answered.
+                Log.e("[PlatformProxy : call] Error when execute function \"$functionName\"")
+                Log.d("[PlatformProxy : call] Error when execute function \"$functionName\": ${e.message}")
+                callNativeProxyCallback(key, "")
+            }
         }
     }
 }

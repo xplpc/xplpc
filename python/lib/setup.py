@@ -1,15 +1,20 @@
-from setuptools import find_packages, setup
+from setuptools import setup
+from setuptools.command.bdist_wheel import bdist_wheel
 
-setup(
-    name="xplpc",
-    version="1.0.0",
-    description="Cross Platform Lite Procedure Call",
-    long_description="Cross Platform Lite Procedure Call - The XPLPC project connects languages and platforms, allowing for the transfer of serialized data between them",
-    long_description_content_type="text/markdown",
-    author="Paulo Coutinho",
-    author_email="paulocoutinhox@gmail.com",
-    url="https://github.com/xplpc/xplpc",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
-    include_package_data=True,
-)
+
+class BinaryDistribution(bdist_wheel):
+    # The package carries a native library for one platform, so the wheel has to say which one
+    # rather than claim it runs anywhere and fail when a call reaches the library. Nothing here is
+    # compiled against an interpreter, so the python tag stays the one every version 3 accepts.
+    def finalize_options(self):
+        super().finalize_options()
+
+        self.root_is_pure = False
+
+    def get_tag(self):
+        _, _, platform = super().get_tag()
+
+        return "py3", "none", platform
+
+
+setup(cmdclass={"bdist_wheel": BinaryDistribution})

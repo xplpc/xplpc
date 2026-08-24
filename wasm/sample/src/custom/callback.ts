@@ -1,7 +1,7 @@
-import { XMessage } from "../xplpc/message/message";
+import { Message } from "../xplpc/message/message";
 
 export class Callback {
-    public static batteryLevel(message: XMessage): Promise<string> {
+    public static batteryLevel(message: Message): Promise<string> {
         return new Promise<string>((resolve) => {
             const suffix = message.get("suffix");
             return resolve("100" + suffix);

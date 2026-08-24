@@ -1,5 +1,6 @@
 #include "xplpc/custom/Todo.hpp"
 #include "fixtures/GeneralTest.hpp"
+#include "fixtures/VerifiedCall.hpp"
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
@@ -17,7 +18,7 @@ TEST_F(GeneralTest, TodoTestSingle)
     auto request = Request{"sample.todo.single", Param<Todo>{"item", item}};
 
     // clang-format off
-    Client::call<Todo>(request, [](const auto &response) {
+    VerifiedCall::run<Todo>(request, [](const auto &response) {
         EXPECT_NE(response, std::nullopt);
 
         if (response)
@@ -40,7 +41,7 @@ TEST_F(GeneralTest, TodoTestSingleAsync)
 
     // clang-format off
     std::thread([=] {
-        Client::call<Todo>(request, [](const auto &response) {
+        VerifiedCall::run<Todo>(request, [](const auto &response) {
             EXPECT_NE(response, std::nullopt);
 
             if (response)
@@ -65,7 +66,7 @@ TEST_F(GeneralTest, TodoMultipleTest)
     auto request = Request{"sample.todo.list", Param<std::vector<Todo>>{"items", items}};
 
     // clang-format off
-    Client::call<std::vector<Todo>>(request, [](const auto &response) {
+    VerifiedCall::run<std::vector<Todo>>(request, [](const auto &response) {
         auto total = 0;
 
         if (response)
@@ -89,7 +90,7 @@ TEST_F(GeneralTest, TodoMultipleTestAsync)
 
     // clang-format off
     std::thread([=] {
-        Client::call<std::vector<Todo>>(request, [](const auto &response) {
+        VerifiedCall::run<std::vector<Todo>>(request, [](const auto &response) {
             auto total = 0;
 
             if (response)
@@ -101,5 +102,19 @@ TEST_F(GeneralTest, TodoMultipleTestAsync)
             EXPECT_EQ(2, total);
         });
     }).join();
+    // clang-format on
+}
+
+TEST_F(GeneralTest, TodoListDoesNotReadPastAListTheCallerSentShort)
+{
+    // How many items arrive is decided by the caller, so a mapping must not reach for ones that are not there.
+
+    auto request = Request{"sample.todo.list", Param<std::vector<Todo>>{"items", {}}};
+
+    // clang-format off
+    VerifiedCall::run<std::vector<Todo>>(request, [](const auto &response) {
+        ASSERT_TRUE(response.has_value());
+        EXPECT_TRUE(response.value().empty());
+    });
     // clang-format on
 }

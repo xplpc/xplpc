@@ -1,11 +1,10 @@
 import os
 
 from pygemstones.io import file as f
-from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
 from core import config as c
-from core import tool
+from core import run, tool
 
 
 # -----------------------------------------------------------------------------
@@ -21,14 +20,14 @@ def run_task_format():
         "black",
         "xplpc.py",
     ]
-    r.run(command)
+    run.run(command)
 
     # core
     command = [
         "black",
         "core/",
     ]
-    r.run(command)
+    run.run(command)
 
     l.ok()
 
@@ -41,13 +40,22 @@ def run_task_clear():
     f.remove_file(os.path.join(c.proj_path, "CMakeUserPresets.json"))
     f.remove_file(os.path.join(c.proj_path, "CMakeLists.txt.user"))
 
-    f.remove_dir(os.path.join(c.proj_path, "kotlin", "lib", "build"))
-    f.remove_dir(os.path.join(c.proj_path, "kotlin", "lib", "library", "build"))
-    f.remove_dir(os.path.join(c.proj_path, "kotlin", "lib", "library", ".cxx"))
+    for project in ["android", "desktop"]:
+        f.remove_dir(os.path.join(c.proj_path, "kotlin", project, "lib", "build"))
+        f.remove_dir(
+            os.path.join(c.proj_path, "kotlin", project, "lib", "library", "build")
+        )
+        f.remove_dir(
+            os.path.join(c.proj_path, "kotlin", project, "lib", "library", ".cxx")
+        )
 
-    f.remove_dir(os.path.join(c.proj_path, "kotlin", "sample", "build"))
-    f.remove_dir(os.path.join(c.proj_path, "kotlin", "sample", "app", "build"))
-    f.remove_dir(os.path.join(c.proj_path, "kotlin", "sample", "app", ".cxx"))
+        f.remove_dir(os.path.join(c.proj_path, "kotlin", project, "sample", "build"))
+        f.remove_dir(
+            os.path.join(c.proj_path, "kotlin", project, "sample", "app", "build")
+        )
+        f.remove_dir(
+            os.path.join(c.proj_path, "kotlin", project, "sample", "app", ".cxx")
+        )
 
     f.remove_dir(os.path.join(c.proj_path, "wasm", "sample", "dist"))
     f.remove_dir(os.path.join(c.proj_path, "wasm", "sample", "node_modules"))
@@ -68,29 +76,10 @@ def run_task_clear():
         os.path.join(c.proj_path, "flutter", "plugin", "example", "macos", "Pods")
     )
 
-    f.remove_dir(
-        os.path.join(c.proj_path, "conan", "darwin-toolchain", "test_package", "build")
-    )
-    f.remove_file(
-        os.path.join(
-            c.proj_path,
-            "conan",
-            "darwin-toolchain",
-            "test_package",
-            "CMakeUserPresets.json",
-        )
-    )
-
     l.ok()
-
-
-# -----------------------------------------------------------------------------
-def run_task_tree():
-    tool.check_tool_tree()
-    r.run("tree")
 
 
 # -----------------------------------------------------------------------------
 def run_task_brew():
     tool.check_tool_brew()
-    r.run(["brew", "bundle", "install"])
+    run.run(["brew", "bundle", "install"])

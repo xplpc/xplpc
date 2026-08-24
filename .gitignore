@@ -22,12 +22,20 @@ Brewfile.lock.json
 
 # node
 node_modules
-package-lock.json
 
 # cmake
 CMakeUserPresets.json
 CMakeSettings.json
 CMakeLists.txt.user
+CMakePresets.json
+
+# conan
+conan_toolchain.cmake
+conandeps_legacy.cmake
+cmakedeps_macros.cmake
+conanbuild*.sh
+conanrun*.sh
+deactivate_conan*.sh
 
 # java/kotlin
 .gradle
@@ -47,7 +55,6 @@ build_*/
 # python
 *.egg-info
 .pytest_cache
-poetry.lock
 
 # environments
 .env

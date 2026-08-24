@@ -20,18 +20,15 @@ class PlatformProxyList
 {
 public:
     void append(const std::shared_ptr<PlatformProxy> &item);
-    void appendFromPtr(PlatformProxy *item);
-    void insert(size_t index, const std::shared_ptr<PlatformProxy> &item);
-    void insertFromPtr(size_t index, PlatformProxy *item);
-    size_t count() const noexcept;
+    void prepend(const std::shared_ptr<PlatformProxy> &item);
+    size_t count() const;
+    void clear();
     static std::shared_ptr<PlatformProxyList> shared();
 
-    std::shared_ptr<PlatformProxy> get(size_t index) const;
     bool forEach(const std::function<bool(const std::shared_ptr<PlatformProxy> &)> &func) const;
 
 #if defined(__EMSCRIPTEN__)
-    static void appendFromJavascript(PlatformProxy *item);
-    static void insertFromJavascript(size_t index, PlatformProxy *item);
+    static void prependFromJavascript(PlatformProxy *item);
 #endif
 
 private:

@@ -1,16 +1,19 @@
 import { XPLPC } from "../core/xplpc";
-import { XParam } from "./param";
+import { Param } from "./param";
 
-export class XRequest {
+export class Request {
     functionName: string;
-    params: XParam[];
+    params: Param[];
 
-    constructor(functionName: string, ...params: XParam[]) {
+    constructor(functionName: string, ...params: Param[]) {
         this.functionName = functionName;
         this.params = params;
     }
 
     data(): string {
-        return XPLPC.shared().config.serializer.encodeRequest(this.functionName, ...this.params);
+        return XPLPC.shared().config.serializer.encodeRequest(
+            this.functionName,
+            ...this.params,
+        );
     }
 }

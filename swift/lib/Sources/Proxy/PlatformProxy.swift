@@ -1,5 +1,6 @@
-class PlatformProxy: ObjCPlatformProxyImpl {
-    static var shared: PlatformProxy = .init()
+/// This carries no mutable state of its own and reaches only registries that guard theirs.
+class PlatformProxy: ObjCPlatformProxyImpl, @unchecked Sendable {
+    static let shared: PlatformProxy = .init()
     override private init() {}
 
     override func onNativeProxyCallback(_ key: String, _ data: String) {
@@ -7,36 +8,36 @@ class PlatformProxy: ObjCPlatformProxyImpl {
     }
 
     override func onNativeProxyCall(_ key: String, _ data: String) {
-        // function name
-        let functionName = XPLPC.shared.config.serializer.decodeFunctionName(data)
+        guard let config = XPLPC.shared.config else {
+            Log.e("[PlatformProxy : call] XPLPC was not initialized")
+            callNativeProxyCallback(key, "")
+            return
+        }
 
-        if functionName.isEmpty {
+        guard let request = config.serializer.decodeRequest(data) else {
+            callNativeProxyCallback(key, "")
+            return
+        }
+
+        if request.functionName.isEmpty {
             Log.e("[PlatformProxy : call] Function name is empty")
             callNativeProxyCallback(key, "")
             return
         }
 
-        // mapping item
-        let mappingItem = MappingList.shared.find(functionName)
-
-        guard let mappingItem else {
-            Log.e("[PlatformProxy : call] Mapping not found for function: \(functionName)")
+        guard let mappingItem = MappingList.shared.find(request.functionName) else {
+            Log.e("[PlatformProxy : call] Mapping not found for function: \(request.functionName)")
             callNativeProxyCallback(key, "")
             return
         }
 
-        // message
-        let message = XPLPC.shared.config.serializer.decodeMessage(data)
+        mappingItem.target(request.message) { [weak self] response in
+            guard let self else {
+                Log.e("[PlatformProxy : call] The proxy is gone, so this answer is lost")
+                return
+            }
 
-        guard let message else {
-            Log.e("[PlatformProxy : call] Error when decode message for function: \(functionName)")
-            callNativeProxyCallback(key, "")
-            return
-        }
-
-        // execute
-        mappingItem.target(message) { response in
-            callNativeProxyCallback(key, XPLPC.shared.config.serializer.encodeFunctionReturnValue(response))
+            self.callNativeProxyCallback(key, config.serializer.encodeFunctionReturnValue(response))
         }
     }
 
@@ -44,9 +45,7 @@ class PlatformProxy: ObjCPlatformProxyImpl {
         return MappingList.shared.has(name)
     }
 
-    override func onInitializePlatform() {
-        // ignore
-    }
+    override func onInitializePlatform() {}
 
     override func onFinalizePlatform() {
         MappingList.shared.clear()

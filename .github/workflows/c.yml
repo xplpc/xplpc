@@ -7,6 +7,11 @@ on:
       - 'docs/**'
       - 'extras/images/**'
 
+# The default branch is never cancelled, since that is where publishing happens.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   build:
     name: ${{ matrix.config.name }}
@@ -23,7 +28,9 @@ jobs:
             cc: "cl",
             cxx: "cl",
             generators: "Visual Studio 17 2022",
-            leaks: false
+            leaks: false,
+            sanitizers: false,
+            conan: true
           }
         - {
             name: "Windows Latest MinGW",
@@ -33,7 +40,9 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "MinGW Makefiles",
-            leaks: false
+            leaks: false,
+            sanitizers: false,
+            conan: true
           }
         - {
             name: "Ubuntu Latest GCC",
@@ -43,17 +52,9 @@ jobs:
             cc: "gcc",
             cxx: "g++",
             generators: "Ninja",
-            leaks: false
-          }
-        - {
-            name: "Ubuntu GCC 9",
-            os: ubuntu-latest,
-            artifact: "ubuntu_gcc9.7z",
-            build_type: "Release",
-            cc: "gcc",
-            cxx: "g++",
-            generators: "Ninja",
-            leaks: false
+            leaks: false,
+            sanitizers: true,
+            conan: true
           }
         - {
             name: "macOS Latest Clang",
@@ -63,16 +64,18 @@ jobs:
             cc: "clang",
             cxx: "clang++",
             generators: "Ninja",
-            leaks: true
+            leaks: true,
+            sanitizers: true,
+            conan: true
           }
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: "3.10"
+          python-version: "3.13"
 
       - name: Install Python Dependencies
         run: |
@@ -82,12 +85,12 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.30.0"
+          cmake-version: "4.3.3"
 
       - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@v6
         with:
-          version: "1.12.1"
+          version: "1.13.2"
 
       - name: Verify
         run: |
@@ -101,8 +104,68 @@ jobs:
       - name: Test
         run: python3 xplpc.py c-test
 
+      - name: Test In A Random Order
+        env:
+          GTEST_SHUFFLE: 1
+        run: python3 xplpc.py c-test
+
+      - name: Test With Conan
+        if: matrix.config.conan
+        run: python3 xplpc.py c-test --dependency-tool conan
+
+      - name: Test With Address Sanitizer
+        if: matrix.config.sanitizers == true
+        run: python3 xplpc.py c-test --sanitizer address
+
+      - name: Test With Debug Logging
+        if: matrix.config.sanitizers == true
+        env:
+          XPLPC_LOG_LEVEL: debug
+        run: python3 xplpc.py c-test --sanitizer address
+
+      - name: Test With Thread Sanitizer
+        if: matrix.config.sanitizers == true
+        run: python3 xplpc.py c-test --sanitizer thread
+
+      - name: Test With Undefined Behavior Sanitizer
+        if: matrix.config.sanitizers == true
+        run: python3 xplpc.py c-test --sanitizer undefined
+
       - name: Build
         run: python3 xplpc.py c-build-static
+
+      - name: Build Shared
+        run: python3 xplpc.py c-build-shared
+
+      - name: Build And Run The Guide Example
+        if: matrix.config.sanitizers == true
+        run: |
+          python3 - <<'EOF'
+          import re
+
+          source = open("docs/c.md", encoding="utf-8").read()
+          blocks = re.findall(r"```c\n(.*?)```", source, re.S)
+
+          if len(blocks) != 1:
+              raise SystemExit(f"the guide carries {len(blocks)} c programs, expected one")
+
+          open("guide-example.c", "w", encoding="utf-8").write(blocks[0])
+          EOF
+
+          lib=$(dirname $(find build/c-shared -name "libxplpc.*" | head -1))
+          cc -std=c11 -Wall -Wextra -Wpedantic -o guide-example guide-example.c -Ic/lib/include -L"$lib" -lxplpc -Wl,-rpath,"$PWD/$lib"
+
+          answer=$(LD_LIBRARY_PATH="$lib" ./guide-example)
+          echo "$answer"
+
+          expected=$'{"r":"LOGGED-WITH-REMEMBER"}'
+          [ "$answer" = "$expected" ] || { echo "the guide example answered something else"; exit 1; }
+
+      - name: Build Sample
+        run: python3 xplpc.py c-build-sample
+
+      - name: Run Sample
+        run: python3 xplpc.py c-run-sample
 
       - name: Leaks
         if: matrix.config.leaks == true

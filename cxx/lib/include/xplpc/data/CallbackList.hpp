@@ -15,12 +15,17 @@ namespace data
 
 using namespace xplpc::util;
 
+using Callback = std::function<void(const std::string &)>;
+
 class CallbackList
 {
 public:
-    void add(const std::string &key, const std::function<void(const std::string &)> callback);
+    void add(const std::string &key, Callback callback);
     void execute(const std::string &key, const std::string &data);
-    size_t count() const noexcept;
+    void remove(const std::string &key);
+    void clear();
+    void answerAndClear(const std::string &data);
+    size_t count() const;
     static std::shared_ptr<CallbackList> shared();
 
 #if defined(__EMSCRIPTEN__)
@@ -30,7 +35,7 @@ public:
 private:
     static std::shared_ptr<CallbackList> instance;
     static std::once_flag initInstanceFlag;
-    TSMap<std::string, std::function<void(const std::string &)>> list;
+    TSMap<std::string, Callback> list;
 
     CallbackList() = default;
     CallbackList(const CallbackList &) = delete;

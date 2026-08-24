@@ -18,31 +18,20 @@ public:
     {
     }
 
-    DataView(DataView &&) = default;
-
-    DataView(const DataView &) = default;
-
-    DataView &operator=(const DataView &rhs)
-    {
-        _ptr = rhs._ptr;
-        _size = rhs._size;
-        return *this;
-    }
-
     void copy(uint8_t *targetPtr) const
     {
-        std::copy(reinterpret_cast<uint8_t *>(_ptr), (reinterpret_cast<uint8_t *>(_ptr) + _size), reinterpret_cast<uint8_t *>(targetPtr));
+        // A view that carries no address describes nothing to read, and a decoded one can arrive empty.
+
+        if (!_ptr || !targetPtr)
+        {
+            return;
+        }
+
+        std::copy(_ptr, _ptr + _size, targetPtr);
     }
 
-    uint8_t *ptr() const
-    {
-        return _ptr;
-    }
-
-    size_t size() const
-    {
-        return _size;
-    }
+    uint8_t *ptr() const { return _ptr; }
+    size_t size() const { return _size; }
 
 private:
     uint8_t *_ptr;

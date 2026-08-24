@@ -1,10 +1,9 @@
-import { XMessage } from "../message/message";
-import { XParam } from "../message/param";
+import { DecodedRequest } from "../message/decoded-request";
+import { Param } from "../message/param";
 
-export interface IXSerializer {
-    decodeFunctionName(data: string): string;
-    decodeMessage(data: string): XMessage | undefined;
+export interface Serializer {
+    decodeRequest(data: string): DecodedRequest | undefined;
     encodeFunctionReturnValue(data: unknown): string;
     decodeFunctionReturnValue<T>(data: string): T | undefined;
-    encodeRequest(functionName: string, ...params: XParam[]): string;
+    encodeRequest(functionName: string, ...params: Param[]): string;
 }

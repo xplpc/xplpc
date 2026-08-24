@@ -14,7 +14,7 @@ object Callback {
         val bm = Application.instance.getSystemService(BATTERY_SERVICE) as BatteryManager
         val level = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
 
-        val suffix = data.value<String>("suffix")
+        val suffix = data.get<String>("suffix")
 
         if (suffix != null) {
             r("$level$suffix")

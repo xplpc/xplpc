@@ -4,6 +4,7 @@ import android.util.Log
 import com.xplpc.system.Constants
 
 object Log {
+    @Volatile
     var isEnabled: Boolean = false
 
     fun d(msg: String) {

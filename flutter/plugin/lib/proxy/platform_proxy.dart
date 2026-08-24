@@ -5,15 +5,16 @@ import "package:ffi/ffi.dart";
 import 'package:xplpc/core/xplpc.dart';
 import 'package:xplpc/data/callback_list.dart';
 import 'package:xplpc/data/mapping_list.dart';
-import 'package:xplpc/message/message.dart';
 import 'package:xplpc/type/typedefs.dart';
 import 'package:xplpc/util/log.dart';
 
 class PlatformProxy {
   static late InitializeFunc initializeFunc;
-  static late IsInitializedFunc isInitializedFunc;
   static late CallProxyFunc nativeCallProxyFunc;
   static late CallProxyCallbackFunc nativeCallProxyCallbackFunc;
+  static late MappingFunc nativeAddMappingFunc;
+  static late ClearMappingsFunc nativeClearMappingsFunc;
+  static late FreeFunc nativeFreeFunc;
 
   static final onInitializePlatformFunc =
       ffi.Pointer.fromFunction<OnInitializePlatform>(onInitializePlatform);
@@ -21,41 +22,47 @@ class PlatformProxy {
   static final onFinalizePlatformFunc =
       ffi.Pointer.fromFunction<OnFinalizePlatform>(onFinalizePlatform);
 
-  static final onHasMappingFunc =
-      ffi.Pointer.fromFunction<OnHasMapping>(onHasMapping, false);
-
   static final onNativeProxyCallFunc =
       ffi.Pointer.fromFunction<CallProxyCallback>(onNativeProxyCall);
 
   static final onNativeProxyCallbackFunc =
       ffi.Pointer.fromFunction<CallProxyCallback>(onNativeProxyCallback);
 
+  // An answer produced on a thread the isolate does not run on can only be delivered through its event loop.
+  static final onNativeProxyCallFromThreadCallable =
+      ffi.NativeCallable<CallProxyCallback>.listener(
+        onNativeProxyCallFromThread,
+      )..keepIsolateAlive = false;
+
+  static final onNativeProxyCallbackFromThreadCallable =
+      ffi.NativeCallable<CallProxyCallback>.listener(
+        onNativeProxyCallbackFromThread,
+      )..keepIsolateAlive = false;
+
   static void initialize() {
-    // function: xplpc_core_initialize
     initializeFunc = XPLPC.instance.library
         .lookupFunction<NativeInitializeFunc, InitializeFunc>(
-      'xplpc_core_initialize',
-    );
-
-    // function: xplpc_core_is_initialized
-    isInitializedFunc = XPLPC.instance.library
-        .lookupFunction<NativeIsInitializedFunc, IsInitializedFunc>(
-      'xplpc_core_is_initialized',
-    );
-
-    // function: xplpc_native_call_proxy
+          'xplpc_core_initialize',
+        );
     nativeCallProxyFunc = XPLPC.instance.library
         .lookupFunction<NativeCallProxyFunc, CallProxyFunc>(
-      'xplpc_native_call_proxy',
-    );
-
-    // function: xplpc_native_call_proxy
+          'xplpc_native_call_proxy',
+        );
     nativeCallProxyCallbackFunc = XPLPC.instance.library
         .lookupFunction<NativeCallProxyCallbackFunc, CallProxyCallbackFunc>(
-      'xplpc_native_call_proxy_callback',
-    );
+          'xplpc_native_call_proxy_callback',
+        );
+    nativeAddMappingFunc = XPLPC.instance.library
+        .lookupFunction<NativeMappingFunc, MappingFunc>(
+          'xplpc_native_add_mapping',
+        );
+    nativeClearMappingsFunc = XPLPC.instance.library
+        .lookupFunction<NativeClearMappingsFunc, ClearMappingsFunc>(
+          'xplpc_native_clear_mappings',
+        );
+    nativeFreeFunc = XPLPC.instance.library
+        .lookupFunction<NativeFreeFunc, FreeFunc>('xplpc_free');
 
-    // initialize cxx platform proxy
     var initializeCxxPlatformProxy = true;
 
     if (Platform.isAndroid) {
@@ -66,14 +73,14 @@ class PlatformProxy {
       initializeCxxPlatformProxy = false;
     }
 
-    // callbacks
     initializeFunc(
       initializeCxxPlatformProxy,
       onInitializePlatformFunc,
       onFinalizePlatformFunc,
-      onHasMappingFunc,
       onNativeProxyCallFunc,
       onNativeProxyCallbackFunc,
+      onNativeProxyCallFromThreadCallable.nativeFunction,
+      onNativeProxyCallbackFromThreadCallable.nativeFunction,
     );
   }
 
@@ -83,58 +90,71 @@ class PlatformProxy {
     ffi.Pointer<Utf8> data,
     int dataSize,
   ) {
-    final keyStr = key.toDartString(length: keySize);
-    final dataStr = data.toDartString(length: dataSize);
+    final String keyStr;
+    final String dataStr;
 
-    // function name
-    final functionName = XPLPC.instance.config.serializer.decodeFunctionName(
-      dataStr,
-    );
-
-    if (functionName.isEmpty) {
-      Log.e("[PlatformProxy : call] Function name is empty");
-      _callNativeProxyWith(keyStr, "");
+    try {
+      keyStr = key.toDartString(length: keySize);
+    } on FormatException catch (e) {
+      // There is nothing to answer under a key that cannot be read, so the call is reported and dropped.
+      Log.e("[PlatformProxy : call] Unable to decode key");
+      Log.d("[PlatformProxy : call] Unable to decode key: $e");
       return;
     }
 
-    // mapping item
-    final mappingItem = MappingList.instance.find(functionName);
+    try {
+      dataStr = data.toDartString(length: dataSize);
+    } on FormatException catch (e) {
+      Log.e("[PlatformProxy : call] Unable to decode data");
+      Log.d("[PlatformProxy : call] Unable to decode data: $e");
+      callNativeProxyCallback(keyStr, "");
+      return;
+    }
+
+    if (!XPLPC.instance.initialized) {
+      Log.e("[PlatformProxy : call] XPLPC was not initialized");
+      callNativeProxyCallback(keyStr, "");
+      return;
+    }
+
+    final request = XPLPC.instance.config.serializer.decodeRequest(dataStr);
+
+    if (request == null) {
+      callNativeProxyCallback(keyStr, "");
+      return;
+    }
+
+    if (request.functionName.isEmpty) {
+      Log.e("[PlatformProxy : call] Function name is empty");
+      callNativeProxyCallback(keyStr, "");
+      return;
+    }
+
+    final mappingItem = MappingList.instance.find(request.functionName);
 
     if (mappingItem == null) {
       Log.e(
-        "[PlatformProxy : call] Mapping not found for function: $functionName",
+        "[PlatformProxy : call] Mapping not found for function: ${request.functionName}",
       );
-      _callNativeProxyWith(keyStr, "");
-      return;
-    }
-
-    // execute
-    Message? message;
-
-    try {
-      message = XPLPC.instance.config.serializer.decodeMessage(dataStr);
-    } catch (e) {
-      Log.e("[PlatformProxy : call] Error when decode message: $e");
-    }
-
-    if (message == null) {
-      Log.e(
-        "[PlatformProxy : call] Error when decode message for function: $functionName",
-      );
-      _callNativeProxyWith(keyStr, "");
+      callNativeProxyCallback(keyStr, "");
       return;
     }
 
     try {
-      mappingItem.target(message, (dynamic r) {
-        final decodedData =
-            XPLPC.instance.config.serializer.encodeFunctionReturnValue(r);
+      mappingItem.target(request.message, (dynamic r) {
+        final decodedData = XPLPC.instance.config.serializer
+            .encodeFunctionReturnValue(r);
 
-        _callNativeProxyWith(keyStr, decodedData);
+        callNativeProxyCallback(keyStr, decodedData);
       });
     } catch (e) {
-      Log.e("[PlatformProxy : call] Error: $e");
-      _callNativeProxyWith(keyStr, "");
+      Log.e(
+        '[PlatformProxy : call] Error when execute function "${request.functionName}"',
+      );
+      Log.d(
+        '[PlatformProxy : call] Error when execute function "${request.functionName}": $e',
+      );
+      callNativeProxyCallback(keyStr, "");
     }
   }
 
@@ -144,34 +164,113 @@ class PlatformProxy {
     ffi.Pointer<Utf8> data,
     int dataSize,
   ) {
-    final keyStr = key.toDartString(length: keySize);
-    final dataStr = data.toDartString(length: dataSize);
+    final String keyStr;
+
+    try {
+      keyStr = key.toDartString(length: keySize);
+    } on FormatException catch (e) {
+      // There is nothing to resolve under a key that cannot be read.
+      Log.e("[PlatformProxy : onNativeProxyCallback] Unable to decode key");
+      Log.d("[PlatformProxy : onNativeProxyCallback] Unable to decode key: $e");
+      return;
+    }
+
+    String dataStr;
+
+    try {
+      dataStr = data.toDartString(length: dataSize);
+    } on FormatException catch (e) {
+      Log.e("[PlatformProxy : onNativeProxyCallback] Unable to decode data");
+      Log.d(
+        "[PlatformProxy : onNativeProxyCallback] Unable to decode data: $e",
+      );
+      dataStr = "";
+    }
 
     CallbackList.instance.execute(keyStr, dataStr);
   }
 
-  static void onInitializePlatform() {
-    // ignore
+  static void onNativeProxyCallFromThread(
+    ffi.Pointer<Utf8> key,
+    int keySize,
+    ffi.Pointer<Utf8> data,
+    int dataSize,
+  ) {
+    // The buffers were copied for this isolate, so they are released once they have been read.
+
+    try {
+      onNativeProxyCall(key, keySize, data, dataSize);
+    } finally {
+      _releaseNativeStrings(key, data);
+    }
   }
+
+  static void onNativeProxyCallbackFromThread(
+    ffi.Pointer<Utf8> key,
+    int keySize,
+    ffi.Pointer<Utf8> data,
+    int dataSize,
+  ) {
+    try {
+      onNativeProxyCallback(key, keySize, data, dataSize);
+    } finally {
+      _releaseNativeStrings(key, data);
+    }
+  }
+
+  static void onInitializePlatform() {}
 
   static void onFinalizePlatform() {
     MappingList.instance.clear();
   }
 
-  static bool onHasMapping(ffi.Pointer<Utf8> name, int nameSize) {
-    final nameStr = name.toDartString(length: nameSize);
-    return MappingList.instance.has(nameStr);
+  static void callNativeProxy(String key, String data) {
+    _withNativeStrings(key, data, nativeCallProxyFunc);
   }
 
-  static void _callNativeProxyWith(String key, String data) {
+  static void addMapping(String name) {
+    // The native side answers hasMapping from these names, so it never has to reach the isolate to resolve a function.
+
+    final nativeName = name.toNativeUtf8();
+
+    try {
+      nativeAddMappingFunc(nativeName, nativeName.length);
+    } finally {
+      malloc.free(nativeName);
+    }
+  }
+
+  static void clearMappings() {
+    nativeClearMappingsFunc();
+  }
+
+  static void callNativeProxyCallback(String key, String data) {
+    _withNativeStrings(key, data, nativeCallProxyCallbackFunc);
+  }
+
+  static void _withNativeStrings(
+    String key,
+    String data,
+    void Function(ffi.Pointer<Utf8>, int, ffi.Pointer<Utf8>, int) body,
+  ) {
+    // The native side copies both buffers before returning, so they are released as soon as the call completes.
+
     final nativeKey = key.toNativeUtf8();
     final nativeData = data.toNativeUtf8();
 
-    nativeCallProxyCallbackFunc(
-      nativeKey,
-      nativeKey.length,
-      nativeData,
-      nativeData.length,
-    );
+    try {
+      body(nativeKey, nativeKey.length, nativeData, nativeData.length);
+    } finally {
+      malloc.free(nativeKey);
+      malloc.free(nativeData);
+    }
+  }
+
+  static void _releaseNativeStrings(
+    ffi.Pointer<Utf8> key,
+    ffi.Pointer<Utf8> data,
+  ) {
+    nativeFreeFunc(key.cast());
+    nativeFreeFunc(data.cast());
   }
 }

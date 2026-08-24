@@ -10,13 +10,20 @@ object CallbackList {
     }
 
     fun execute(key: String, data: String) {
-        list[key]?.let { callback ->
-            list.remove(key)
-            callback(data)
-        }
+        // The entry is removed and invoked in a single step, so concurrent callers never run the same callback twice.
+
+        list.remove(key)?.invoke(data)
+    }
+
+    fun remove(key: String) {
+        list.remove(key)
+    }
+
+    fun clear() {
+        list.clear()
     }
 
     fun count(): Int {
-        return list.count()
+        return list.size
     }
 }

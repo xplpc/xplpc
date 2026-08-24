@@ -1,15 +1,23 @@
-class BaseSerializer:
-    def decode_function_name(self, data):
-        pass
+from abc import ABC, abstractmethod
+from typing import Any
 
-    def decode_function_return_value(self, data, class_type=None):
-        pass
+from xplpc.message.decoded_request import DecodedRequest
+from xplpc.message.param import Param
 
-    def decode_message(self, data):
-        pass
 
-    def encode_function_return_value(self, data):
-        pass
+class BaseSerializer(ABC):
+    @abstractmethod
+    def decode_function_return_value(
+        self, data: str, class_type=None
+    ) -> Any | None: ...
 
-    def encode_request(self, function_name, params=None):
-        pass
+    @abstractmethod
+    def decode_request(self, data: str) -> DecodedRequest | None: ...
+
+    @abstractmethod
+    def encode_function_return_value(self, data: Any) -> str: ...
+
+    @abstractmethod
+    def encode_request(
+        self, function_name: str, params: list[Param] | None = None
+    ) -> str: ...

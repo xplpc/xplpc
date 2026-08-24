@@ -8,7 +8,9 @@ import com.xplpc.runner.BuildConfig
 import com.xplpc.runner.custom.Mapping
 import com.xplpc.util.Log
 
-class Application : MultiDexApplication(), CameraXConfig.Provider {
+class Application :
+    MultiDexApplication(),
+    CameraXConfig.Provider {
     override fun onCreate() {
         super.onCreate()
 
@@ -23,7 +25,6 @@ class Application : MultiDexApplication(), CameraXConfig.Provider {
     private fun initializeXPLPC() {
         Log.d("[Application : initializeXPLPC]")
 
-        // initialize local mappings
         Mapping.initialize()
     }
 
@@ -32,14 +33,16 @@ class Application : MultiDexApplication(), CameraXConfig.Provider {
 
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(
-                StrictMode.ThreadPolicy.Builder()
+                StrictMode.ThreadPolicy
+                    .Builder()
                     .detectAll()
                     .penaltyLog()
                     .build()
             )
 
             StrictMode.setVmPolicy(
-                StrictMode.VmPolicy.Builder()
+                StrictMode.VmPolicy
+                    .Builder()
                     .detectLeakedSqlLiteObjects()
                     .detectLeakedClosableObjects()
                     .penaltyLog()

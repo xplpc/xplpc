@@ -1,43 +1,48 @@
 #pragma once
 
-#include "spdlog/spdlog.h"
+#include "xplpc/util/Log.hpp"
 
 #include <any>
-#include <exception>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 namespace xplpc
 {
 namespace message
 {
 
-class Message : public std::unordered_map<std::string, std::any>
+class Message
 {
 public:
     template <typename T>
-    const std::optional<T> get(const std::string &name) const
+    std::optional<T> get(const std::string &name) const
     {
-        try
+        auto it = values.find(name);
+
+        if (it == values.end())
         {
-            auto it = find(name);
-            if (it != end())
-            {
-                return std::any_cast<T>(it->second);
-            }
-            else
-            {
-                spdlog::debug("[Message : get] Key not exists: {}", name);
-            }
+            return std::nullopt;
         }
-        catch (const std::exception &e)
+
+        if (const auto *value = std::any_cast<T>(&it->second))
         {
-            spdlog::error("[Message : get] Error when cast value: {}", e.what());
+            return *value;
         }
+
+        util::Log::e("[Message : get] Value of \"{}\" has another type", name);
 
         return std::nullopt;
     }
+
+    void set(const std::string &name, std::any value)
+    {
+        values[name] = std::move(value);
+    }
+
+private:
+    std::unordered_map<std::string, std::any> values;
 };
 
 } // namespace message

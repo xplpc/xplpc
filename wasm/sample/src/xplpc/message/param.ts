@@ -1,4 +1,4 @@
-export class XParam {
+export class Param {
     name: string;
     value?: unknown;
 

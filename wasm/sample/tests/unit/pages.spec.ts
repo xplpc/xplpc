@@ -1,10 +1,10 @@
 import MainPage from "@/components/pages/MainPage.vue";
 import { mount } from "@vue/test-utils";
-import { createPinia, setActivePinia } from 'pinia';
+import { createPinia, setActivePinia } from "pinia";
 
 describe("MainPage", () => {
     beforeEach(() => {
-        setActivePinia(createPinia())
+        setActivePinia(createPinia());
     });
 
     it("check if show loading message", async () => {

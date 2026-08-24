@@ -1,75 +1,45 @@
 # XPLPC
 
-A new Flutter FFI plugin project.
+Cross Platform Lite Procedure Call for Flutter.
 
-## Getting Started
+XPLPC lets Dart call a procedure implemented in C++, Kotlin, Swift, Python or JavaScript, and lets any of them call one implemented in Dart. The data is serialized and carried through device memory rather than over a network protocol, so there is no server and no port.
 
-This project is a starting point for a Flutter
-[FFI plugin](https://docs.flutter.dev/development/platform-integration/c-interop),
-a specialized package that includes native code directly invoked with Dart FFI.
+This package is the Dart side of the bridge. It reaches the C++ core through `dart:ffi`, which is why it is an FFI plugin and why the native library has to be built for the platform you are targeting.
 
-## Project stucture
+## Getting started
 
-This template uses the following structure:
+```dart
+XPLPC.instance.initialize(Config(JsonSerializer()));
 
-* `src`: Contains the native source code, and a CmakeFile.txt file for building
-  that source code into a dynamic library.
+final request = Request("sample.login", [
+  Param("username", "paulo"),
+  Param("password", "123456"),
+  Param("remember", true),
+]);
 
-* `lib`: Contains the Dart code that defines the API of the plugin, and which
-  calls into the native code using `dart:ffi`.
-
-* platform folders (`android`, `ios`, `windows`, etc.): Contains the build files
-  for building and bundling the native code library with the platform application.
-
-## Buidling and bundling native code
-
-The `pubspec.yaml` specifies FFI plugins as follows:
-
-```yaml
-  plugin:
-    platforms:
-      some_platform:
-        ffiPlugin: true
+Client.call<String>(request, (response) {
+  print(response);
+});
 ```
 
-This configuration invokes the native build for the various target platforms
-and bundles the binaries in Flutter applications using these FFI plugins.
+A mapping this side owns is registered by the name every other language reaches it through:
 
-This can be combined with dartPluginClass, such as when FFI is used for the
-implementation of one platform in a federated plugin:
-
-```yaml
-  plugin:
-    implements: some_other_plugin
-    platforms:
-      some_platform:
-        dartPluginClass: SomeClass
-        ffiPlugin: true
+```dart
+MappingList.instance.add("platform.battery.level", MappingItem(batteryLevel));
 ```
 
-A plugin can have both FFI and method channels:
+Reflectable has to be initialized before the first call, since Flutter is compiled without reflection and the serializer fills a type through the `fromJson` constructor it declares.
 
-```yaml
-  plugin:
-    platforms:
-      some_platform:
-        pluginClass: SomeName
-        ffiPlugin: true
-```
+## Documentation
 
-The native build systems that are invoked by FFI (and method channel) plugins are:
+The guide for this platform covers building the native library for each target, the setup Reflectable needs, both ways of making a call, writing a mapping that answers later, carrying a large buffer with `DataView`, and how to raise the log level.
 
-* For Android: Gradle, which invokes the Android NDK for native builds.
-  * See the documentation in android/build.gradle.
-* For iOS and MacOS: Xcode, via CocoaPods.
-  * See the documentation in ios/xplpc.podspec.
-  * See the documentation in macos/xplpc.podspec.
-* For Linux and Windows: CMake.
-  * See the documentation in linux/CMakeLists.txt.
-  * See the documentation in windows/CMakeLists.txt.
+<https://github.com/xplpc/xplpc/blob/main/docs/flutter.md>
 
-## Flutter help
+## Supported platforms
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Android, iOS, macOS, Linux and Windows.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

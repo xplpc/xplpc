@@ -16,7 +16,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity(), CoroutineScope {
+class MainActivity :
+    AppCompatActivity(),
+    CoroutineScope {
     override val coroutineContext = Dispatchers.Main
     private lateinit var binding: ActivityMainBinding
 
@@ -81,7 +83,6 @@ class MainActivity : AppCompatActivity(), CoroutineScope {
     private fun onBtSubmitForCameraClick() {
         intentForPermission =
             Intent(this, CameraActivity::class.java).apply {
-                // you can add values(if any) to pass to the next class or avoid using `.apply`
             }
 
         checkPermissions(permissions)

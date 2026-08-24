@@ -31,10 +31,10 @@
      let decoder = JSONDecoder()
      let dictionary = try! decoder.decode([String: AnyDecodable].self, from: json)
  */
-@frozen public struct AnyDecodable: Decodable {
-    public let value: Any
+struct AnyDecodable: Decodable {
+    let value: Any
 
-    public init<T>(_ value: T?) {
+    init<T>(_ value: T?) {
         self.value = value ?? ()
     }
 }
@@ -78,7 +78,7 @@ extension _AnyDecodable {
 }
 
 extension AnyDecodable: Equatable {
-    public static func == (lhs: AnyDecodable, rhs: AnyDecodable) -> Bool {
+    static func == (lhs: AnyDecodable, rhs: AnyDecodable) -> Bool {
         switch (lhs.value, rhs.value) {
         #if canImport(Foundation)
             case is (NSNull, NSNull), is (Void, Void):
@@ -114,8 +114,6 @@ extension AnyDecodable: Equatable {
             return lhs == rhs
         case let (lhs as Double, rhs as Double):
             return lhs == rhs
-        case let (lhs as Character, rhs as Character):
-            return lhs == rhs
         case let (lhs as String, rhs as String):
             return lhs == rhs
         case let (lhs as [String: AnyDecodable], rhs as [String: AnyDecodable]):
@@ -129,7 +127,7 @@ extension AnyDecodable: Equatable {
 }
 
 extension AnyDecodable: CustomStringConvertible {
-    public var description: String {
+    var description: String {
         switch value {
         case is Void:
             return String(describing: nil as Any?)
@@ -142,7 +140,7 @@ extension AnyDecodable: CustomStringConvertible {
 }
 
 extension AnyDecodable: CustomDebugStringConvertible {
-    public var debugDescription: String {
+    var debugDescription: String {
         switch value {
         case let value as CustomDebugStringConvertible:
             return "AnyDecodable(\(value.debugDescription))"
@@ -153,7 +151,7 @@ extension AnyDecodable: CustomDebugStringConvertible {
 }
 
 extension AnyDecodable: Hashable {
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         switch value {
         case let value as Bool:
             hasher.combine(value)
@@ -184,8 +182,6 @@ extension AnyDecodable: Hashable {
         case let value as Float64:
             hasher.combine(value)
         case let value as Double:
-            hasher.combine(value)
-        case let value as Character:
             hasher.combine(value)
         case let value as String:
             hasher.combine(value)

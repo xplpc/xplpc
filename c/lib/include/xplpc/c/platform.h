@@ -3,31 +3,50 @@
 
 #include "xplpc/c/typedefs.h"
 
-#if _WIN32
-#define XPLPC_EXPORT extern "C" __declspec(dllexport)
+#if defined(_WIN32)
+#define XPLPC_API __declspec(dllexport)
 #else
-#define XPLPC_EXPORT extern "C" __attribute__((visibility("default"))) __attribute__((used))
+#define XPLPC_API __attribute__((visibility("default"))) __attribute__((used))
 #endif
 
-XPLPC_EXPORT
-void xplpc_core_initialize(
-    bool initializeCxxNativePlatformProxy,
-    FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform,
-    FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform,
-    FuncPtrToOnHasMapping funcPtrToOnHasMapping,
-    FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall,
-    FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-XPLPC_EXPORT
-void xplpc_core_finalize();
+    XPLPC_API
+    void xplpc_core_initialize(
+        bool initializeCxxNativePlatformProxy,
+        FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform,
+        FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform,
+        FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall,
+        FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback,
+        FuncPtrToOnNativeProxyCallFromThread funcPtrToOnNativeProxyCallFromThread,
+        FuncPtrToOnNativeProxyCallbackFromThread funcPtrToOnNativeProxyCallbackFromThread);
 
-XPLPC_EXPORT
-bool xplpc_core_is_initialized();
+    XPLPC_API
+    void xplpc_core_finalize(void);
 
-XPLPC_EXPORT
-void xplpc_native_call_proxy(char *key, size_t keySize, char *data, size_t dataSize);
+    XPLPC_API
+    bool xplpc_core_is_initialized(void);
 
-XPLPC_EXPORT
-void xplpc_native_call_proxy_callback(char *key, size_t keySize, char *data, size_t dataSize);
+    XPLPC_API
+    void xplpc_native_call_proxy(const char *key, size_t keySize, const char *data, size_t dataSize);
+
+    XPLPC_API
+    void xplpc_native_call_proxy_callback(const char *key, size_t keySize, const char *data, size_t dataSize);
+
+    XPLPC_API
+    void xplpc_native_add_mapping(const char *name, size_t nameSize);
+
+    XPLPC_API
+    void xplpc_native_clear_mappings(void);
+
+    XPLPC_API
+    void xplpc_free(void *ptr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

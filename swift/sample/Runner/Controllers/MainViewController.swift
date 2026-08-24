@@ -154,7 +154,12 @@ class MainViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // general
+        setupChrome()
+        setupHierarchy()
+        setupLayout()
+    }
+
+    private func setupChrome() {
         title = "XPLPC"
         view.backgroundColor = .white
         navigationController?.navigationBar.isTranslucent = false
@@ -162,12 +167,12 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         navigationController?.navigationBar.setBarColor(textColor: .white, backgroundColor: UIColor(rgb: 0x1565C0))
         navigationController?.navigationBar.addShadow()
 
-        // keyboard
         hideKeyboardWhenTappedAround()
         edUsername.delegate = self
         edPassword.delegate = self
+    }
 
-        // components
+    private func setupHierarchy() {
         view.addSubview(scrollContainer)
         scrollContainer.addSubview(container)
         container.addSubview(lbTitleBatteryLevel)
@@ -184,8 +189,9 @@ class MainViewController: UIViewController, UITextFieldDelegate {
         container.addSubview(divider2)
         container.addSubview(lbTitleCamera)
         container.addSubview(btSubmitForCamera)
+    }
 
-        // layout
+    private func setupLayout() {
         scrollContainer.align(with: view)
         scrollContainer.constrainWidth(to: view)
         scrollContainer.constrainHeight(to: view)

@@ -10,7 +10,8 @@ object NativeLib {
             System.loadLibrary("xplpc")
             Log.d("[NativeLib : initialize] XPLPC native library loaded")
         } catch (e: UnsatisfiedLinkError) {
-            Log.e("[NativeLib : initialize] Could not load XPLPC native library: " + e.message)
+            Log.e("[NativeLib : initialize] Could not load XPLPC native library")
+            Log.d("[NativeLib : initialize] Could not load XPLPC native library: " + e.message)
         }
     }
 }

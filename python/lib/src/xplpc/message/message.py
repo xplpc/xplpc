@@ -1,11 +1,11 @@
-from typing import Any, Optional
+from typing import Any
 
 
 class Message:
     def __init__(self):
         self.data = {}
 
-    def get(self, name: str) -> Optional[Any]:
+    def get(self, name: str) -> Any | None:
         return self.data.get(name)
 
     def set(self, name: str, value: Any):

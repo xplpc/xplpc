@@ -1,18 +1,9 @@
-import threading
+import itertools
 
 
 class UniqueID:
-    # singleton
-    _instance = None
-    lock = threading.Lock()
-    counter = 0
+    _counter = itertools.count(1)
 
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(UniqueID, cls).__new__(cls, *args, **kwargs)
-        return cls._instance
-
-    def generate(self):
-        with self.lock:
-            self.counter += 1
-            return f"PY-{self.counter}"
+    @staticmethod
+    def generate() -> str:
+        return f"PY-{next(UniqueID._counter)}"

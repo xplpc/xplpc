@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
-ClientCallback = Callable[[Optional[Any]], None]
+ClientCallback = Callable[[Any | None], None]
 ClientCallbackFromString = Callable[[str], None]

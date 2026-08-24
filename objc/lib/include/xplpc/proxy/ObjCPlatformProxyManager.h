@@ -6,12 +6,9 @@
 
 @interface ObjCPlatformProxyManager : NSObject
 {
-    // instance variables
 }
 
-// methods
-
-+ (void)initialize:(ObjCPlatformProxyImpl *)proxy;
++ (void)registerProxy:(ObjCPlatformProxyImpl *)proxyImpl;
 
 @end
 

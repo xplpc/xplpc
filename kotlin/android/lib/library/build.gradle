@@ -1,15 +1,39 @@
 plugins {
-    id 'org.jetbrains.kotlin.android'
     id 'com.android.library'
 }
+
+// The target platform selects which native build output is packaged, and it comes from the command line or from local.properties.
+def resolveXplpcPlatform() {
+    def localPropsFile = rootProject.file("local.properties")
+
+    if (localPropsFile.exists()) {
+        def localProps = new Properties()
+        localPropsFile.withInputStream { localProps.load(it) }
+
+        if (localProps.getProperty("xplpc.platform")) {
+            return localProps.getProperty("xplpc.platform")
+        }
+    }
+
+    if (project.hasProperty("xplpc_platform") && project.property("xplpc_platform")) {
+        return project.property("xplpc_platform")
+    }
+
+    return "android"
+}
+
+def xplpcPlatform = resolveXplpcPlatform()
+def xplpcRootDir = file("$projectDir/../../../..")
+def jniLibsDir = file("$xplpcRootDir/build/kotlin-jni-libs-$xplpcPlatform")
+def jniLibsAbis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
 
 android {
     namespace 'com.xplpc.library'
 
     defaultConfig {
         minSdk = 21
-        targetSdk = 36
-        compileSdk = 36
+        targetSdk = 37
+        compileSdk = 37
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -17,36 +41,32 @@ android {
 
     sourceSets {
         main {
-            // default settings
-            String platform = "android"
-
-            if (project.hasProperty("xplpc_platform")) {
-                platform = project.property("xplpc_platform")
-            }
-
-            if (!platform) {
-                platform = "android"
-            }
-
-            // settings from local properties file
-            def localProps = new Properties()
-            def localPropsFile = rootProject.file("local.properties")
-
-            if (localPropsFile.exists()) {
-                localProps.load(new FileInputStream(localPropsFile))
-
-                if (localProps.getProperty("xplpc.platform")) {
-                    platform = localProps.getProperty("xplpc.platform")
-                }
-            }
-
-            def jniLibsDir = file(project.projectDir.absolutePath + "/../../../../build/kotlin-jni-libs-$platform")
             jniLibs.srcDirs += [jniLibsDir]
 
-            java {
+            kotlin {
                 srcDirs 'src/main/java', '../../../shared/src'
             }
         }
+
+        test {
+            kotlin {
+                srcDirs 'src/test/java'
+            }
+        }
+
+        androidTest {
+            kotlin {
+                srcDirs 'src/androidTest/java', '../../../shared/tests'
+            }
+        }
+    }
+
+
+    lint {
+        // A dependency this project pins on purpose is not a finding.
+        disable 'GradleDependency', 'AndroidGradlePluginVersion'
+        warningsAsErrors true
+        abortOnError true
     }
 
     buildTypes {
@@ -57,10 +77,6 @@ android {
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            packagingOptions {
-                doNotStrip '**/*.so'
-            }
         }
     }
 
@@ -75,62 +91,34 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.17.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
-    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
+    implementation 'com.google.code.gson:gson:2.14.0'
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
 }
 
-tasks.register('copyJniLibs') {
-    // default settings
-    String platform = "android"
+// The native output is mirrored into the jni libs source directory before anything reads it.
+tasks.register('copyJniLibs', Sync) {
+    jniLibsAbis.each { abi ->
+        def abiSourceDir = file("$xplpcRootDir/build/kotlin-$xplpcPlatform/$abi/lib")
 
-    if (project.hasProperty("xplpc_platform")) {
-        platform = project.property("xplpc_platform")
-    }
-
-    if (!platform) {
-        platform = "android"
-    }
-
-    // settings from local properties file
-    def localProps = new Properties()
-    def localPropsFile = rootProject.file("local.properties")
-
-    if (localPropsFile.exists()) {
-        localProps.load(new FileInputStream(localPropsFile))
-
-        if (localProps.getProperty("xplpc.platform")) {
-            platform = localProps.getProperty("xplpc.platform")
-        }
-    }
-
-    // jni libs
-    def jniLibsTargetDir = file(project.projectDir.absolutePath + "/../../../../build/kotlin-jni-libs-$platform")
-    jniLibsTargetDir.deleteDir()
-
-    def abis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
-
-    abis.each { abi ->
-        copy {
-            def jniLibsSourceDir = file(project.projectDir.absolutePath + "/../../../../build/kotlin-$platform/$abi")
-
-            if (!jniLibsSourceDir.exists()) {
-                throw new GradleException("XPLPC: You need build libraries for platform \"$platform\" and ABI \"$abi\" inside path \"$jniLibsSourceDir\".")
+        doFirst {
+            if (!abiSourceDir.exists()) {
+                throw new GradleException("XPLPC: You need build libraries for platform \"$xplpcPlatform\" and ABI \"$abi\" inside path \"$abiSourceDir\".")
             }
+        }
 
-            from file("$jniLibsSourceDir/lib")
-            into file("$jniLibsTargetDir/$abi")
+        from(abiSourceDir) {
+            into abi
         }
     }
+
+    into jniLibsDir
 }
 
-tasks.withType(JavaCompile).configureEach {
-    compileTask -> compileTask.dependsOn(copyJniLibs)
+tasks.named('preBuild') {
+    dependsOn 'copyJniLibs'
 }
-
-clean.dependsOn 'cleanCopyJniLibs'

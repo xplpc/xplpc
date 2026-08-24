@@ -1,4 +1,3 @@
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
@@ -38,9 +38,12 @@ import com.xplpc.client.Client
 import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.platform.PlatformInitializer
+import com.xplpc.system.Constants
 import custom.Mapping
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.logging.ConsoleHandler
+import java.util.logging.Level
+import java.util.logging.Logger
 
 @Composable
 @Preview
@@ -85,12 +88,10 @@ fun app() {
                 onClick = {
                     batteryLevelResponse = "Loading..."
 
-                    scope.launch(Dispatchers.IO) {
+                    scope.launch {
                         val request = Request("platform.battery.level", Param("suffix", "%"))
 
-                        Client.call<String>(request) { response ->
-                            batteryLevelResponse = response ?: "ERROR"
-                        }
+                        batteryLevelResponse = Client.callAsync<String>(request) ?: "ERROR"
                     }
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = Color.White, backgroundColor = Color.Blue)
@@ -158,7 +159,7 @@ fun app() {
                 onClick = {
                     loginResponse = "Loading..."
 
-                    scope.launch(Dispatchers.IO) {
+                    scope.launch {
                         val request =
                             Request(
                                 "sample.login",
@@ -167,9 +168,7 @@ fun app() {
                                 Param("remember", rememberMe)
                             )
 
-                        Client.call<String>(request) { response ->
-                            loginResponse = response ?: "ERROR"
-                        }
+                        loginResponse = Client.callAsync<String>(request) ?: "ERROR"
                     }
                 },
                 colors = ButtonDefaults.textButtonColors(contentColor = Color.White, backgroundColor = Color.Blue)
@@ -181,14 +180,21 @@ fun app() {
     }
 }
 
-fun main() =
+fun main() {
+    // The console handler java installs accepts nothing below info, so a debug line needs one that takes it.
+    val handler = ConsoleHandler()
+    handler.level = Level.FINE
+    Logger.getLogger(Constants.LOG_GROUP).addHandler(handler)
+
+    PlatformInitializer.initialize()
+    Mapping.initialize()
+
     application {
         Window(
             onCloseRequest = ::exitApplication,
             title = "Runner",
         ) {
-            PlatformInitializer.initialize()
-            Mapping.initialize()
             app()
         }
     }
+}

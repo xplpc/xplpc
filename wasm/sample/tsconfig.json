@@ -7,13 +7,12 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,
-    "baseUrl": ".",
-    "outDir": "dist",
+    "noEmit": true,
     "lib": [
       "esnext",
       "dom",
@@ -27,14 +26,9 @@
       "node",
       "xplpc"
     ],
-    "plugins": [
-      {
-        "name": "@vuedx/typescript-plugin-vue"
-      }
-    ],
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ],
       "@xplpc/*": [
         "../../*"

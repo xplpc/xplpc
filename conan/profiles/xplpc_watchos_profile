@@ -1,6 +1,7 @@
 include(default)
 
 [settings]
+compiler.cppstd=20
 os=watchOS
 os.version=5.0
 os.sdk=watchos

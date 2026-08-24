@@ -1,26 +1,8 @@
-import { Lock } from "../util/lock";
-
 export class UniqueID {
-    private static instance: UniqueID;
-    private lock = new Lock();
-    private uid = 0;
+    // A number is a double, so incrementing one stops changing it past the safe integer and every key after that is the same one.
+    private static uid = 0n;
 
-    private constructor() {
-        // ignore
-    }
-
-    public static shared(): UniqueID {
-        if (!UniqueID.instance) {
-            UniqueID.instance = new UniqueID();
-        }
-
-        return UniqueID.instance;
-    }
-
-    static async generate(): Promise<string> {
-        await UniqueID.shared().lock.acquire();
-        const value = "JS-" + (++UniqueID.shared().uid).toString();
-        UniqueID.shared().lock.release();
-        return value;
+    static generate(): string {
+        return "JS-" + (++UniqueID.uid).toString();
     }
 }

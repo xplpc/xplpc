@@ -1,0 +1,15 @@
+# The linter runs the checks that find a defect, which is an undefined name, an unused import, a
+# deprecated api or a known bug pattern. Style is black's, and the rules that argue with a decision
+# this project already made are not enabled.
+
+target-version = "py310"
+
+[lint]
+select = ["F", "E", "W", "I", "UP", "B"]
+
+ignore = [
+    # Line length is black's to decide.
+    "E501",
+    # Numbered positional fields read no worse than implicit ones and changing them finds nothing.
+    "UP030",
+]

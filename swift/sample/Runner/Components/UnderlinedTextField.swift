@@ -23,11 +23,11 @@ class UnderlinedTextField: UITextField {
         fatalError("init(coder:) has not been implemented")
     }
 
-    public func setUnderlineColor(color: UIColor = .red) {
+    func setUnderlineColor(color: UIColor = .red) {
         bottomLine.backgroundColor = color
     }
 
-    public func setDefaultUnderlineColor() {
+    func setDefaultUnderlineColor() {
         bottomLine.backgroundColor = defaultUnderlineColor
     }
 }

@@ -1,41 +1,33 @@
-[tool.poetry]
-description = "XPLPC - Sample"
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
 name = "xplpc-sample"
 version = "1.0.0"
-
-authors = ["Paulo Coutinho <paulocoutinhox@gmail.com>"]
+description = "XPLPC - Sample"
+requires-python = ">=3.10,<3.14"
 license = "MIT"
-maintainers = []
-
-documentation = "https://github.com/xplpc/xplpc"
-homepage = "https://github.com/xplpc/xplpc"
-repository = "https://github.com/xplpc/xplpc"
-
-keywords = []
-
-classifiers = [
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+authors = [{ name = "Paulo Coutinho", email = "paulocoutinhox@gmail.com" }]
+dependencies = [
+    "xplpc",
+    "kivy==2.3.1",
+    "kivymd2==2.0.1",
+    "pygame==2.6.1",
+    "psutil==7.2.2",
 ]
 
+[project.urls]
+Homepage = "https://github.com/xplpc/xplpc"
+Repository = "https://github.com/xplpc/xplpc"
+Documentation = "https://github.com/xplpc/xplpc"
+
+[tool.poetry]
+# This is an application that pyinstaller packages, not a python package, so there is no root to install.
+package-mode = false
+
 [tool.poetry.dependencies]
-python = ">=3.7.0,<3.14"
 xplpc = { path = "../../../build/python", develop = true }
-psutil = "^5.9.5"
-kivy = "^2.2.1"
-kivymd = "^2.0.0"
 
-[tool.poetry.dev-dependencies]
-pyinstaller = "^5.13.0"
-
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry_core>=1.0.0"]
+[tool.poetry.group.dev.dependencies]
+pyinstaller = "6.22.2"

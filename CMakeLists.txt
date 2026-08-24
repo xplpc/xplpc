@@ -1,7 +1,11 @@
-# project
 cmake_minimum_required(VERSION 3.20.0)
 project(xplpc LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
+
+# Only what XPLPC_API and JNIEXPORT mark leaves the library, and this is set before any dependency is added so their objects are hidden too.
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -9,21 +13,19 @@ if(PROJECT_IS_TOP_LEVEL)
     include(CTest)
 endif()
 
-# policies
 cmake_policy(SET CMP0054 NEW) # only interpret if() arguments as variables or keywords when unquoted
 cmake_policy(SET CMP0076 NEW) # target_sources() command converts relative paths to absolute
 set(CMAKE_POLICY_DEFAULT_CMP0091 NEW) # msvc runtime library flags are selected by an abstraction
 set(CMAKE_POLICY_DEFAULT_CMP0135 NEW) # set the timestamps of all extracted contents to the time of the extraction
 
-# settings
 set(XPLPC_DEPENDENCY_TOOL_VALUES "cpm" "conan")
+set(XPLPC_SANITIZER_VALUES "none" "address" "thread" "undefined")
 
 if (NOT XCODE AND NOT MSVC AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-# options
 set(XPLPC_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "Root Directory")
 set(XPLPC_ADD_CUSTOM_DATA OFF CACHE BOOL "Build Custom Data")
 set(XPLPC_CUSTOM_DATA_PATH "cxx/custom" CACHE STRING "Custom Data Path")
@@ -42,19 +44,36 @@ set(XPLPC_PROJECT_NAME ${PROJECT_NAME} CACHE INTERNAL "Project Name Suffix")
 set(XPLPC_VERSION "1.0.0" CACHE STRING "Version Name")
 set(XPLPC_VERSION_CODE "1" CACHE STRING "Version Code")
 set(XPLPC_DEPENDENCY_TOOL "cpm" CACHE STRING "Dependency Tool")
+set(XPLPC_SANITIZER "none" CACHE STRING "Sanitizer")
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(XPLPC_ENABLE_LOG ON CACHE BOOL "Enable Log Messages")
-else()
-    set(XPLPC_ENABLE_LOG OFF CACHE BOOL "Enable Log Messages")
-endif()
-
-# validate dependency tool
 if(NOT XPLPC_DEPENDENCY_TOOL IN_LIST XPLPC_DEPENDENCY_TOOL_VALUES)
     message(FATAL_ERROR "Dependency tool need be one of: ${XPLPC_DEPENDENCY_TOOL_VALUES}")
 endif()
 
-# output directories
+if(NOT XPLPC_SANITIZER IN_LIST XPLPC_SANITIZER_VALUES)
+    message(FATAL_ERROR "Sanitizer need be one of: ${XPLPC_SANITIZER_VALUES}")
+endif()
+
+if(NOT XPLPC_SANITIZER STREQUAL "none")
+    message(STATUS "XPLPC Sanitizer: ${XPLPC_SANITIZER}")
+
+    # The swift driver rejects the clang spelling, so these only reach the c family.
+    set(XPLPC_SANITIZER_LANGUAGES "$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>")
+
+    add_compile_options(
+        "$<${XPLPC_SANITIZER_LANGUAGES}:-fsanitize=${XPLPC_SANITIZER}>"
+        "$<${XPLPC_SANITIZER_LANGUAGES}:-fno-omit-frame-pointer>"
+        "$<${XPLPC_SANITIZER_LANGUAGES}:-g>"
+    )
+
+    add_link_options(-fsanitize=${XPLPC_SANITIZER})
+
+    if(XPLPC_SANITIZER STREQUAL "undefined")
+        add_compile_options("$<${XPLPC_SANITIZER_LANGUAGES}:-fno-sanitize-recover=all>")
+        add_link_options(-fno-sanitize-recover=all)
+    endif()
+endif()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin") # .exe and .dll
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "bin") # .exe and .dll
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "bin") # .exe and .dll
@@ -67,29 +86,24 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "lib") # .lib and .a
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "lib") # .lib and .a
 
-# setup log
-if(XPLPC_ENABLE_LOG)
-    add_compile_definitions(XPLPC_ENABLE_LOG)
-endif()
-
-# setup serializer
 if(XPLPC_ENABLE_SERIALIZER_FOR_JSON)
     add_compile_definitions(XPLPC_SERIALIZER_JSON)
 else()
-    message(FATAL_ERROR "You need enable one serializer")
+    message(FATAL_ERROR "A serializer has to be enabled, and json is the only one")
 endif()
 
-# setup target
 if(XPLPC_TARGET STREQUAL "")
     message(FATAL_ERROR "You need set the target")
 else()
     message(STATUS "XPLPC Target: ${XPLPC_TARGET}")
 endif()
 
-# xplpc files
+if(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
+    set(XPLPC_ENABLE_INTERFACE ON)
+endif()
+
 add_subdirectory(${XPLPC_ROOT_DIR}/cxx/lib)
 
-# xplpc interface
 if(XPLPC_ENABLE_INTERFACE)
     message(STATUS "XPLPC Interface: Enabled")
     add_subdirectory(c/lib)
@@ -97,33 +111,24 @@ else()
     message(STATUS "XPLPC Interface: Disabled")
 endif()
 
-# custom data
 if(XPLPC_ADD_CUSTOM_DATA)
     message(STATUS "XPLPC Custom Data: ${XPLPC_CUSTOM_DATA_PATH}")
-    add_subdirectory(${XPLPC_CUSTOM_DATA_PATH})
+    add_subdirectory(${XPLPC_CUSTOM_DATA_PATH} ${CMAKE_BINARY_DIR}/custom-data)
 endif()
 
-# target data
 if(XPLPC_TARGET STREQUAL "cxx-static")
     add_compile_definitions(XPLPC_TARGET_CXX)
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
-elseif(XPLPC_TARGET STREQUAL "cxx-shared")
-    add_compile_definitions(XPLPC_TARGET_CXX)
-
-    set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
-    add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
 elseif(XPLPC_TARGET STREQUAL "c-static")
     add_compile_definitions(XPLPC_TARGET_C)
-    add_subdirectory(c/lib)
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_library(${XPLPC_PROJECT_NAME} STATIC "${XPLPC_ALL_FILES}")
     target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/c/lib/include)
 elseif(XPLPC_TARGET STREQUAL "c-shared")
     add_compile_definitions(XPLPC_TARGET_C)
-    add_subdirectory(c/lib)
 
     set(XPLPC_ALL_FILES ${XPLPC_INC_FILES} ${XPLPC_SRC_FILES})
     add_library(${XPLPC_PROJECT_NAME} SHARED "${XPLPC_ALL_FILES}")
@@ -143,10 +148,6 @@ elseif(XPLPC_TARGET STREQUAL "kotlin")
 elseif(XPLPC_TARGET STREQUAL "swift")
     enable_language(Swift)
     set(CMAKE_Swift_LANGUAGE_VERSION 5)
-
-    if (XPLPC_ENABLE_LOG)
-        set(CMAKE_Swift_FLAGS "${CMAKE_Swift_FLAGS} -D XPLPC_ENABLE_LOG")
-    endif()
 
     add_compile_definitions(XPLPC_TARGET_SWIFT)
     add_subdirectory(${XPLPC_ROOT_DIR}/objc/lib)
@@ -194,40 +195,46 @@ else()
     message(FATAL_ERROR "Target is invalid: ${XPLPC_TARGET}")
 endif()
 
-# xplpc interface include path
+# A signed comparison or a parameter nobody reads is how a real defect first shows, so the project is built with them visible.
+# The swift driver rejects the clang spelling, so these only reach the c family.
+set(XPLPC_WARNING_LANGUAGES "$<COMPILE_LANGUAGE:C,CXX,OBJC,OBJCXX>")
+
+if(MSVC)
+    target_compile_options(${XPLPC_PROJECT_NAME} PRIVATE "$<${XPLPC_WARNING_LANGUAGES}:/W4>")
+else()
+    target_compile_options(${XPLPC_PROJECT_NAME} PRIVATE
+        "$<${XPLPC_WARNING_LANGUAGES}:-Wall>"
+        "$<${XPLPC_WARNING_LANGUAGES}:-Wextra>"
+    )
+endif()
+
 if(XPLPC_ENABLE_INTERFACE)
     target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/c/lib/include)
 endif()
 
-# cxx include path
 target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_ROOT_DIR}/cxx/lib/include)
 
-# custom data
 if(XPLPC_ADD_CUSTOM_DATA)
     target_include_directories(${XPLPC_PROJECT_NAME} PUBLIC ${XPLPC_CUSTOM_DATA_INCLUDE_PATH})
 endif()
 
-# compile definitions
 target_compile_definitions(${XPLPC_PROJECT_NAME} PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
 
-# apple frameworks
 if (APPLE)
     find_library(FWK_FOUNDATION Foundation REQUIRED)
     target_link_libraries(${XPLPC_PROJECT_NAME} PRIVATE ${FWK_FOUNDATION})
 endif()
 
-# sample
 if (XPLPC_BUILD_SAMPLE)
-    if(XPLPC_TARGET STREQUAL "cxx-static" OR XPLPC_TARGET STREQUAL "cxx-shared")
+    if(XPLPC_TARGET STREQUAL "cxx-static")
         add_subdirectory(cxx/sample)
     elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
         add_subdirectory(c/sample)
     endif()
 endif()
 
-# tests
 if(XPLPC_BUILD_TESTS)
-    if(XPLPC_TARGET STREQUAL "cxx-static" OR XPLPC_TARGET STREQUAL "cxx-shared")
+    if(XPLPC_TARGET STREQUAL "cxx-static")
         enable_testing()
         add_subdirectory(cxx/tests)
 
@@ -237,6 +244,7 @@ if(XPLPC_BUILD_TESTS)
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_PROJECT_NAME})
         target_include_directories(${XPLPC_PROJECT_NAME}-tests PRIVATE ${XPLPC_ROOT_DIR}/cxx/tests/include)
     elseif(XPLPC_TARGET STREQUAL "c-static" OR XPLPC_TARGET STREQUAL "c-shared")
+        enable_language(C)
         enable_testing()
         add_subdirectory(c/tests)
 
@@ -270,21 +278,17 @@ if(XPLPC_BUILD_TESTS)
         target_link_libraries(${XPLPC_PROJECT_NAME}-tests PRIVATE "c++")
     endif()
 
-    # compile definitions
     target_compile_definitions(${XPLPC_PROJECT_NAME}-tests PRIVATE XPLPC_TARGET="${XPLPC_TARGET}" XPLPC_VERSION="${XPLPC_VERSION}" XPLPC_VERSION_CODE="${XPLPC_VERSION_CODE}")
 endif()
 
-# download dependency tool
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
     include(${XPLPC_ROOT_DIR}/cmake/cpm/cpm-downloader.cmake)
 endif()
 
-# setup all dependencies
 if (XPLPC_DEPENDENCY_TOOL STREQUAL "cpm")
     include(${XPLPC_ROOT_DIR}/cmake/cpm/cpm-dependency.cmake)
 elseif (XPLPC_DEPENDENCY_TOOL STREQUAL "conan")
     include(${XPLPC_ROOT_DIR}/cmake/conan/conan-dependency.cmake)
 endif()
 
-# java dependencies
 include(${XPLPC_ROOT_DIR}/cmake/java/java-dependency.cmake)

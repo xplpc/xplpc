@@ -21,19 +21,6 @@ def check_tool_gradlew(path):
 
 
 # -----------------------------------------------------------------------------
-def check_tool_adb():
-    """Checks if invoking supplied adb binary works."""
-    try:
-        subprocess.check_output(["adb", "--version"])
-        return True
-    except OSError:
-        l.e(
-            "The tool ADB is not installed, check: https://developer.android.com/studio/command-line/adb"
-        )
-        return False
-
-
-# -----------------------------------------------------------------------------
 def check_tool_xcodebuild():
     """Checks if invoking supplied xcodebuild binary works."""
     try:
@@ -41,32 +28,6 @@ def check_tool_xcodebuild():
         return True
     except OSError:
         l.e("Xcode is not installed, check: https://developer.apple.com/xcode")
-        return False
-
-
-# -----------------------------------------------------------------------------
-def check_tool_ios_deploy():
-    """Checks if invoking supplied ios-deploy binary works."""
-    try:
-        subprocess.check_output(["ios-deploy", "--version"])
-        return True
-    except OSError:
-        l.e(
-            "The tool ios-deploy is not installed, check: https://github.com/ios-control/ios-deploy"
-        )
-        return False
-
-
-# -----------------------------------------------------------------------------
-def check_tool_cocoapods():
-    """Checks if invoking supplied pod binary works."""
-    try:
-        subprocess.check_output(["pod", "--version"])
-        return True
-    except OSError:
-        l.e(
-            "The tool cocoapods is not installed, check: https://github.com/CocoaPods/CocoaPods"
-        )
         return False
 
 
@@ -93,24 +54,12 @@ def check_tool_python_formatter():
 
 
 # -----------------------------------------------------------------------------
-def check_tool_cmake_formatter():
+def check_tool_python_linter():
     try:
-        subprocess.check_output(["cmake-format", "--version"])
+        subprocess.check_output(["ruff", "--version"])
         return True
     except OSError:
-        l.e(
-            "Cmake-format is not installed, check: https://github.com/cheshirekow/cmake_format"
-        )
-        return False
-
-
-# -----------------------------------------------------------------------------
-def check_tool_tree():
-    try:
-        subprocess.check_output(["tree", "--version"])
-        return True
-    except OSError:
-        l.e("Tree tool is not installed")
+        l.e("Ruff is not installed, check: https://github.com/astral-sh/ruff")
         return False
 
 
@@ -147,6 +96,36 @@ def check_tool_swift_formatter():
 
 
 # -----------------------------------------------------------------------------
+def check_tool_swift_linter():
+    try:
+        subprocess.check_output(["swiftlint", "--version"])
+        return True
+    except OSError:
+        l.e("SwiftLint is not installed, check: https://github.com/realm/SwiftLint")
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_kotlin_linter():
+    try:
+        subprocess.check_output(["detekt", "--version"])
+        return True
+    except OSError:
+        l.e("Detekt is not installed, check: https://detekt.dev")
+        return False
+
+
+# -----------------------------------------------------------------------------
+def check_tool_xcodegen():
+    try:
+        subprocess.check_output(["xcodegen", "--version"])
+        return True
+    except OSError:
+        l.e("XcodeGen is not installed, check: https://github.com/yonaskolb/XcodeGen")
+        return False
+
+
+# -----------------------------------------------------------------------------
 def check_tool_cmake():
     try:
         subprocess.check_output(["cmake", "--version"])
@@ -169,11 +148,7 @@ def check_tool_leaks():
 def check_tool_emsdk():
     try:
         subprocess.check_output(["emsdk", "help"])
-
-        if os.environ.get("EMSDK") is not None:
-            return True
-
-        return False
+        return True
     except OSError:
         l.e(
             "Emscripten SDK is not installed, check: https://github.com/emscripten-core/emsdk"
@@ -264,14 +239,12 @@ def check_tool_pytest():
 
 
 # -----------------------------------------------------------------------------
-def check_tool_pyinstaller():
+def check_tool_poetry():
     try:
-        subprocess.check_output(["pyinstaller", "--version"])
+        subprocess.check_output(["poetry", "--version"])
         return True
     except OSError:
-        l.e(
-            "PyInstaller is not installed, check: https://github.com/pyinstaller/pyinstaller"
-        )
+        l.e("Poetry is not installed, check: https://python-poetry.org")
         return False
 
 

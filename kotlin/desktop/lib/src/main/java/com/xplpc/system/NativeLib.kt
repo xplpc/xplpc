@@ -23,14 +23,15 @@ object NativeLib {
 
             FileOutputStream(libFile).use { output ->
                 inputStream.copyTo(output)
-                Log.d("[NativeLib : initialize] XPLPC native library copied to: $output")
+                Log.d("[NativeLib : initialize] XPLPC native library copied to: ${libFile.absolutePath}")
             }
 
             System.load(libFile.absolutePath)
 
             Log.d("[NativeLib : initialize] XPLPC native library loaded")
         } catch (e: UnsatisfiedLinkError) {
-            Log.e("[NativeLib : initialize] Could not load XPLPC native library: " + e.message)
+            Log.e("[NativeLib : initialize] Could not load XPLPC native library")
+            Log.d("[NativeLib : initialize] Could not load XPLPC native library: " + e.message)
         }
     }
 }

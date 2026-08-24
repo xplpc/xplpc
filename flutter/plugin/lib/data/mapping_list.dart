@@ -1,32 +1,33 @@
 import 'package:xplpc/map/mapping_item.dart';
+import 'package:xplpc/proxy/platform_proxy.dart';
 
 class MappingList {
-  // singleton
   static MappingList? _instance;
   MappingList._();
   static MappingList get instance => _instance ??= MappingList._();
 
-  // properties
-  var list = <String, MappingItem>{};
+  final _list = <String, MappingItem>{};
 
-  // methods
   void add(String name, MappingItem item) {
-    list[name] = item;
+    // The native side routes from the names it was told, so a failure to declare one must leave nothing behind to be unreachable later.
+    PlatformProxy.addMapping(name);
+    _list[name] = item;
   }
 
   MappingItem? find(String name) {
-    if (list.containsKey(name)) {
-      return list[name];
-    }
-
-    return null;
+    return _list[name];
   }
 
   bool has(String name) {
-    return list.containsKey(name);
+    return _list.containsKey(name);
   }
 
   void clear() {
-    return list.clear();
+    PlatformProxy.clearMappings();
+    _list.clear();
+  }
+
+  int count() {
+    return _list.length;
   }
 }

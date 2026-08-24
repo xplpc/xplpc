@@ -1,26 +1,19 @@
-public class UniqueID {
-    private static var shared: UniqueID = .init()
+import Foundation
 
-    private var mutex = pthread_mutex_t()
+/// The counter is guarded by the lock below, which is what the unchecked conformance asserts.
+class UniqueID: @unchecked Sendable {
+    private static let shared: UniqueID = .init()
+    private init() {}
+
+    private let lock = NSLock()
     private var counter: UInt = 0
 
-    private init() {
-        pthread_mutex_init(&mutex, nil)
-    }
-
-    deinit {
-        pthread_mutex_destroy(&mutex)
-    }
-
     static func generate() -> String {
-        pthread_mutex_lock(&shared.mutex)
+        shared.lock.lock()
+        defer { shared.lock.unlock() }
 
-        defer {
-            pthread_mutex_unlock(&shared.mutex)
-        }
+        shared.counter &+= 1
 
-        shared.counter += 1
-
-        return "SW-" + String(shared.counter)
+        return "SW-\(shared.counter)"
     }
 }

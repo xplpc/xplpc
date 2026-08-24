@@ -1,9 +1,9 @@
-import { IXSerializer } from "../serializer/serializer";
+import { Serializer } from "../serializer/serializer";
 
-export class XConfig {
-    public serializer: IXSerializer
+export class Config {
+    public serializer: Serializer;
 
-    constructor(serializer: IXSerializer) {
-        this.serializer = serializer
+    constructor(serializer: Serializer) {
+        this.serializer = serializer;
     }
 }

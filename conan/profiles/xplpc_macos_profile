@@ -1,6 +1,7 @@
 include(default)
 
 [settings]
+compiler.cppstd=20
 os=Macos
 os.version=11.0
 arch=x86_64

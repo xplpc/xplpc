@@ -31,3 +31,7 @@ build/
 
 # Flutter Reflectable
 *.reflectable.dart
+
+# The build points these at what it produced, so a checkout carries no link into a directory that may not exist.
+/ios/xplpc.xcframework
+/macos/xplpc.xcframework

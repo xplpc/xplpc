@@ -35,68 +35,85 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
         addCameraInput()
         addPreviewLayer()
         addVideoOutput()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        guard !captureSession.isRunning else {
+            return
+        }
 
         DispatchQueue.global(qos: .background).async {
             self.captureSession.startRunning()
         }
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        guard captureSession.isRunning else {
+            return
+        }
+
+        DispatchQueue.global(qos: .background).async {
+            self.captureSession.stopRunning()
+        }
+    }
+
     func captureOutput(_: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from _: AVCaptureConnection) {
-        // device orientation
         guard let orientation else {
             debugPrint("[CameraViewController : captureOutput] Orientation is invalid")
             return
         }
 
-        // single frame
         guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             debugPrint("[CameraViewController : captureOutput] Unable to get image from sample buffer")
             return
         }
 
-        // image size
         let size = CVPixelBufferGetDataSize(frame)
 
-        #if DEBUG
-            // remove comment below for debug only
-            // print("[CameraViewController : captureOutput] Original image size is: " + String(size / 1024) + " kb")
-        #endif
+        guard let originalImage = ImageHelper.imageFromSampleBuffer(sampleBuffer: sampleBuffer, orientation: orientation) else {
+            debugPrint("[CameraViewController : captureOutput] Unable to build an image from the sample buffer")
+            return
+        }
 
-        // original image
-        let originalImage = ImageHelper.imageFromSampleBuffer(sampleBuffer: sampleBuffer, orientation: orientation)
         var buffer = ImageHelper.getRGBABytes(from: originalImage)
 
-        // image dimension
         let width = Int(originalImage.size.width)
         let height = Int(originalImage.size.height)
 
-        // data view
-        let dataView = DataView.createFromByteArray(&buffer)
-
-        // convert
+        // The buffer is processed in place while the view is alive.
         let startTime = CFAbsoluteTimeGetCurrent()
+        var processedBytes: [UInt8] = []
 
-        let request = Request(
-            "sample.image.grayscale.dataview",
-            Param("dataView", dataView)
-        )
+        DataView.withByteArray(&buffer) { dataView in
+            let request = Request(
+                "sample.image.grayscale.dataview",
+                Param("dataView", dataView)
+            )
 
-        Client.call(request) { (response: String?) in
-            guard response != nil else {
-                debugPrint("[CameraViewController : captureOutput] Unable to get response data")
-                return
+            Client.call(request) { (response: String?) in
+                guard response != nil else {
+                    debugPrint("[CameraViewController : captureOutput] Unable to get response data")
+                    return
+                }
+
+                processedBytes = ByteArrayHelper.createFromDataView(dataView)
             }
+        }
 
-            let elapsedTime = CFAbsoluteTimeGetCurrent() - startTime
-            let duration = Float(elapsedTime)
+        guard !processedBytes.isEmpty else {
+            return
+        }
 
-            // draw image
-            let finalImage = ImageHelper.rgbaBytesToUIImage(imageData: buffer, width: width, height: height)
+        let duration = Float(CFAbsoluteTimeGetCurrent() - startTime)
+        let finalImage = ImageHelper.rgbaBytesToUIImage(imageData: processedBytes, width: width, height: height)
 
-            DispatchQueue.main.async {
-                self.previewImage.image = finalImage
-                self.lbOverlay.text = String(format: "Time to process: %.3f seconds\nImage size: %d kb", duration, size / 1024)
-            }
+        DispatchQueue.main.async {
+            self.previewImage.image = finalImage
+            self.lbOverlay.text = String(format: "Time to process: %.3f seconds\nImage size: %d kb", duration, size / 1024)
         }
     }
 
@@ -106,7 +123,10 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
             return
         }
 
-        let cameraInput = try! AVCaptureDeviceInput(device: device)
+        guard let cameraInput = try? AVCaptureDeviceInput(device: device) else {
+            debugPrint("[CameraViewController : addCameraInput] The video device could not be opened")
+            return
+        }
 
         captureSession.sessionPreset = AVCaptureSession.Preset.medium
         captureSession.addInput(cameraInput)
@@ -131,7 +151,10 @@ class CameraViewController: UIViewController, AVCaptureVideoDataOutputSampleBuff
     }
 
     private func updateOrientation() {
-        orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
+        orientation = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?
+            .interfaceOrientation
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

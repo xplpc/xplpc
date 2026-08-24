@@ -1,13 +1,10 @@
 import os
 
 from pygemstones.io import file as f
-from pygemstones.system import platform as p
-from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
-from core import conan
+from core import conan, run, tool, util
 from core import config as c
-from core import tool, util
 
 
 # -----------------------------------------------------------------------------
@@ -31,10 +28,10 @@ def run_task_build_static():
     build_type = util.get_param_build_type(target, format="cmake")
     l.i(f"Build type: {build_type}")
 
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    target_data = get_target_data_for_platform()
+    target_data = util.get_target_data_for_host()
 
     # build
     l.i("Building...")
@@ -74,10 +71,10 @@ def run_task_build_shared():
     build_type = util.get_param_build_type(target, format="cmake")
     l.i(f"Build type: {build_type}")
 
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    target_data = get_target_data_for_platform()
+    target_data = util.get_target_data_for_host()
 
     # build
     l.i("Building...")
@@ -117,10 +114,10 @@ def run_task_build_sample():
     build_type = util.get_param_build_type(target, format="cmake")
     l.i(f"Build type: {build_type}")
 
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    target_data = get_target_data_for_platform()
+    target_data = util.get_target_data_for_host()
 
     # build
     l.i("Building...")
@@ -145,11 +142,11 @@ def run_task_run_sample():
 
     build_dir = os.path.join(c.proj_path, "build", "c-sample")
 
-    target_data = get_target_data_for_platform()
+    target_data = util.get_target_data_for_host()
     arch = target_data[0]["arch"]
     bin_dir = os.path.join(build_dir, arch, "c", "sample", "bin")
 
-    r.run([util.run_name("xplpc-sample")], cwd=bin_dir)
+    run.run([util.run_name(bin_dir, "xplpc-sample")], cwd=bin_dir)
 
     l.ok()
 
@@ -174,10 +171,10 @@ def run_task_build_leaks():
     # configure
     l.i("Configuring...")
 
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    target_data = get_target_data_for_platform()
+    target_data = util.get_target_data_for_host()
 
     # build
     l.i("Building...")
@@ -198,7 +195,7 @@ def run_task_build_leaks():
 
     arch = target_data[0]["arch"]
 
-    r.run(
+    run.run(
         [
             "leaks",
             "--atExit",
@@ -241,10 +238,10 @@ def run_task_test():
     build_type = util.get_param_build_type(target, format="cmake")
     l.i(f"Build type: {build_type}")
 
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    target_data = get_target_data_for_platform()
+    target_data = util.get_target_data_for_host()
 
     # build
     l.i("Building...")
@@ -266,7 +263,7 @@ def run_task_test():
     build_dir = os.path.join(c.proj_path, "build", "c-test")
     arch = target_data[0]["arch"]
 
-    r.run(
+    run.run(
         ["ctest", "-C", build_type, "--output-on-failure"],
         cwd=os.path.join(build_dir, arch),
     )
@@ -296,7 +293,7 @@ def run_task_format():
 
         util.run_format(
             path_list=path_list,
-            formatter=lambda file_item: r.run(
+            formatter=lambda file_item: run.run(
                 [
                     "clang-format",
                     "-style",
@@ -328,49 +325,21 @@ def do_build(
     build_dir = os.path.join(c.proj_path, "build", build_folder)
     conan_build_dir = os.path.join(c.proj_path, "build", "conan", build_folder)
 
-    # dry run
-    dry_run = util.get_param_dry()
-    if not dry_run:
+    incremental = util.get_param_incremental()
+    if not incremental:
         f.recreate_dir(build_dir)
 
     # dependencies
     no_deps = util.get_param_no_deps()
 
-    if not dry_run and not no_deps and c.dependency_tool == "conan":
+    if not incremental and not no_deps and c.dependency_tool == "conan":
         for item in target_data:
             l.i(f"Building dependencies for arch {item['arch']}...")
 
             arch_dir = os.path.join(conan_build_dir, item["arch"])
             f.recreate_dir(arch_dir)
 
-            # conan
-            build_profile = conan.get_build_profile()
-
-            if build_profile != "default":
-                build_profile = os.path.join(
-                    c.proj_path, "conan", "profiles", build_profile
-                )
-
-            run_args = [
-                "conan",
-                "install",
-                c.proj_path,
-                "-pr:b",
-                build_profile,
-                "-pr:h",
-                os.path.join(c.proj_path, "conan", "profiles", item["conan_profile"]),
-            ]
-
-            conan.add_target_setup_common_args(run_args, item, build_type)
-
-            if has_tests:
-                run_args.append("-o:h")
-                run_args.append("xplpc_build_tests=True")
-
-            run_args.append("--build=missing")
-            run_args.append("--update")
-
-            r.run(run_args, cwd=arch_dir)
+            conan.install(item, build_type, arch_dir, has_tests)
 
     # build
     for item in target_data:
@@ -389,6 +358,7 @@ def do_build(
             f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DXPLPC_TARGET={target}",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+            f"-DXPLPC_SANITIZER={util.get_param_sanitizer()}",
         ]
 
         # custom data
@@ -418,19 +388,7 @@ def do_build(
             toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
             run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
 
-        r.run(run_args)
+        run.run(run_args)
 
         # build
-        r.run(["cmake", "--build", arch_dir, "--config", build_type])
-
-
-# -----------------------------------------------------------------------------
-def get_target_data_for_platform():
-    if p.is_macos():
-        return c.targets["platform-macos"]
-    elif p.is_windows():
-        return c.targets["platform-windows"]
-    elif p.is_linux():
-        return c.targets["platform-linux"]
-    else:
-        l.e("Unknown platform")
+        run.run(["cmake", "--build", arch_dir, "--config", build_type])

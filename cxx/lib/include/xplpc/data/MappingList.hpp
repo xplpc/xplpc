@@ -1,9 +1,9 @@
 #pragma once
 
 #include "xplpc/map/MappingItem.hpp"
+#include "xplpc/util/TSMap.hpp"
 
 #include <cstddef>
-#include <map>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -15,20 +15,22 @@ namespace data
 {
 
 using namespace xplpc::map;
+using namespace xplpc::util;
 
 class MappingList
 {
 public:
     void add(const std::string &name, const MappingItem &item);
-    std::optional<MappingItem> find(const std::string &name);
-    size_t count() const noexcept;
-    void clear() noexcept;
+    std::optional<MappingItem> find(const std::string &name) const;
+    bool has(const std::string &name) const;
+    size_t count() const;
+    void clear();
     static std::shared_ptr<MappingList> shared();
 
 private:
     static std::shared_ptr<MappingList> instance;
     static std::once_flag initInstanceFlag;
-    std::map<std::string, MappingItem> list;
+    TSMap<std::string, MappingItem> list;
 
     MappingList() = default;
     MappingList(const MappingList &) = delete;

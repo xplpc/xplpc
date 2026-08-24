@@ -7,6 +7,11 @@ on:
       - 'docs/**'
       - 'extras/images/**'
 
+# The default branch is never cancelled, since that is where publishing happens.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   build:
     name: ${{ matrix.config.name }}
@@ -21,12 +26,12 @@ jobs:
           }
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: "3.10"
+          python-version: "3.13"
 
       - name: Install Python Dependencies
         run: |
@@ -36,15 +41,15 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.30.0"
+          cmake-version: "4.3.3"
 
       - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@v6
         with:
-          version: "1.12.1"
+          version: "1.13.2"
 
       - name: Install Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "corretto"
           java-version: "17"
@@ -53,7 +58,7 @@ jobs:
         uses: nttld/setup-ndk@v1
         id: setup-ndk
         with:
-          ndk-version: r25c
+          ndk-version: r29
           add-to-path: true
 
       - name: Verify
@@ -67,8 +72,6 @@ jobs:
       - name: Get AVD info
         uses: ./.github/actions/get-avd-info
         id: avd-info
-        with:
-            api-level: 34
 
       - name: Enable KVM
         run: |
@@ -87,12 +90,34 @@ jobs:
       - name: Build AAR
         run: python3 xplpc.py kotlin-build-aar --platform android
 
+      - name: Build Sample
+        run: python3 xplpc.py kotlin-build-sample --platform android
+
+      - name: Android Lint
+        run: |
+          ./kotlin/android/lib/gradlew -p kotlin/android/lib :library:lintDebug
+          ./kotlin/android/sample/gradlew -p kotlin/android/sample :app:lintDebug
+
+      - name: Verify The Keep Rules Survived R8
+        run: |
+          seeds=kotlin/android/sample/app/build/outputs/mapping/release/seeds.txt
+          cat "$seeds" | grep -E "com\.xplpc\.(message\.Param|serializer\.JsonSerializer)" || true
+          for field in \
+            "com.xplpc.message.Param: java.lang.String n" \
+            "com.xplpc.message.Param: java.lang.Object v" \
+            "com.xplpc.serializer.JsonSerializer\$JsonRequestData: java.lang.String f" \
+            "com.xplpc.serializer.JsonSerializer\$JsonRequestData: java.util.ArrayList p" \
+            "com.xplpc.serializer.JsonSerializer\$JsonFunctionReturnValueData: java.lang.Object r"; do
+            grep -qF "$field" "$seeds" || { echo "r8 did not keep: $field"; exit 1; }
+          done
+          echo "every field the wire format reads by name survived"
+
       - name: Test
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
           arch: ${{ steps.avd-info.outputs.arch }}
-          target: ${{ steps.avd-info.outputs.target }}
+          target: default
           disable-animations: true
           force-avd-creation: true
           ram-size: 4096M

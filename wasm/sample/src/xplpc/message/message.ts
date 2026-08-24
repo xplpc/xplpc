@@ -1,12 +1,8 @@
-export class XMessage {
-    private data = new Map<string, unknown>()
+export class Message {
+    private data = new Map<string, unknown>();
 
-    public get<T>(name: string): T | undefined | unknown {
-        if (this.data.has(name)) {
-            return this.data.get(name);
-        }
-
-        return undefined
+    public get<T>(name: string): T | undefined {
+        return this.data.get(name) as T | undefined;
     }
 
     public set(name: string, value: unknown) {

@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=80.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xplpc"
+version = "1.0.0"
+description = "Cross Platform Lite Procedure Call"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Paulo Coutinho", email = "paulocoutinhox@gmail.com" }]
+
+[project.urls]
+Homepage = "https://github.com/xplpc/xplpc"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+xplpc = ["lib/**/*"]

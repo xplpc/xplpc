@@ -6,23 +6,15 @@ extension CIImage {
         var deviceOrientation = orientation
 
         if deviceOrientation == nil {
-            guard let currentOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation else {
-                #if DEBUG
-                    fatalError("[CIImage : orientationCorrectedImage] Could not obtain UIInterfaceOrientation from a valid windowScene")
-                #else
-                    return nil
-                #endif
-            }
-
-            deviceOrientation = currentOrientation
+            deviceOrientation = UIApplication.shared.connectedScenes
+                .compactMap { $0 as? UIWindowScene }
+                .first?
+                .interfaceOrientation
         }
 
         guard let deviceOrientation else {
-            #if DEBUG
-                fatalError("[CIImage : orientationCorrectedImage] Orientation is invalid")
-            #else
-                return nil
-            #endif
+            debugPrint("[CIImage : orientationCorrectedImage] No interface orientation is available")
+            return nil
         }
 
         var imageOrientation = UIImage.Orientation.up

@@ -1,5 +1,6 @@
 include(default)
 
 [settings]
+compiler.cppstd=20
 os=Linux
 arch=x86_64

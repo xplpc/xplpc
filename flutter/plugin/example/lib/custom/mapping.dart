@@ -5,12 +5,10 @@ import 'package:xplpc/message/message.dart';
 import 'package:xplpc/message/response.dart';
 
 class Mapping {
-  // singleton
   static Mapping? _instance;
   Mapping._();
   static Mapping get instance => _instance ??= Mapping._();
 
-  // methods
   void initialize() {
     MappingList.instance.add(
       "platform.battery.level",

@@ -1,5 +1,4 @@
-#ifndef XPLPC_OBJC_PLATFORM_PROXY_H
-#define XPLPC_OBJC_PLATFORM_PROXY_H
+#pragma once
 
 #import "xplpc/proxy/ObjCPlatformProxyImpl.h"
 #import "xplpc/proxy/PlatformProxy.hpp"
@@ -17,20 +16,25 @@ class ObjCPlatformProxy : public PlatformProxy
 {
 public:
     static std::shared_ptr<ObjCPlatformProxy> shared();
+    static void registerProxies();
 
     virtual void initialize() override;
     virtual void initializePlatform() override;
-    virtual void finalize() override;
-    virtual void finalizePlatform() override;
+    void finalize();
+    void finalizePlatform();
     virtual void callProxy(const std::string &key, const std::string &data) override;
     virtual bool hasMapping(const std::string &name) override;
 
     void setProxyImpl(ObjCPlatformProxyImpl *proxyImpl);
 
 private:
-    ObjCPlatformProxyImpl *proxyImpl;
+    ObjCPlatformProxyImpl *currentProxyImpl() const;
+
+    ObjCPlatformProxyImpl *proxyImpl = nullptr;
+    mutable std::mutex proxyImplMutex;
     static std::shared_ptr<ObjCPlatformProxy> instance;
     static std::once_flag initInstanceFlag;
+    static std::once_flag proxyRegistrationFlag;
 
     ObjCPlatformProxy() = default;
     ObjCPlatformProxy(const ObjCPlatformProxy &) = delete;
@@ -39,5 +43,3 @@ private:
 
 } // namespace proxy
 } // namespace xplpc
-
-#endif

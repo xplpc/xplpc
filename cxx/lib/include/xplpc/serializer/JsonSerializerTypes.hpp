@@ -1,6 +1,6 @@
-#ifdef XPLPC_SERIALIZER_JSON
-
 #pragma once
+
+#ifdef XPLPC_SERIALIZER_JSON
 
 #include "xplpc/type/DataView.hpp"
 
@@ -12,8 +12,6 @@
 using json = nlohmann::json;
 
 NLOHMANN_JSON_NAMESPACE_BEGIN
-
-// OPTIONAL TYPE
 
 template <typename T>
 struct adl_serializer<std::optional<T>>
@@ -43,8 +41,6 @@ struct adl_serializer<std::optional<T>>
     }
 };
 
-// CHRONO (DATE AND TIME) TYPE
-
 template <typename Clock, typename Duration>
 struct adl_serializer<std::chrono::time_point<Clock, Duration>>
 {
@@ -68,8 +64,6 @@ struct adl_serializer<std::chrono::time_point<Clock, Duration>>
     }
 };
 
-// DATAVIEW TYPE
-
 template <>
 struct adl_serializer<xplpc::type::DataView>
 {
@@ -79,21 +73,24 @@ struct adl_serializer<xplpc::type::DataView>
             {"ptr", reinterpret_cast<std::uintptr_t>(dataView.ptr())},
             {"size", dataView.size()},
         };
-    };
+    }
 
     static xplpc::type::DataView from_json(const json &j)
     {
-        if (j.is_null())
+        if (j.is_null() || !j.contains("ptr") || !j.contains("size"))
         {
-            return xplpc::type::DataView{0, 0};
+            return xplpc::type::DataView{nullptr, 0};
         }
-        else
+
+        auto ptr = reinterpret_cast<uint8_t *>(j["ptr"].get<std::uintptr_t>());
+
+        // The address comes from another process boundary, and a null one can never carry bytes.
+        if (!ptr)
         {
-            return xplpc::type::DataView{
-                reinterpret_cast<uint8_t *>(j["ptr"].get<std::uintptr_t>()),
-                j["size"].get<size_t>(),
-            };
+            return xplpc::type::DataView{nullptr, 0};
         }
+
+        return xplpc::type::DataView{ptr, j["size"].get<size_t>()};
     }
 };
 

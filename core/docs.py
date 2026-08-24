@@ -1,10 +1,9 @@
 import os
 
-from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
 from core import config as c
-from core import tool, util
+from core import run, tool, util
 
 
 # -----------------------------------------------------------------------------
@@ -28,7 +27,7 @@ def run_task_format():
 
         util.run_format(
             path_list=path_list,
-            formatter=lambda file_item: r.run(
+            formatter=lambda file_item: run.run(
                 [
                     "remark",
                     file_item,

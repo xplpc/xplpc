@@ -19,11 +19,11 @@ public:
          std::string body_,
          std::unordered_map<std::string, std::string> data_,
          bool done_)
-        : id(std::move(id_))
+        : id(id_)
         , title(std::move(title_))
         , body(std::move(body_))
         , data(std::move(data_))
-        , done(std::move(done_))
+        , done(done_)
     {
     }
 };

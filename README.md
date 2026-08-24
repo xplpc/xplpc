@@ -16,6 +16,7 @@
     <a href="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/wasm.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/flutter.yml/badge.svg"></a>
     <a href="https://github.com/xplpc/xplpc/actions/workflows/python.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/python.yml/badge.svg"></a>
+    <a href="https://github.com/xplpc/xplpc/actions/workflows/docs.yml"><img src="https://github.com/xplpc/xplpc/actions/workflows/docs.yml/badge.svg"></a>
 </p>
 
 ## Project
@@ -79,21 +80,21 @@ let request = Request(
 )
 
 Client.call(request) { (response: String?) in
-    print("Returned Value: \(response)")
+    print("Returned Value: \(response ?? "")")
 }
 ```
 
 Using WASM with Typescript:
 
 ```typescript
-const request = new XRequest(
+const request = new Request(
     "sample.login",
-    new XParam("username", "paulo"),
-    new XParam("password", "123456"),
-    new XParam("remember", true),
+    new Param("username", "paulo"),
+    new Param("password", "123456"),
+    new Param("remember", true),
 );
 
-XClient.call<string>(request).then((response : string | undefined) => {
+Client.call<string>(request).then((response : string | undefined) => {
     console.log("Returned Value: " + response);
 });
 ```
@@ -124,35 +125,37 @@ request = Request(
     ],
 )
 
-response = Client.call(request)
-print(response)
+def on_response(response):
+    print(response)
+
+Client.call(request, on_response, str)
 ```
 
-Obs: There are syntax suggar for async/await/future calls, see the documentation about each language/platform.
+Every language also has a waiting form of the same call, which is `callAsync` everywhere except TypeScript, where `call` already answers with a promise. And every language has `callSync`, which answers with the value itself when the mapping answered before it returned, and with the empty value when it did not. The guide for each language describes both.
 
 ## Supported languages and platforms
 
-*   C
-*   C++
-*   Kotlin (Android, Desktop)
-*   Swift (iOS, macOS, tvOS, watchOS, Catalyst)
-*   WebAssembly
-*   Flutter (iOS, Android, Desktop)
-*   Python
+* C
+* C++
+* Kotlin (Android, Desktop)
+* Swift (iOS, macOS, tvOS, watchOS, Catalyst)
+* WebAssembly
+* Flutter (iOS, Android, Desktop)
+* Python
 
 ## Documentation
 
-*   [General](docs/general.md)
-*   [C](docs/c.md)
-*   [C++](docs/cxx.md)
-*   [Kotlin](docs/kotlin.md)
-*   [Swift](docs/swift.md)
-*   [WebAssembly](docs/wasm.md)
-*   [Flutter](docs/flutter.md)
-*   [Python](docs/python.md)
-*   [Dependency Manager](docs/dependency-manager.md)
-*   [Contribution](docs/contribution.md)
-*   [Purpose](docs/purpose.md)
+* [General](docs/general.md)
+* [C](docs/c.md)
+* [C++](docs/cxx.md)
+* [Kotlin](docs/kotlin.md)
+* [Swift](docs/swift.md)
+* [WebAssembly](docs/wasm.md)
+* [Flutter](docs/flutter.md)
+* [Python](docs/python.md)
+* [Dependency Manager](docs/dependency-manager.md)
+* [Contribution](docs/contribution.md)
+* [Purpose](docs/purpose.md)
 
 ## License
 

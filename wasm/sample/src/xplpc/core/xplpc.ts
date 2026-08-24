@@ -1,17 +1,15 @@
-import { IXWasmModule } from "../module/xplpc-module";
-import XWebPlatformProxy from "../proxy/platform-proxy";
-import { XConfig } from "./config";
+import { WasmModule } from "../module/xplpc-module";
+import platformProxy from "../proxy/platform-proxy";
+import { Config } from "./config";
 
 export class XPLPC {
     private static instance: XPLPC;
 
-    public config!: XConfig;
-    public module!: IXWasmModule;
+    public config!: Config;
+    public module!: WasmModule;
     public initialized = false;
 
-    private constructor() {
-        // ignore
-    }
+    private constructor() {}
 
     public static shared(): XPLPC {
         if (!XPLPC.instance) {
@@ -21,48 +19,29 @@ export class XPLPC {
         return XPLPC.instance;
     }
 
-    public initialize(module: IXWasmModule, config: XConfig): void {
+    public initialize(module: WasmModule, config: Config): void {
         if (this.initialized) {
             return;
         }
 
-        this.initialized = true;
         this.config = config;
-
-        // load native library
         this.module = module;
 
-        if (this.module) {
-            // initialize xplpc
-            if (this.module.XPLPC) {
-                this.module.XPLPC.initialize();
-            }
+        const nativePlatformProxy = new module.NativePlatformProxy();
+        nativePlatformProxy.initialize();
+        module.PlatformProxyList.prependFromJavascript(nativePlatformProxy);
 
-            // initialize native platform proxy
-            if (this.module.NativePlatformProxy) {
-                // eslint-disable-next-line
-                // @ts-ignore:next-line
-                const nativePlatformProxy = new this.module.NativePlatformProxy();
-                nativePlatformProxy.initialize();
+        const ProxyClass = module.PlatformProxy.extend(
+            "PlatformProxy",
+            platformProxy,
+        );
+        const webProxy = new ProxyClass();
+        webProxy.initialize();
+        module.PlatformProxyList.prependFromJavascript(webProxy);
 
-                if (this.module.PlatformProxyList) {
-                    this.module.PlatformProxyList.insertFromJavascript(0, nativePlatformProxy);
-                }
-            }
+        module.XPLPC.initialize();
 
-            // javascript platform proxy
-            if (this.module.PlatformProxy) {
-                // eslint-disable-next-line
-                // @ts-ignore:next-line
-                const ProxyClass = new this.module.PlatformProxy.extend("PlatformProxy", XWebPlatformProxy);
-                const proxyInstance = new ProxyClass();
-
-                proxyInstance.initialize();
-
-                if (this.module.PlatformProxyList) {
-                    this.module.PlatformProxyList.insertFromJavascript(0, proxyInstance);
-                }
-            }
-        }
+        // This is only set once the module is fully wired, since a failure above must not leave a half built singleton.
+        this.initialized = true;
     }
 }

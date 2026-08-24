@@ -1,6 +1,7 @@
 include(default)
 
 [settings]
+compiler.cppstd=20
 os=iOS
 os.version=12.0
 os.sdk=iphoneos

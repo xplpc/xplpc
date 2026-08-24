@@ -28,3 +28,39 @@ TEST_F(GeneralTest, ConcurrencyAll)
         thread.join();
     }
 }
+
+TEST_F(GeneralTest, ConcurrencyMappingDeclarations)
+{
+    // The declared names are read by every routing decision while the host is free to keep declaring and dropping them.
+
+    xplpc_native_clear_mappings();
+
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < 16; ++i)
+    {
+        // clang-format off
+        threads.emplace_back([i] {
+            for (int n = 0; n < 200; ++n)
+            {
+                const auto name = "concurrency.mapping." + std::to_string(n % 8);
+                xplpc_native_add_mapping(name.c_str(), name.size());
+
+                testLogin();
+
+                if (i == 0 && n % 64 == 0)
+                {
+                    xplpc_native_clear_mappings();
+                }
+            }
+        });
+        // clang-format on
+    }
+
+    for (auto &thread : threads)
+    {
+        thread.join();
+    }
+
+    xplpc_native_clear_mappings();
+}

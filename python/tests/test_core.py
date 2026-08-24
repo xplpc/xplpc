@@ -1,38 +1,27 @@
 import logging
 
 import pytest
-
 from xplpc.core.config import Config
 from xplpc.core.xplpc import XPLPC
+from xplpc.data.callback_list import CallbackList
+from xplpc.data.mapping_list import MappingList
+from xplpc.map.mapping_item import MappingItem
 from xplpc.serializer.json_serializer import JsonSerializer
 
-# ------------------------------------------------------------------------------
-# FIXTURES
-# ------------------------------------------------------------------------------
 
-
-# general fixture before and after all tests
 @pytest.fixture(scope="session", autouse=True)
 def setup_and_teardown_session():
-    # general command before all tests
     logging.basicConfig(level=logging.DEBUG)
 
     yield
 
-    # general command after all tests
 
-
-# fixture before and after each individual test
 @pytest.fixture(autouse=True)
 def setup_and_teardown():
-    # command before each test
     yield
-    # command after each test
 
-
-# ------------------------------------------------------------------------------
-# CALLBACKS
-# ------------------------------------------------------------------------------
+    # A leaked callback is the defect this project has found most often, so every test is held to leaving none.
+    assert CallbackList().count() == 0
 
 
 def test_core_initialize():
@@ -41,3 +30,19 @@ def test_core_initialize():
     XPLPC().initialize(config)
 
     assert XPLPC().is_initialized()
+
+
+def test_a_mapping_that_cannot_be_declared_leaves_nothing_behind():
+    # The native side routes from the names it was told, so a name recorded locally but never
+    # declared would be unreachable for the life of the process with nothing reporting it.
+
+    XPLPC().initialize(Config(JsonSerializer()))
+
+    name = "platform.\ud800"
+    before = MappingList().count()
+
+    with pytest.raises(UnicodeEncodeError):
+        MappingList().add(name, MappingItem(lambda message, r: r(None)))
+
+    assert not MappingList().has(name)
+    assert MappingList().count() == before

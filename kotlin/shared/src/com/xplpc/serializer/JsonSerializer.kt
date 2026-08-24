@@ -9,6 +9,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import com.google.gson.JsonSerializationContext
 import com.google.gson.reflect.TypeToken
+import com.xplpc.message.DecodedRequest
 import com.xplpc.message.Message
 import com.xplpc.message.Param
 import com.xplpc.type.DataView
@@ -17,17 +18,15 @@ import java.lang.reflect.Type
 import java.util.Date
 
 class JsonSerializer : Serializer {
-    @Suppress("UNUSED")
-    internal class JsonRequestData(val f: String, val p: ArrayList<Param> = ArrayList())
+    // Gson is immutable and thread safe once built, so the adapters are registered a single time.
+    private val gson: Gson by lazy { createGson() }
 
+    // Gson fills these by reflection and leaves a missing field null, whatever the declared type says.
     @Suppress("UNUSED")
-    internal class JsonFunctionNameData(val f: String)
+    internal class JsonRequestData(val f: String?, val p: ArrayList<Param> = ArrayList())
 
     @Suppress("UNUSED")
     internal class JsonFunctionReturnValueData<T>(val r: T)
-
-    @Suppress("UNUSED")
-    internal class JsonParametersData(val p: ArrayList<Param> = ArrayList())
 
     override fun encodeRequest(functionName: String, vararg params: Param): String {
         try {
@@ -37,89 +36,74 @@ class JsonSerializer : Serializer {
                 request.p.add(p)
             }
 
-            val gson = createGson()
             return gson.toJson(request)
         } catch (e: Exception) {
-            Log.e("[JsonSerializer : encodeRequest] Error when encode data: ${e.message}")
+            Log.e("[JsonSerializer : encodeRequest] Error when encode data")
+            Log.d("[JsonSerializer : encodeRequest] Error when encode data: ${e.message}")
         }
 
         return ""
     }
 
-    override fun decodeFunctionName(data: String): String {
-        try {
-            val gson = createGson()
-            return gson.fromJson(data, JsonFunctionNameData::class.java).f
-        } catch (e: Exception) {
-            Log.e("[JsonSerializer : decodeFunctionName] Error when parse json: ${e.message}")
-        }
-
-        return ""
-    }
-
-    @Suppress("UNCHECKED_CAST")
     override fun <T> decodeFunctionReturnValue(data: String, type: TypeToken<T>): T? {
+        // An empty response is the empty value every failing path answers with, not a document that failed to parse.
+        if (data.isEmpty()) {
+            return null
+        }
+
         try {
-            val gson = createGson()
             val typeToken = TypeToken.getParameterized(
                 JsonFunctionReturnValueData::class.java, type.type
             )
             return gson.fromJson<JsonFunctionReturnValueData<T>>(data, typeToken.type).r
         } catch (e: Exception) {
-            Log.e("[JsonSerializer : decodeFunctionReturnValue] Error when parse json: ${e.message}")
+            Log.e("[JsonSerializer : decodeFunctionReturnValue] Error when parse json")
+            Log.d("[JsonSerializer : decodeFunctionReturnValue] Error when parse json: ${e.message}")
         }
 
         return null
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun encodeFunctionReturnValue(data: Any): String {
+    override fun encodeFunctionReturnValue(data: Any?): String {
         try {
             val obj = JsonFunctionReturnValueData(data)
-            val gson = createGson()
             return gson.toJson(obj, JsonFunctionReturnValueData::class.java)
         } catch (e: Exception) {
-            Log.e("[JsonSerializer : encodeFunctionReturnValue] Error when encode data: ${e.message}")
+            Log.e("[JsonSerializer : encodeFunctionReturnValue] Error when encode data")
+            Log.d("[JsonSerializer : encodeFunctionReturnValue] Error when encode data: ${e.message}")
         }
 
         return ""
     }
 
-    override fun decodeMessage(data: String): Message? {
+    override fun decodeRequest(data: String): DecodedRequest? {
         try {
-            var decodedData: JsonParametersData? = null
-
-            // decode parameters
-            try {
-                val gson = createGson()
-                decodedData = gson.fromJson(data, JsonParametersData::class.java)
-            } catch (e: Exception) {
-                Log.e("[JsonSerializer : decodeMessage] Error when get parameters data: ${e.message}")
-            }
+            val decodedData = gson.fromJson(data, JsonRequestData::class.java)
 
             if (decodedData == null) {
+                Log.e("[JsonSerializer : decodeRequest] Error when decode request")
                 return null
             }
-
-            // message data
             val message = Message()
 
-            for (p in decodedData.p) {
-                message[p.n] = p.v
+            // A parameter that arrived without a value is left out, so reading it answers null like every other bridge.
+            for (p in decodedData.p.orEmpty()) {
+                p.v?.let { message.set(p.n, it) }
             }
 
-            return message
+            return DecodedRequest(decodedData.f.orEmpty(), message)
         } catch (e: Exception) {
-            Log.e("[JsonSerializer : decodeMessage] Error when decode message: ${e.message}")
+            Log.e("[JsonSerializer : decodeRequest] Error when decode request")
+            Log.d("[JsonSerializer : decodeRequest] Error when decode request: ${e.message}")
         }
 
         return null
     }
 
     private fun createGson(): Gson {
-        val builder = GsonBuilder()
+        // A parameter without a value has to reach the wire as null, and gson drops it from the object otherwise.
+        val builder = GsonBuilder().serializeNulls()
 
-        // date
         val customDateSerializer =
             object : JsonDeserializer<Any?>, com.google.gson.JsonSerializer<Date?> {
                 override fun deserialize(
@@ -130,6 +114,8 @@ class JsonSerializer : Serializer {
                     return try {
                         Date(json.asJsonPrimitive.asLong)
                     } catch (e: Exception) {
+                        Log.e("[JsonSerializer : deserialize] Error when read a date")
+                        Log.d("[JsonSerializer : deserialize] Error when read a date: ${e.message}")
                         null
                     }
                 }
@@ -145,7 +131,6 @@ class JsonSerializer : Serializer {
 
         builder.registerTypeAdapter(Date::class.java, customDateSerializer)
 
-        // char
         val customCharSerializer =
             object : JsonDeserializer<Any?>, com.google.gson.JsonSerializer<Char?> {
                 override fun deserialize(
@@ -156,6 +141,8 @@ class JsonSerializer : Serializer {
                     return try {
                         Char(json.asJsonPrimitive.asInt)
                     } catch (e: Exception) {
+                        Log.e("[JsonSerializer : deserialize] Error when read a character")
+                        Log.d("[JsonSerializer : deserialize] Error when read a character: ${e.message}")
                         null
                     }
                 }
@@ -170,9 +157,8 @@ class JsonSerializer : Serializer {
             }
 
         builder.registerTypeAdapter(Char::class.java, customCharSerializer)
-        builder.registerTypeAdapter(Character::class.java, customCharSerializer)
+        builder.registerTypeAdapter(Char::class.javaObjectType, customCharSerializer)
 
-        // data view
         val customDataViewSerializer =
             object : JsonDeserializer<Any?>, com.google.gson.JsonSerializer<DataView?> {
                 override fun deserialize(
@@ -187,6 +173,8 @@ class JsonSerializer : Serializer {
 
                         DataView(ptr, size)
                     } catch (e: Exception) {
+                        Log.e("[JsonSerializer : deserialize] Error when read a data view")
+                        Log.d("[JsonSerializer : deserialize] Error when read a data view: ${e.message}")
                         null
                     }
                 }

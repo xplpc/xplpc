@@ -1,4 +1,3 @@
-# files
 set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/custom/AllTypes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/custom/Mapping.hpp"

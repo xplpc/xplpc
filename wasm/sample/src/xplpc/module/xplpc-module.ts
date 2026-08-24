@@ -1,32 +1,39 @@
-interface IXNativeClient {
-    call(data: string, callback: (response: string) => void): string;
+interface NativeClient {
+    call(data: string, callback: (response: string) => void): void;
 }
 
-interface IXNativePlatformProxy {
-    extend(name: string, obj: unknown): unknown;
+interface NativePlatformProxy {
     initialize(): void;
 }
 
-interface IXNativePlatformProxyList {
-    shared: () => IXNativePlatformProxyList;
-    appendFromJavascript: (item: IXNativePlatformProxy) => void;
-    insertFromJavascript: (index: number, item: IXNativePlatformProxy) => void;
+// Embind exposes the bound class itself, so it is both constructable and extendable from javascript.
+interface NativePlatformProxyClass {
+    new (): NativePlatformProxy;
+    extend(name: string, obj: unknown): NativePlatformProxyClass;
 }
 
-interface IXNativeCallbackList {
+interface NativePlatformProxyList {
+    prependFromJavascript: (item: NativePlatformProxy) => void;
+}
+
+interface NativeCallbackList {
     executeFromJavascript: (key: string, data: string) => void;
 }
 
-interface IXNativeLib {
+interface NativeLib {
     initialize(): void;
-    isInitialized(): boolean;
 }
 
-export interface IXWasmModule {
-    XPLPC: IXNativeLib,
-    Client: IXNativeClient,
-    PlatformProxy: IXNativePlatformProxy,
-    NativePlatformProxy: IXNativePlatformProxy,
-    PlatformProxyList: IXNativePlatformProxyList,
-    CallbackList: IXNativeCallbackList
+export interface WasmModule {
+    XPLPC: NativeLib;
+    Client: NativeClient;
+    PlatformProxy: NativePlatformProxyClass;
+    NativePlatformProxy: NativePlatformProxyClass;
+    PlatformProxyList: NativePlatformProxyList;
+    CallbackList: NativeCallbackList;
+
+    // The emscripten runtime exports are enabled through EXPORTED_FUNCTIONS and EXPORTED_RUNTIME_METHODS.
+    HEAPU8: Uint8Array<ArrayBuffer>;
+    _malloc(size: number): number;
+    _free(ptr: number): void;
 }

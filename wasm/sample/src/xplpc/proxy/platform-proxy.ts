@@ -1,89 +1,86 @@
 import { XPLPC } from "../core/xplpc";
-import { XMappingList } from "../data/mapping-list";
-import { XMessage } from "../message/message";
+import { MappingList } from "../data/mapping-list";
 import { ExceptionMessage } from "../util/exception-message";
 import { Log } from "../util/log";
 
-interface IXWebPlatformProxy {
+interface PlatformProxy {
     initialize(): void;
     initializePlatform(): void;
-    finalize(): void;
-    finalizePlatform(): void;
     callProxy(key: string, data: string): void;
     hasMapping(name: string): boolean;
 }
 
-const XWebPlatformProxy: IXWebPlatformProxy = {
+function callNativeProxyCallback(key: string, data: string): void {
+    XPLPC.shared().module.CallbackList.executeFromJavascript(key, data);
+}
+
+const platformProxy: PlatformProxy = {
     initialize() {
         this.initializePlatform();
     },
-    initializePlatform() {
-        // ignore
-    },
-    finalize() {
-        this.finalizePlatform();
-    },
-    finalizePlatform() {
-        // ignore
-    },
-    callProxy: function (key: string, data: string) {
+
+    initializePlatform() {},
+
+    callProxy(key: string, data: string) {
         if (!XPLPC.shared().initialized) {
-            Log.e("[XWebPlatformProxy : call] The WASM module is not initialized");
+            Log.e("[PlatformProxy : call] XPLPC was not initialized");
+            callNativeProxyCallback(key, "");
             return;
         }
 
-        // function name
-        const functionName = XPLPC.shared().config.serializer.decodeFunctionName(data)
+        const request = XPLPC.shared().config.serializer.decodeRequest(data);
 
-        if (!functionName) {
-            Log.e("[XWebPlatformProxy : call] Function name is empty");
-            XPLPC.shared().module.CallbackList.executeFromJavascript(key, "");
+        if (!request) {
+            callNativeProxyCallback(key, "");
             return;
         }
 
-        // mapping item
-        const mappingItem = XMappingList.shared().find(functionName)
+        if (!request.functionName) {
+            Log.e("[PlatformProxy : call] Function name is empty");
+            callNativeProxyCallback(key, "");
+            return;
+        }
+
+        const mappingItem = MappingList.shared().find(request.functionName);
 
         if (!mappingItem) {
-            Log.e("[XWebPlatformProxy : call] Mapping not found for function: " + functionName);
-            XPLPC.shared().module.CallbackList.executeFromJavascript(key, "");
+            Log.e(
+                "[PlatformProxy : call] Mapping not found for function: " +
+                    request.functionName,
+            );
+            callNativeProxyCallback(key, "");
             return;
         }
 
-        // execute
-        let message: XMessage | undefined = undefined;
-
-        try {
-            message = XPLPC.shared().config.serializer.decodeMessage(data);
-        } catch (e: unknown) {
-            Log.e("[XWebPlatformProxy : call] Error when decode message: " + ExceptionMessage.get(e));
-        }
-
-        if (!message) {
-            Log.e("[XWebPlatformProxy : call] Error when decode message for function: " + functionName);
-            XPLPC.shared().module.CallbackList.executeFromJavascript(key, "");
-            return;
-        }
-
-        mappingItem.target(message)
+        mappingItem
+            .target(request.message)
             .then((response: unknown) => {
-                return XPLPC.shared().config.serializer.encodeFunctionReturnValue(response);
-            }).then((data: string) => {
-                XPLPC.shared().module.CallbackList.executeFromJavascript(key, data);
-            }).catch((e: Error) => {
-                Log.e("[XWebPlatformProxy : call] Error when encode message: " + ExceptionMessage.get(e))
-                XPLPC.shared().module.CallbackList.executeFromJavascript(key, "");
+                callNativeProxyCallback(
+                    key,
+                    XPLPC.shared().config.serializer.encodeFunctionReturnValue(
+                        response,
+                    ),
+                );
+            })
+            .catch((e: unknown) => {
+                Log.e(
+                    '[PlatformProxy : call] Error when execute function "' +
+                        request.functionName +
+                        '"',
+                );
+                Log.d(
+                    '[PlatformProxy : call] Error when execute function "' +
+                        request.functionName +
+                        '": ' +
+                        ExceptionMessage.get(e),
+                );
+                callNativeProxyCallback(key, "");
             });
     },
+
     hasMapping(name: string): boolean {
-        const mappingItem = XMappingList.shared().find(name);
+        return MappingList.shared().has(name);
+    },
+};
 
-        if (mappingItem) {
-            return true;
-        }
-
-        return false;
-    }
-}
-
-export default XWebPlatformProxy;
+export default platformProxy;

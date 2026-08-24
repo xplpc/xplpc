@@ -290,10 +290,6 @@ extension UIView {
 
 extension UIView {
     var layoutGuide: UILayoutGuide {
-        if #available(iOS 11.0, *) {
-            return safeAreaLayoutGuide
-        } else {
-            return layoutMarginsGuide
-        }
+        return safeAreaLayoutGuide
     }
 }

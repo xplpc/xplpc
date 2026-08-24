@@ -1,3 +1,4 @@
-from typing import Any, Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
-Response = Callable[[Optional[Any]], None]
+Response = Callable[[Any | None], None]

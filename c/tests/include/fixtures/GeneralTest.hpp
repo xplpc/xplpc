@@ -4,26 +4,11 @@
 class GeneralTest : public ::testing::Test
 {
 protected:
-    GeneralTest()
-    {
-        // you can do set-up work for each test here.
-    }
-
-    ~GeneralTest() override
-    {
-        // cleanup any pending stuff, but no exceptions allowed
-    }
-
     void SetUp() override
     {
-        // code here will be called immediately after the constructor (right before each test)
-        xplpc_core_initialize(true, nullptr, nullptr, nullptr, nullptr, nullptr);
-    }
+        // Every test starts from a registry it did not inherit, so a name one of them declares cannot route another one somewhere else.
 
-    void TearDown() override
-    {
-        // code here will be called immediately after each test (right before the destructor)
+        xplpc_core_initialize(true, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+        xplpc_native_clear_mappings();
     }
-
-    // class members declared here can be used by all tests in the test suite
 };

@@ -5,7 +5,7 @@
 #include "xplpc/message/Response.hpp"
 #include "xplpc/serializer/Serializer.hpp"
 
-#include <functional>
+#include <array>
 #include <string>
 #include <vector>
 
@@ -14,24 +14,25 @@ namespace xplpc
 namespace map
 {
 
-using namespace xplpc::map;
 using namespace xplpc::serializer;
-using namespace xplpc::data;
 using namespace xplpc::message;
 
 class Map
 {
 public:
+    // The array is sized by the declared parameter types, so naming a parameter the signature does not carry is a build error rather than a mapping that ignores it.
     template <typename Tr, typename... Ts>
-    static MappingItem create(const std::vector<std::string> &params, const std::function<void(const Message &, const Response)> &target)
+    static MappingItem create(const std::array<std::string, sizeof...(Ts)> &params, Target target)
     {
+        const auto names = std::vector<std::string>(params.begin(), params.end());
+
+        // clang-format off
         return MappingItem{
-            target,
-            [=](const std::string &key, const std::string &data)
-            {
-                Serializer::execute<Tr, Ts...>(key, data, params);
+            [names, target](const std::string &key, const std::string &data, const std::string &functionName) {
+                Serializer::execute<Tr, Ts...>(key, data, names, functionName, target);
             },
         };
+        // clang-format on
     }
 };
 

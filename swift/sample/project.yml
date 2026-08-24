@@ -1,0 +1,96 @@
+name: Runner
+
+options:
+  bundleIdPrefix: com.xplpc.runner
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 1.0.0
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 99AHAA343Q
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  Runner:
+    type: application
+    platform: iOS
+    sources:
+      - path: Runner
+    dependencies:
+      - framework: ../../build/swift-ios-xcframework/xplpc.xcframework
+        embed: true
+        codeSign: true
+    settings:
+      base:
+        PRODUCT_NAME: XPLPC
+        PRODUCT_BUNDLE_IDENTIFIER: com.xplpc.runner
+        PRODUCT_MODULE_NAME: $(TARGET_NAME:c99extidentifier)
+        INFOPLIST_FILE: Runner/Info.plist
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: Apple Development
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LD_RUNPATH_SEARCH_PATHS:
+          - $(inherited)
+          - "@executable_path/Frameworks"
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        INFOPLIST_KEY_NSCameraUsageDescription: Test camera processing image in realtime
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        INFOPLIST_KEY_UILaunchStoryboardName: LaunchScreen
+        INFOPLIST_KEY_UIStatusBarStyle: UIStatusBarStyleLightContent
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight
+
+  RunnerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: ../../swift/tests/Sources
+    dependencies:
+      - target: Runner
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
+        BUNDLE_LOADER: $(TEST_HOST)
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/XPLPC.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/XPLPC
+
+  RunnerUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RunnerUITests
+    dependencies:
+      - target: Runner
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Runner
+
+schemes:
+  Runner:
+    build:
+      targets:
+        Runner: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - RunnerTests
+        - RunnerUITests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release

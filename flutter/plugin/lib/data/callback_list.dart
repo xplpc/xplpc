@@ -1,38 +1,29 @@
-import 'package:synchronized/synchronized.dart';
-
 class CallbackList {
-  // singleton
   static CallbackList? _instance;
   CallbackList._();
   static CallbackList get instance => _instance ??= CallbackList._();
 
-  // properties
-  var list = <String, void Function(String)>{};
-  var lock = Lock(reentrant: true);
+  final _list = <String, void Function(String)>{};
 
-  // methods
-  void add(String key, void Function(String) callback) async {
-    await lock.synchronized(() async {
-      list[key] = callback;
-    });
+  void add(String key, void Function(String) callback) {
+    _list[key] = callback;
   }
 
-  void execute(String key, String data) async {
-    void Function(String)? callback;
+  void execute(String key, String data) {
+    // The native side may answer before this call returns, so registration and lookup must stay synchronous.
 
-    await lock.synchronized(() async {
-      if (list.containsKey(key)) {
-        callback = list[key];
-        list.remove(key);
-      }
-    });
-
-    callback?.call(data);
+    _list.remove(key)?.call(data);
   }
 
-  Future<int> count() async {
-    return await lock.synchronized(() async {
-      return list.length;
-    });
+  void remove(String key) {
+    _list.remove(key);
+  }
+
+  void clear() {
+    _list.clear();
+  }
+
+  int count() {
+    return _list.length;
   }
 }

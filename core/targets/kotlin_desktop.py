@@ -2,7 +2,7 @@ import platform
 
 from pygemstones.system import platform as p
 
-from xplpc import util
+from core import host
 
 # general
 data = []
@@ -18,7 +18,7 @@ has_macos_x64 = False
 has_macos_arm64 = False
 
 # check arch
-arch = util.get_arch_path()
+arch = host.get_arch_path()
 
 if p.is_windows():
     if platform.processor() == "arm":

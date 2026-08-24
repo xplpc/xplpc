@@ -8,11 +8,7 @@ void main() {
     test('Initialize', () {
       expect(XPLPC.instance.initialized, false);
 
-      XPLPC.instance.initialize(
-        Config(
-          JsonSerializer(),
-        ),
-      );
+      XPLPC.instance.initialize(Config(JsonSerializer()));
 
       expect(XPLPC.instance.initialized, true);
     });

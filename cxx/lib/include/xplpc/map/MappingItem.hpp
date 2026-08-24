@@ -13,17 +13,20 @@ namespace map
 
 using namespace xplpc::message;
 
+using Target = std::function<void(const Message &, const Response &)>;
+using Executor = std::function<void(const std::string &key, const std::string &data, const std::string &functionName)>;
+
 class MappingItem
 {
 public:
+    // The keyed map this is stored in assigns through the subscript, which builds a value before it overwrites one.
     MappingItem() = default;
-    MappingItem(const std::function<void(const Message &, const Response)> &target, const std::function<void(const std::string &, const std::string &)> &executor);
-    std::function<void(const Message &, const Response)> &getTarget();
-    const std::function<void(const std::string &, const std::string &)> &getExecutor();
+    explicit MappingItem(Executor executor);
+
+    const Executor &getExecutor() const;
 
 private:
-    std::function<void(const Message &, const Response)> target;
-    std::function<void(const std::string &, const std::string &)> executor;
+    Executor executor;
 };
 
 } // namespace map

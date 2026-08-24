@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 """
 XPLPC MANAGER TOOL
@@ -13,11 +12,15 @@ Options:
   -h --help                         Show this screen.
   -d --debug                        Enable debug mode.
   --version                         Show version.
-  --dry                             Run in dry mode.
+  --incremental                     Keep what a previous build left, skipping the setup steps.
   --build=<build-type>              Build type.
   --interface                       Enable C interface.
   --platform=<platform>             Define custom platform.
   --no-deps                         Run without build dependencies.
+  --sanitizer=<sanitizer>           Build with a sanitizer (address, thread, undefined).
+  --dependency-tool=<tool>          Resolve dependencies with cpm or conan.
+  --url=<url>                       Define the url an artifact will be published to, defaulting to the release named after the project version.
+  --wheel                           Install the built wheel instead of the development package.
 
 Examples:
   python3 xplpc.py -h
@@ -26,7 +29,6 @@ Examples:
 
 Tasks:
   - clear
-  - tree
   - brew
 
   - docs-format
@@ -34,13 +36,13 @@ Tasks:
 
   - cxx-format
   - cxx-build-static
-  - cxx-build-shared
   - cxx-test
   - cxx-build-sample
   - cxx-run-sample
   - cxx-build-leaks
 
   - kotlin-format
+  - kotlin-lint
   - kotlin-build
   - kotlin-test
   - kotlin-build-sample
@@ -49,9 +51,15 @@ Tasks:
   - kotlin-build-jar
 
   - swift-format
+  - swift-lint
   - swift-build
   - swift-test
+  - swift-test (--platform ios)
+  - swift-test (--platform ios-device)
   - swift-build-xcframework
+  - swift-build-sample
+  - swift-generate-sample-project
+  - swift-generate-spm-package [--url]
 
   - wasm-format
   - wasm-build
@@ -68,11 +76,13 @@ Tasks:
   - c-run-sample
   - c-build-leaks
 
+  - flutter-format
   - flutter-test
 
   - python-format
+  - python-lint
   - python-build
-  - python-install
+  - python-install [--wheel]
   - python-test
   - python-run-sample
   - python-pyinstaller
@@ -84,30 +94,27 @@ from docopt import docopt
 from pygemstones.system import bootstrap as b
 from pygemstones.util import log as l
 
-import core.c as c
-import core.conan as conan
 import core.config as cfg
-import core.cxx as cxx
-import core.docs as docs
-import core.flutter as flutter
-import core.general as general
-import core.kotlin as kotlin
-import core.python as python
-import core.swift as swift
-import core.wasm as wasm
-from core import util
+from core import (
+    c,
+    conan,
+    cxx,
+    docs,
+    flutter,
+    general,
+    kotlin,
+    python,
+    swift,
+    util,
+    wasm,
+)
 
 
 def main(options):
     cfg.proj_path = os.path.dirname(os.path.abspath(__file__))
 
     # show all params for debug
-    if ("--debug" in options and options["--debug"]) or (
-        "-d" in options and options["-d"]
-    ):
-        cfg.debug = True
-
-    if cfg.debug:
+    if (options.get("--debug")) or (options.get("-d")):
         l.bold("You have executed with options:", l.YELLOW)
         l.m(str(options))
         l.nl()
@@ -115,11 +122,12 @@ def main(options):
     # bind options
     cfg.options = options
 
-    if "<task-name>" in options:
-        task = options["<task-name>"]
-        cfg.task = task
+    if options["--dependency-tool"]:
+        cfg.dependency_tool = util.get_param_dependency_tool()
 
     # validate task
+    task = options["<task-name>"]
+
     if not task:
         l.e("Task is invalid. Use 'python3 xplpc.py -h' for help.")
 
@@ -130,10 +138,6 @@ def main(options):
     # clear
     if task == "clear":
         general.run_task_clear()
-
-    # tree
-    elif task == "tree":
-        general.run_task_tree()
 
     # brew
     elif task == "brew":
@@ -162,6 +166,10 @@ def main(options):
     # format
     elif task == "python-format":
         python.run_task_format()
+
+    # lint
+    elif task == "python-lint":
+        python.run_task_lint()
 
     # build
     elif task == "python-build":
@@ -195,10 +203,6 @@ def main(options):
     elif task == "cxx-build-static":
         cxx.run_task_build_static()
 
-    # build shared
-    elif task == "cxx-build-shared":
-        cxx.run_task_build_shared()
-
     # test
     elif task == "cxx-test":
         cxx.run_task_test()
@@ -222,6 +226,10 @@ def main(options):
     # format
     elif task == "kotlin-format":
         kotlin.run_task_format()
+
+    # lint
+    elif task == "kotlin-lint":
+        kotlin.run_task_lint()
 
     # build
     elif task == "kotlin-build":
@@ -255,13 +263,13 @@ def main(options):
     elif task == "swift-format":
         swift.run_task_format()
 
+    # lint
+    elif task == "swift-lint":
+        swift.run_task_lint()
+
     # build
     elif task == "swift-build":
         swift.run_task_build()
-
-    # build for macos
-    elif task == "swift-build-macos":
-        swift.run_task_build_macos()
 
     # test
     elif task == "swift-test":
@@ -271,9 +279,17 @@ def main(options):
     elif task == "swift-build-xcframework":
         swift.run_task_build_xcframework()
 
-    # build xcframework for macos
-    elif task == "swift-build-xcframework-macos":
-        swift.run_task_build_xcframework_macos()
+    # build sample
+    elif task == "swift-build-sample":
+        swift.run_task_build_sample()
+
+    # generate sample project
+    elif task == "swift-generate-sample-project":
+        swift.run_task_generate_sample_project()
+
+    # generate swift package
+    elif task == "swift-generate-spm-package":
+        swift.run_task_generate_spm_package()
 
     #######################
     # WASM
@@ -339,13 +355,9 @@ def main(options):
     # FLUTTER
     #######################
 
-    # build xcframework
-    elif task == "flutter-build-xcframework":
-        flutter.run_task_build_xcframework()
-
-    # build xcframework for macos
-    elif task == "flutter-build-xcframework-macos":
-        flutter.run_task_build_xcframework_macos()
+    # format
+    elif task == "flutter-format":
+        flutter.run_task_format()
 
     # test
     elif task == "flutter-test":

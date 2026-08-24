@@ -1,12 +1,25 @@
 #include "xplpc/proxy/CNativePlatformProxy.hpp"
+#include "xplpc/core/XPLPC.hpp"
+#include "xplpc/data/CallbackList.hpp"
+#include "xplpc/data/PlatformProxyList.hpp"
+#include "xplpc/proxy/HostCallScope.hpp"
+#include "xplpc/proxy/NativePlatformProxy.hpp"
+#include "xplpc/util/Log.hpp"
+
+#include <algorithm>
+#include <cstdlib>
+#include <cstring>
 
 namespace xplpc
 {
 namespace proxy
 {
 
+using namespace xplpc::data;
+
 std::shared_ptr<CNativePlatformProxy> CNativePlatformProxy::instance = nullptr;
 std::once_flag CNativePlatformProxy::initInstanceFlag;
+std::once_flag CNativePlatformProxy::proxyRegistrationFlag;
 
 std::shared_ptr<CNativePlatformProxy> CNativePlatformProxy::shared()
 {
@@ -19,6 +32,24 @@ std::shared_ptr<CNativePlatformProxy> CNativePlatformProxy::shared()
     return instance;
 }
 
+void CNativePlatformProxy::registerProxies(bool initializeCxxNativePlatformProxy)
+{
+    // The proxies are registered only on the first call, so re-initializing rebinds the host callbacks instead of stacking duplicates.
+
+    // clang-format off
+    std::call_once(proxyRegistrationFlag, [initializeCxxNativePlatformProxy]() {
+        if (initializeCxxNativePlatformProxy)
+        {
+            auto nativePlatformProxy = std::make_shared<NativePlatformProxy>();
+            nativePlatformProxy->initialize();
+            PlatformProxyList::shared()->prepend(nativePlatformProxy);
+        }
+
+        PlatformProxyList::shared()->prepend(shared());
+    });
+    // clang-format on
+}
+
 void CNativePlatformProxy::initialize()
 {
     initializePlatform();
@@ -26,9 +57,9 @@ void CNativePlatformProxy::initialize()
 
 void CNativePlatformProxy::initializePlatform()
 {
-    if (funcPtrToOnInitializePlatform)
+    if (auto callback = funcPtrToOnInitializePlatform.load())
     {
-        funcPtrToOnInitializePlatform();
+        callback();
     }
 }
 
@@ -39,84 +70,147 @@ void CNativePlatformProxy::finalize()
 
 void CNativePlatformProxy::finalizePlatform()
 {
-    if (funcPtrToOnFinalizePlatform)
+    // A call still waiting is answered while the host can still be reached, since every channel that could carry an answer is dropped below.
+    core::XPLPC::finalize();
+
+    if (auto callback = funcPtrToOnFinalizePlatform.exchange(nullptr))
     {
-        funcPtrToOnFinalizePlatform();
+        callback();
     }
 
-    funcPtrToOnInitializePlatform = nullptr;
-    funcPtrToOnFinalizePlatform = nullptr;
-    funcPtrToOnHasMapping = nullptr;
-    funcPtrToOnNativeProxyCall = nullptr;
-    funcPtrToOnNativeProxyCallback = nullptr;
+    funcPtrToOnInitializePlatform.store(nullptr);
+    funcPtrToOnNativeProxyCall.store(nullptr);
+    funcPtrToOnNativeProxyCallback.store(nullptr);
+    funcPtrToOnNativeProxyCallFromThread.store(nullptr);
+    funcPtrToOnNativeProxyCallbackFromThread.store(nullptr);
+
+    clearMappings();
 }
 
 bool CNativePlatformProxy::hasMapping(const std::string &name)
 {
-    if (funcPtrToOnHasMapping)
-    {
-        return funcPtrToOnHasMapping(const_cast<char *>(name.c_str()), name.size());
-    }
+    // The host declares what it owns, so this is answered without crossing the bridge and stays valid on any thread.
 
-    return false;
+    std::shared_lock<std::shared_mutex> lock(mappingsMutex);
+    return mappings.find(name) != mappings.end();
+}
+
+void CNativePlatformProxy::addMapping(const std::string &name)
+{
+    std::unique_lock<std::shared_mutex> lock(mappingsMutex);
+    mappings.insert(name);
+}
+
+void CNativePlatformProxy::clearMappings()
+{
+    std::unique_lock<std::shared_mutex> lock(mappingsMutex);
+    mappings.clear();
 }
 
 void CNativePlatformProxy::callProxy(const std::string &key, const std::string &data)
 {
-    if (funcPtrToOnNativeProxyCall)
+    if (HostCallScope::active())
     {
-        funcPtrToOnNativeProxyCall(const_cast<char *>(key.c_str()), key.size(), const_cast<char *>(data.c_str()), data.size());
+        if (auto callback = funcPtrToOnNativeProxyCall.load())
+        {
+            callback(key.c_str(), key.size(), data.c_str(), data.size());
+            return;
+        }
+    }
+    else if (auto callback = funcPtrToOnNativeProxyCallFromThread.load())
+    {
+        if (sendOwned(callback, key, data))
+        {
+            return;
+        }
+    }
+
+    // The caller is answered with the empty value rather than left waiting for a response that can no longer arrive.
+    util::Log::e("[CNativePlatformProxy : callProxy] The host cannot be reached from this thread");
+    CallbackList::shared()->execute(key, "");
+}
+
+void CNativePlatformProxy::answer(const std::string &key, const std::string &data) const
+{
+    if (HostCallScope::active())
+    {
+        if (auto callback = funcPtrToOnNativeProxyCallback.load())
+        {
+            callback(key.c_str(), key.size(), data.c_str(), data.size());
+            return;
+        }
+
+        util::Log::e("[CNativePlatformProxy : answer] The bridge is gone, so this answer is lost");
+
+        return;
+    }
+
+    auto callback = funcPtrToOnNativeProxyCallbackFromThread.load();
+
+    if (!callback)
+    {
+        util::Log::e("[CNativePlatformProxy : answer] The host declared no way to be answered from another thread, so this answer is lost");
+        return;
+    }
+
+    if (!sendOwned(callback, key, data))
+    {
+        util::Log::e("[CNativePlatformProxy : answer] There was no memory to hand the answer over, so it is lost");
     }
 }
 
-void CNativePlatformProxy::setFuncPtrToOnInitializePlatform(FuncPtrToOnInitializePlatform funcPtrToOnInitializePlatform)
+bool CNativePlatformProxy::sendOwned(FuncPtrToOnHostBufferOwner callback, const std::string &key, const std::string &data)
 {
-    this->funcPtrToOnInitializePlatform = funcPtrToOnInitializePlatform;
+    // The host reads the buffers after this frame is gone, so it receives copies it owns, and it receives both or neither.
+
+    // An empty answer is what every failing path sends, and asking for zero bytes may answer null, which would read here as a failure to allocate.
+    auto ownedKey = static_cast<char *>(std::malloc(std::max<size_t>(key.size(), 1)));
+    auto ownedData = static_cast<char *>(std::malloc(std::max<size_t>(data.size(), 1)));
+
+    if (!ownedKey || !ownedData)
+    {
+        std::free(ownedKey);
+        std::free(ownedData);
+
+        return false;
+    }
+
+    std::memcpy(ownedKey, key.data(), key.size());
+    std::memcpy(ownedData, data.data(), data.size());
+
+    callback(ownedKey, key.size(), ownedData, data.size());
+
+    return true;
 }
 
-void CNativePlatformProxy::setFuncPtrToOnFinalizePlatform(FuncPtrToOnFinalizePlatform funcPtrToOnFinalizePlatform)
+void CNativePlatformProxy::setFuncPtrToOnInitializePlatform(FuncPtrToOnInitializePlatform value)
 {
-    this->funcPtrToOnFinalizePlatform = funcPtrToOnFinalizePlatform;
+    funcPtrToOnInitializePlatform.store(value);
 }
 
-void CNativePlatformProxy::setFuncPtrToOnHasMapping(FuncPtrToOnHasMapping funcPtrToOnHasMapping)
+void CNativePlatformProxy::setFuncPtrToOnFinalizePlatform(FuncPtrToOnFinalizePlatform value)
 {
-    this->funcPtrToOnHasMapping = funcPtrToOnHasMapping;
+    funcPtrToOnFinalizePlatform.store(value);
 }
 
-void CNativePlatformProxy::setFuncPtrToOnNativeProxyCall(FuncPtrToOnNativeProxyCall funcPtrToOnNativeProxyCall)
+void CNativePlatformProxy::setFuncPtrToOnNativeProxyCall(FuncPtrToOnNativeProxyCall value)
 {
-    this->funcPtrToOnNativeProxyCall = funcPtrToOnNativeProxyCall;
+    funcPtrToOnNativeProxyCall.store(value);
 }
 
-void CNativePlatformProxy::setFuncPtrToOnNativeProxyCallback(FuncPtrToOnNativeProxyCallback funcPtrToOnNativeProxyCallback)
+void CNativePlatformProxy::setFuncPtrToOnNativeProxyCallback(FuncPtrToOnNativeProxyCallback value)
 {
-    this->funcPtrToOnNativeProxyCallback = funcPtrToOnNativeProxyCallback;
+    funcPtrToOnNativeProxyCallback.store(value);
 }
 
-FuncPtrToOnInitializePlatform CNativePlatformProxy::getFuncPtrToOnInitializePlatform()
+void CNativePlatformProxy::setFuncPtrToOnNativeProxyCallFromThread(FuncPtrToOnNativeProxyCallFromThread value)
 {
-    return this->funcPtrToOnInitializePlatform;
+    funcPtrToOnNativeProxyCallFromThread.store(value);
 }
 
-FuncPtrToOnFinalizePlatform CNativePlatformProxy::getFuncPtrToOnFinalizePlatform()
+void CNativePlatformProxy::setFuncPtrToOnNativeProxyCallbackFromThread(FuncPtrToOnNativeProxyCallbackFromThread value)
 {
-    return this->funcPtrToOnFinalizePlatform;
-}
-
-FuncPtrToOnHasMapping CNativePlatformProxy::getFuncPtrToOnHasMapping()
-{
-    return this->funcPtrToOnHasMapping;
-}
-
-FuncPtrToOnNativeProxyCall CNativePlatformProxy::getFuncPtrToOnNativeProxyCall()
-{
-    return this->funcPtrToOnNativeProxyCall;
-}
-
-FuncPtrToOnNativeProxyCallback CNativePlatformProxy::getFuncPtrToOnNativeProxyCallback()
-{
-    return this->funcPtrToOnNativeProxyCallback;
+    funcPtrToOnNativeProxyCallbackFromThread.store(value);
 }
 
 } // namespace proxy

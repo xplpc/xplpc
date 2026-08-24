@@ -1,25 +1,9 @@
 import asyncio
 import logging
-import sys
-import types
 
 import psutil
 
-# KivyMD 2.0.1 unconditionally imports kivy.core.window.window_sdl2 (for a type hint),
-# which fails when Kivy is built without SDL2 (e.g. pygame backend on Python 3.14).
-# Provide a stub so the import chain does not break.
-if "kivy.core.window._window_sdl2" not in sys.modules:
-    _stub = types.ModuleType("kivy.core.window._window_sdl2")
-    _stub._WindowSDL2Storage = type("_WindowSDL2Storage", (), {})
-    sys.modules["kivy.core.window._window_sdl2"] = _stub
-
-if "kivy.core.window.window_sdl2" not in sys.modules:
-    _stub_sdl2 = types.ModuleType("kivy.core.window.window_sdl2")
-    _stub_sdl2.WindowSDL = type("WindowSDL", (), {})
-    sys.modules["kivy.core.window.window_sdl2"] = _stub_sdl2
-
 from kivy.app import async_runTouchApp
-from kivy.core.window import Window
 from kivy.uix.scrollview import ScrollView
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -50,10 +34,8 @@ global_loop = asyncio.new_event_loop()
 
 
 async def main(m, r):
-    # simulate a long-running task with asyncio.sleep
     await asyncio.sleep(0.1)
 
-    # return response
     suffix = m.get("suffix")
     battery = psutil.sensors_battery()
     r(f"{battery.percent}{suffix}")
@@ -77,11 +59,9 @@ class PaddedScrollView(ScrollView):
 
 class MyApp(MDApp):
     def build(self):
-        # general
         scroll_view = PaddedScrollView(size_hint=(1, 1), do_scroll_x=False)
         main_box = MDBoxLayout(orientation="vertical", spacing="10dp", padding="10dp")
 
-        # battery level
         battery_label = MDLabel(
             text="BATTERY LEVEL", font_style="Headline", halign="center", bold=True
         )
@@ -120,7 +100,6 @@ class MyApp(MDApp):
         battery_button_box.add_widget(MDBoxLayout(size_hint=(1, None)))
         main_box.add_widget(battery_button_box)
 
-        # login form
         login_label = MDLabel(
             text="LOGIN", font_style="Headline", halign="center", bold=True
         )
@@ -202,7 +181,6 @@ class MyApp(MDApp):
         login_button_box.add_widget(self.login_button)
         login_button_box.add_widget(MDBoxLayout(size_hint=(1, None)))
 
-        # main container
         main_box.add_widget(login_button_box)
         scroll_view.add_widget(main_box)
 

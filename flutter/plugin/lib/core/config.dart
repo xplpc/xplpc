@@ -1,7 +1,7 @@
 import 'package:xplpc/serializer/serializer.dart';
 
 class Config {
-  late Serializer serializer;
+  final Serializer serializer;
 
   Config(this.serializer);
 }

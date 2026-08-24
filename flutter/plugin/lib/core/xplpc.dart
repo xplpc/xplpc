@@ -5,60 +5,44 @@ import 'package:xplpc/core/config.dart';
 import 'package:xplpc/proxy/platform_proxy.dart';
 
 class XPLPC {
-  // singleton
   static XPLPC? _instance;
   XPLPC._();
   static XPLPC get instance => _instance ??= XPLPC._();
 
-  // native library
   late ffi.DynamicLibrary library;
 
-  // properties
   bool initialized = false;
   late Config config;
 
-  // methods
   void initialize(Config config) {
     if (initialized) {
       return;
     }
 
-    initialized = true;
-
     this.config = config;
 
-    initializeLibrary();
-    initializePlatformProxy();
-  }
-
-  void initializeLibrary() {
-    var openDirect = false;
-    late String openPath;
-
-    if (Platform.isAndroid) {
-      openPath = "libxplpc.so";
-    } else if (Platform.isWindows) {
-      openPath = "xplpc.dll";
-    } else if (Platform.isLinux) {
-      openPath = "libxplpc.so";
-    } else {
-      openDirect = true;
-    }
-
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      openDirect = false;
-      openPath =
-          "../../build/swift-macos-flutter-xcframework/xplpc.xcframework/macos-arm64_x86_64/xplpc.framework/Versions/A/xplpc";
-    }
-
-    if (openDirect) {
-      library = ffi.DynamicLibrary.process();
-    } else {
-      library = ffi.DynamicLibrary.open(openPath);
-    }
-  }
-
-  void initializePlatformProxy() {
+    library = _openLibrary();
     PlatformProxy.initialize();
+
+    // This is only set once the library is loaded and the proxy is bound, since a failure above must not leave a half built singleton.
+    initialized = true;
+  }
+
+  ffi.DynamicLibrary _openLibrary() {
+    final path = Platform.environment["XPLPC_LIBRARY_PATH"];
+
+    if (path != null && path.isNotEmpty) {
+      return ffi.DynamicLibrary.open(path);
+    }
+
+    if (Platform.isAndroid || Platform.isLinux) {
+      return ffi.DynamicLibrary.open("libxplpc.so");
+    }
+
+    if (Platform.isWindows) {
+      return ffi.DynamicLibrary.open("xplpc.dll");
+    }
+
+    return ffi.DynamicLibrary.process();
   }
 }

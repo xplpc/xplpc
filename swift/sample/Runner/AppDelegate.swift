@@ -5,25 +5,17 @@ import xplpc
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
-    var controller: MainViewController?
-    var nav: UINavigationController?
-
     func application(_: UIApplication, didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        initializeXPLPC()
+        Mapping.initialize()
 
         UIDevice.current.isBatteryMonitoringEnabled = true
 
-        controller = MainViewController()
-        nav = UINavigationController(rootViewController: controller!)
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = UINavigationController(rootViewController: MainViewController())
+        window.makeKeyAndVisible()
 
-        window = UIWindow(frame: UIScreen.main.bounds)
-        window?.rootViewController = nav
-        window?.makeKeyAndVisible()
+        self.window = window
 
         return true
-    }
-
-    private func initializeXPLPC() {
-        Mapping.initialize()
     }
 }

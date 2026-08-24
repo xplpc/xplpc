@@ -1,19 +1,17 @@
 import os
 
 from pygemstones.io import file as f
-from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
-from core import conan
+from core import conan, host, run, tool, util
 from core import config as c
-from core import tool, util
 
 
 # -----------------------------------------------------------------------------
 def run_task_build():
     # environment
     target = "kotlin"
-    platform = util.get_param_platform(target)
+    platform = util.get_param_platform()
 
     # check
     tool.check_tool_cmake()
@@ -34,13 +32,13 @@ def run_task_build():
     build_type = util.get_param_build_type(target, platform, "cmake")
     l.i(f"Build type: {build_type}")
 
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    interface = util.get_param_interface(target)
+    interface = util.get_param_interface()
     l.i(f"Interface: {interface}")
 
-    platform = util.get_param_platform(target)
+    platform = util.get_param_platform()
     l.i(f"Platform: {platform}")
 
     target_data = get_target_data_for_platform(platform)
@@ -50,44 +48,20 @@ def run_task_build():
         c.proj_path, "build", "conan", f"{target}-{platform}"
     )
 
-    # dry run
-    if not dry_run:
+    if not incremental:
         f.recreate_dir(build_dir)
 
     # dependencies
     no_deps = util.get_param_no_deps()
 
-    if not dry_run and not no_deps and c.dependency_tool == "conan":
+    if not incremental and not no_deps and c.dependency_tool == "conan":
         for item in target_data:
             l.i(f"Building dependencies for arch {item['arch']}...")
 
             arch_dir = os.path.join(conan_build_dir, item["arch"])
             f.recreate_dir(arch_dir)
 
-            # conan
-            build_profile = conan.get_build_profile()
-
-            if build_profile != "default":
-                build_profile = os.path.join(
-                    c.proj_path, "conan", "profiles", build_profile
-                )
-
-            run_args = [
-                "conan",
-                "install",
-                c.proj_path,
-                "-pr:b",
-                build_profile,
-                "-pr:h",
-                os.path.join(c.proj_path, "conan", "profiles", item["conan_profile"]),
-            ]
-
-            conan.add_target_setup_common_args(run_args, item, build_type)
-
-            run_args.append("--build=missing")
-            run_args.append("--update")
-
-            r.run(run_args, cwd=arch_dir)
+            conan.install(item, build_type, arch_dir)
 
     # build
     for item in target_data:
@@ -106,6 +80,7 @@ def run_task_build():
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+            f"-DXPLPC_SANITIZER={util.get_param_sanitizer()}",
         ]
 
         if platform in ["android", "flutter"]:
@@ -135,29 +110,26 @@ def run_task_build():
                 toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
                 run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
 
-            r.run(run_args)
+            run.run(run_args)
         elif platform == "desktop":
             if c.dependency_tool == "conan":
                 toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
                 run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
 
-            r.run(run_args)
+            run.run(run_args)
 
         # build
-        r.run(["cmake", "--build", arch_dir])
+        run.run(["cmake", "--build", arch_dir])
 
     l.ok()
 
 
 # -----------------------------------------------------------------------------
 def run_task_build_sample():
-    # environment
-    target = "kotlin"
-
     # configure
     l.i("Configuring...")
 
-    platform = util.get_param_platform(target)
+    platform = util.get_param_platform()
     l.i(f"Platform: {platform}")
 
     # check
@@ -173,13 +145,10 @@ def run_task_build_sample():
 
 # -----------------------------------------------------------------------------
 def run_task_build_aar():
-    # environment
-    target = "kotlin"
-
     # configure
     l.i("Configuring...")
 
-    platform = util.get_param_platform(target)
+    platform = util.get_param_platform()
     l.i(f"Platform: {platform}")
 
     # check
@@ -209,20 +178,17 @@ def run_task_build_aar():
 
 # -----------------------------------------------------------------------------
 def run_task_build_jar():
-    # environment
-    target = "kotlin"
-
     # configure
     l.i("Configuring...")
 
-    platform = util.get_param_platform(target)
+    platform = util.get_param_platform()
     l.i(f"Platform: {platform}")
 
     # check
     lib_dir = os.path.join("kotlin", get_project_by_platform(platform), "lib")
     tool.check_tool_gradlew(lib_dir)
 
-    arch_path = util.get_arch_path()
+    arch_path = host.get_arch_path()
 
     # build
     l.i("Building...")
@@ -247,13 +213,10 @@ def run_task_build_jar():
 
 # -----------------------------------------------------------------------------
 def run_task_test():
-    # environment
-    target = "kotlin"
-
     # configure
     l.i("Configuring...")
 
-    platform = util.get_param_platform(target)
+    platform = util.get_param_platform()
     l.i(f"Platform: {platform}")
 
     # check
@@ -275,13 +238,10 @@ def run_task_test():
 
 # -----------------------------------------------------------------------------
 def run_task_run_sample():
-    # environment
-    target = "kotlin"
-
     # configure
     l.i("Configuring...")
 
-    platform = util.get_param_platform(target)
+    platform = util.get_param_platform()
     l.i(f"Platform: {platform}")
 
     # check
@@ -292,6 +252,30 @@ def run_task_run_sample():
     l.i("Running...")
 
     util.run_gradle(["run"], sample_dir)
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_lint():
+    tool.check_tool_kotlin_linter()
+
+    l.i("Linting Kotlin files...")
+
+    run.run(
+        [
+            "detekt",
+            "--config",
+            os.path.join(c.proj_path, "detekt.yml"),
+            "--input",
+            os.path.join(c.proj_path, "kotlin"),
+            # Build output is not source, and leaving it in makes the set of linted files depend on what an earlier build left behind.
+            "--excludes",
+            "**/build/**",
+            "--build-upon-default-config",
+        ],
+        cwd=c.proj_path,
+    )
 
     l.ok()
 
@@ -326,7 +310,7 @@ def run_task_format():
 
         util.run_format(
             path_list=path_list,
-            formatter=lambda file_item: r.run(
+            formatter=lambda file_item: run.run(
                 [
                     "ktlint",
                     os.path.relpath(file_item),

@@ -1,18 +1,15 @@
-// add imports
 #include "xplpc/xplpc.hpp"
 
 #include <iostream>
 #include <string>
 
-// add namespaces
 using namespace xplpc::core;
 using namespace xplpc::map;
 using namespace xplpc::data;
 using namespace xplpc::client;
 using namespace xplpc::message;
 
-// callback method
-void callbackLogin(const Message &m, const Response r)
+void callbackLogin(const Message &m, const Response &r)
 {
     auto username = m.get<std::string>("username");
     auto password = m.get<std::string>("password");
@@ -38,7 +35,6 @@ void callbackLogin(const Message &m, const Response r)
     r(std::string("NOT-LOGGED"));
 }
 
-// custom platform initializer
 namespace xplpc
 {
 namespace proxy
@@ -46,23 +42,21 @@ namespace proxy
 
 void NativePlatformProxy::initializePlatform()
 {
-    // mapping data (function name, map<return value, params types>(params names), function ref)
     MappingList::shared()->add("sample.login", Map::create<std::string, std::string, std::string, bool>({"username", "password", "remember"}, &callbackLogin));
 }
 
 } // namespace proxy
 } // namespace xplpc
 
-// sample
 int main()
 {
-    // initialize
     auto proxy = std::make_shared<NativePlatformProxy>();
     proxy->initialize();
 
     PlatformProxyList::shared()->append(proxy);
 
-    // call function
+    XPLPC::initialize();
+
     {
         auto request = Request{
             "sample.login",

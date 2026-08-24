@@ -12,23 +12,24 @@ import androidx.camera.core.UseCaseGroup
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
-import com.google.common.util.concurrent.ListenableFuture
 import com.xplpc.client.Client
+import com.xplpc.helper.ByteArrayHelper
 import com.xplpc.message.Param
 import com.xplpc.message.Request
 import com.xplpc.runner.R
 import com.xplpc.runner.databinding.ActivityCameraBinding
 import com.xplpc.type.DataView
+import com.xplpc.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import java.nio.ByteBuffer
 
-class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineScope {
+class CameraActivity :
+    AppCompatActivity(),
+    ImageAnalysis.Analyzer,
+    CoroutineScope {
     override val coroutineContext = Dispatchers.Main
 
     private lateinit var binding: ActivityCameraBinding
-
-    private var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,43 +43,49 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
     }
 
     private fun setupCamera() {
-        cameraProviderFuture = ProcessCameraProvider.getInstance(applicationContext)
-        cameraProviderFuture?.addListener({
+        val future = ProcessCameraProvider.getInstance(applicationContext)
+
+        future.addListener({
             try {
-                val cameraProvider = cameraProviderFuture!!.get()
-                startCameraX(cameraProvider)
+                startCameraX(future.get())
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e("[CameraActivity : setupCamera] The camera provider is not available")
+                Log.d("[CameraActivity : setupCamera] The camera provider is not available: ${e.message}")
             }
         }, ContextCompat.getMainExecutor(this))
     }
 
     @SuppressLint("RestrictedApi")
     private fun startCameraX(cameraProvider: ProcessCameraProvider) {
-        // preview
         val preview = Preview.Builder().build()
         preview.setSurfaceProvider(binding.vPreview.surfaceProvider)
 
-        // prepare
         val cameraSelector = CameraSelector.Builder().build()
 
-        // image analysis use case
         val imageAnalysis =
-            ImageAnalysis.Builder()
+            ImageAnalysis
+                .Builder()
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
 
         imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this), this)
 
-        // use group
+        // The view port only exists once the preview has been laid out, and the provider can resolve before that.
+        val viewPort = binding.vPreview.viewPort
+
+        if (viewPort == null) {
+            binding.vPreview.post { startCameraX(cameraProvider) }
+            return
+        }
+
         val useCaseGroup =
-            UseCaseGroup.Builder()
+            UseCaseGroup
+                .Builder()
                 .addUseCase(preview)
                 .addUseCase(imageAnalysis)
-                .setViewPort(binding.vPreview.viewPort!!)
+                .setViewPort(viewPort)
                 .build()
 
-        // bind to lifecycle
         cameraProvider.unbindAll()
 
         cameraProvider.bindToLifecycle(
@@ -89,7 +96,6 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
     }
 
     override fun analyze(image: ImageProxy) {
-        // bitmap buffer
         val bitmap = binding.vPreview.bitmap
         image.close()
 
@@ -97,16 +103,8 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
             return
         }
 
-        val bitmapBuffer = bitmapToRgba(bitmap)
+        val dataView = DataView.createFromByteArray(bitmapToRgba(bitmap))
 
-        // byte buffer
-        val buffer: ByteBuffer = ByteBuffer.allocateDirect(bitmapBuffer.size)
-        buffer.put(bitmapBuffer)
-
-        // data view
-        val dataView = DataView.createFromByteBuffer(buffer)
-
-        // process image for current frame
         val startTime = System.currentTimeMillis()
 
         val request =
@@ -123,7 +121,8 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
             val elapsedTime = System.currentTimeMillis() - startTime
             val duration = (elapsedTime / 1000f)
 
-            val processedPreview = bitmapFromRgba(bitmap.width, bitmap.height, buffer.array())
+            val processedPreview =
+                bitmapFromRgba(bitmap.width, bitmap.height, ByteArrayHelper.createFromDataView(dataView))
 
             runOnUiThread {
                 binding.vProcessedPreview.setImageBitmap(processedPreview)
@@ -144,7 +143,6 @@ class CameraActivity : AppCompatActivity(), ImageAnalysis.Analyzer, CoroutineSco
         var i = 0
 
         for (pixel in pixels) {
-            // get components assuming is argb
             val pixelA = pixel shr 24 and 0xff
             val pixelR = pixel shr 16 and 0xff
             val pixelG = pixel shr 8 and 0xff

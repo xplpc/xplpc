@@ -12,24 +12,20 @@ buildscript {
 
     dependencies {
         // The Android Gradle Plugin knows how to build native code with the NDK.
-        classpath "com.android.tools.build:gradle:8.13.0"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
+        classpath "com.android.tools.build:gradle:9.3.1"
     }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     namespace 'com.xplpc.library.flutter'
 
     defaultConfig {
-        minSdk = 16
-        targetSdk = 36
-        compileSdk = 36
+        minSdk = 21
+        targetSdk = 37
+        compileSdk = 37
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles "consumer-rules.pro"
     }
 
     buildTypes {
@@ -40,19 +36,11 @@ android {
         }
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            packagingOptions {
-                doNotStrip '**/*.so'
-            }
         }
     }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(17)
     }
 }

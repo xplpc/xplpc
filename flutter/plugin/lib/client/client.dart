@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:ffi/ffi.dart';
 import 'package:xplpc/core/xplpc.dart';
 import 'package:xplpc/data/callback_list.dart';
 import 'package:xplpc/message/request.dart';
@@ -10,32 +9,23 @@ import 'package:xplpc/util/log.dart';
 import 'package:xplpc/util/unique_id.dart';
 
 class Client {
-  static void call<T>(
-    Request request,
-    ClientCallback callback,
-  ) {
+  static void call<T>(Request request, ClientCallback<T> callback) {
+    final key = UniqueID.generate();
+
     try {
-      UniqueID.generate().then((key) {
-        CallbackList.instance.add(key, (String response) {
-          callback?.call(
-            XPLPC.instance.config.serializer.decodeFunctionReturnValue<T>(
-              response,
-            ),
-          );
-        });
-
-        final nativeKey = key.toNativeUtf8();
-        final nativeData = request.data().toNativeUtf8();
-
-        PlatformProxy.nativeCallProxyFunc(
-          nativeKey,
-          nativeKey.length,
-          nativeData,
-          nativeData.length,
+      CallbackList.instance.add(key, (String response) {
+        callback?.call(
+          XPLPC.instance.config.serializer.decodeFunctionReturnValue<T>(
+            response,
+          ),
         );
       });
+
+      PlatformProxy.callNativeProxy(key, request.data());
     } catch (e) {
-      Log.e("[Client : call] Error: $e");
+      Log.e("[Client : call] Error when reach the native side");
+      Log.d("[Client : call] Error when reach the native side: $e");
+      CallbackList.instance.remove(key);
       callback?.call(null);
     }
   }
@@ -44,36 +34,71 @@ class Client {
     String requestData,
     ClientCallbackFromString callback,
   ) {
+    final key = UniqueID.generate();
+
     try {
-      UniqueID.generate().then((key) {
-        CallbackList.instance.add(key, (String response) {
-          callback?.call(response);
-        });
-
-        final nativeKey = key.toNativeUtf8();
-        final nativeData = requestData.toNativeUtf8();
-
-        PlatformProxy.nativeCallProxyFunc(
-          nativeKey,
-          nativeKey.length,
-          nativeData,
-          nativeData.length,
-        );
+      CallbackList.instance.add(key, (String response) {
+        callback?.call(response);
       });
+
+      PlatformProxy.callNativeProxy(key, requestData);
     } catch (e) {
-      Log.e("[Client : callFromString] Error: $e");
+      Log.e("[Client : callFromString] Error when reach the native side");
+      Log.d("[Client : callFromString] Error when reach the native side: $e");
+      CallbackList.instance.remove(key);
       callback?.call("");
     }
   }
 
-  static Future<T?> callAsync<T>(
-    Request request,
-  ) async {
-    Completer<T?> completer = Completer();
+  static T? callSync<T>(Request request) {
+    final response = _answerSynchronously(request.data(), "callSync");
+
+    if (response == null) {
+      return null;
+    }
+
+    return XPLPC.instance.config.serializer.decodeFunctionReturnValue<T>(
+      response,
+    );
+  }
+
+  static String callSyncFromString(String requestData) {
+    return _answerSynchronously(requestData, "callSyncFromString") ?? "";
+  }
+
+  // An isolate is single threaded, so nothing can write the answer while this function reads it.
+  static String? _answerSynchronously(String data, String source) {
+    String? answer;
+    final key = UniqueID.generate();
 
     try {
-      String key = await UniqueID.generate();
+      CallbackList.instance.add(key, (String response) {
+        answer = response;
+      });
 
+      PlatformProxy.callNativeProxy(key, data);
+    } catch (e) {
+      Log.e("[Client : $source] Error when reach the native side");
+      Log.d("[Client : $source] Error when reach the native side: $e");
+      CallbackList.instance.remove(key);
+      return null;
+    }
+
+    // Taking the key back is what decides the two cases, since a mapping that answered inline has already taken it and one that deferred never will.
+    CallbackList.instance.remove(key);
+
+    if (answer == null) {
+      Log.e("[Client : $source] The function did not answer synchronously");
+    }
+
+    return answer;
+  }
+
+  static Future<T?> callAsync<T>(Request request) async {
+    final completer = Completer<T?>();
+    final key = UniqueID.generate();
+
+    try {
       CallbackList.instance.add(key, (String response) {
         if (!completer.isCompleted) {
           completer.complete(
@@ -84,17 +109,11 @@ class Client {
         }
       });
 
-      final nativeKey = key.toNativeUtf8();
-      final nativeData = request.data().toNativeUtf8();
-
-      PlatformProxy.nativeCallProxyFunc(
-        nativeKey,
-        nativeKey.length,
-        nativeData,
-        nativeData.length,
-      );
+      PlatformProxy.callNativeProxy(key, request.data());
     } catch (e) {
-      Log.e("[Client : callAsync] Error: $e");
+      Log.e("[Client : callAsync] Error when reach the native side");
+      Log.d("[Client : callAsync] Error when reach the native side: $e");
+      CallbackList.instance.remove(key);
 
       if (!completer.isCompleted) {
         completer.complete(null);
@@ -104,34 +123,27 @@ class Client {
     return completer.future;
   }
 
-  static Future<String> callAsyncFromString(
-    String requestData,
-  ) async {
-    Completer<String> completer = Completer();
+  static Future<String> callAsyncFromString(String requestData) async {
+    final completer = Completer<String>();
+    final key = UniqueID.generate();
 
     try {
-      String key = await UniqueID.generate();
-
       CallbackList.instance.add(key, (String response) {
         if (!completer.isCompleted) {
           completer.complete(response);
         }
       });
 
-      final nativeKey = key.toNativeUtf8();
-      final nativeData = requestData.toNativeUtf8();
-
-      PlatformProxy.nativeCallProxyFunc(
-        nativeKey,
-        nativeKey.length,
-        nativeData,
-        nativeData.length,
-      );
+      PlatformProxy.callNativeProxy(key, requestData);
     } catch (e) {
-      Log.e("[Client : callAsyncFromString] Error: $e");
+      Log.e("[Client : callAsyncFromString] Error when reach the native side");
+      Log.d(
+        "[Client : callAsyncFromString] Error when reach the native side: $e",
+      );
+      CallbackList.instance.remove(key);
 
       if (!completer.isCompleted) {
-        completer.completeError(e);
+        completer.complete("");
       }
     }
 

@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { useWasmModuleStore } from "../../store/wasm-module";
+    import { useWasmModuleStore } from "../../store/wasm-module";
 
-const wm = useWasmModuleStore();
-const currentDateTime = import.meta.env.CURRENT_DATE_TIME;
+    const wm = useWasmModuleStore();
+    const currentDateTime = import.meta.env.CURRENT_DATE_TIME;
 </script>
 
 <template>
@@ -22,7 +22,9 @@ const currentDateTime = import.meta.env.CURRENT_DATE_TIME;
             <p>
                 This is an open-source software made by:
                 <br />
-                <a href="https://github.com/paulocoutinhox" target="_blank">Paulo Coutinho</a>.
+                <a href="https://github.com/paulocoutinhox" target="_blank"
+                    >Paulo Coutinho</a
+                >.
             </p>
 
             <br />
@@ -49,5 +51,5 @@ const currentDateTime = import.meta.env.CURRENT_DATE_TIME;
 </template>
 
 <style scoped>
-/* ignore */
+    /* ignore */
 </style>

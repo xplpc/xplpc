@@ -1,1 +1,1 @@
-typedef Response = Function(dynamic);
+typedef Response = void Function(dynamic);

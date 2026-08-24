@@ -1,13 +1,13 @@
-import { XMessage } from "../message/message";
+import { Message } from "../message/message";
 
-interface IXMappingItemTarget {
-    (message: XMessage): Promise<unknown>;
+interface MappingItemTarget {
+    (message: Message): Promise<unknown>;
 }
 
-export class XMappingItem {
-    target: IXMappingItemTarget;
+export class MappingItem {
+    target: MappingItemTarget;
 
-    constructor(target: IXMappingItemTarget) {
+    constructor(target: MappingItemTarget) {
         this.target = target;
     }
 }

@@ -1,42 +1,66 @@
 /// <reference types="vitest/config" />
-import { defineConfig } from 'vite'
+import { defineConfig } from "vite";
 
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
-import { fileURLToPath, URL } from "url"
-import EnvironmentPlugin from "vite-plugin-environment"
-import eslintPLugin from "vite-plugin-eslint"
+import vue from "@vitejs/plugin-vue";
+import { fileURLToPath, URL } from "url";
+import checker from "vite-plugin-checker";
+import EnvironmentPlugin from "vite-plugin-environment";
 
-const BASE_URL = (process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$|$/, '/') : '/');
+const BASE_URL = process.env.BASE_URL
+    ? process.env.BASE_URL.replace(/\/$|$/, "/")
+    : "/";
 
 const keepImportMetaUrlPlugin = {
     name: "keep-import-meta-url",
-    enforce: "pre",
-    transform(code, id, _options) {
+    enforce: "pre" as const,
+    transform(code: string, id: string) {
         if (id.endsWith("xplpc.js")) {
-            return code.replace(/\bimport\.meta\.url\b/g, `String(import.meta.url)`);
+            return code.replace(
+                /\bimport\.meta\.url\b/g,
+                `String(import.meta.url)`,
+            );
         }
     },
 };
 
-// https://vite.dev/config/
+// The checker spawns its own type and lint processes, which is wasted work while running the suite.
+const checkerPlugin = checker({
+    eslint: {
+        useFlatConfig: true,
+        lintCommand: 'eslint "./src/**/*.{ts,vue}" "./tests/**/*.ts"',
+    },
+    vueTsc: true,
+});
+
 export default defineConfig({
     base: BASE_URL,
     build: {
-        target: ['esnext']
+        target: ["esnext"],
+    },
+    css: {
+        preprocessorOptions: {
+            scss: {
+                // Bootstrap still ships @import and the legacy if(), so the warnings come from the dependency and not from this project.
+                silenceDeprecations: [
+                    "import",
+                    "if-function",
+                    "global-builtin",
+                    "color-functions",
+                ],
+            },
+        },
     },
     resolve: {
         alias: {
             "@": fileURLToPath(new URL("./src", import.meta.url)),
-            '@xplpc': resolve(__dirname, '../../'),
-            '@bootstrap': resolve(__dirname, 'node_modules/bootstrap'),
+            "@xplpc": fileURLToPath(new URL("../../", import.meta.url)),
+            "@bootstrap": fileURLToPath(
+                new URL("./node_modules/bootstrap", import.meta.url),
+            ),
         },
     },
     plugins: [
         vue(),
-        eslintPLugin({
-            exclude: ["../../build/**", "**/node_modules/**"]
-        }),
         EnvironmentPlugin(
             {
                 CURRENT_DATE_TIME:
@@ -44,9 +68,9 @@ export default defineConfig({
             },
             {
                 defineOn: "import.meta.env",
-            }
+            },
         ),
-        ...(process.env.VITEST ? [keepImportMetaUrlPlugin] : [])
+        ...(process.env.VITEST ? [keepImportMetaUrlPlugin] : [checkerPlugin]),
     ],
     server: {
         host: true,
@@ -58,14 +82,11 @@ export default defineConfig({
     },
     test: {
         globals: true,
-        environment: 'jsdom',
-        setupFiles: './src/setupTests.ts',
+        environment: "jsdom",
+        setupFiles: "./src/setupTests.ts",
         coverage: {
-            reporter: ['text', 'html'],
-            exclude: [
-                'node_modules/',
-                'src/setupTests.ts',
-            ],
+            reporter: ["text", "html"],
+            exclude: ["node_modules/", "src/setupTests.ts"],
         },
-    }
-})
+    },
+});

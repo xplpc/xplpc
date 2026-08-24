@@ -25,8 +25,8 @@ public:
     const std::string &data() const noexcept { return rawData; }
 
 private:
-    const std::string rawData;
     const std::string rawFunctionName;
+    const std::string rawData;
 };
 
 } // namespace message

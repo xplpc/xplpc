@@ -10,7 +10,7 @@ object Callback {
     ) {
         val level = 100
 
-        val suffix = data.value<String>("suffix")
+        val suffix = data.get<String>("suffix")
 
         if (suffix != null) {
             r("$level$suffix")

@@ -1,22 +1,18 @@
 #include "xplpc/map/MappingItem.hpp"
 
+#include <utility>
+
 namespace xplpc
 {
 namespace map
 {
 
-MappingItem::MappingItem(const std::function<void(const Message &, const Response)> &target, const std::function<void(const std::string &, const std::string &)> &executor)
+MappingItem::MappingItem(Executor executor)
+    : executor(std::move(executor))
 {
-    this->target = target;
-    this->executor = executor;
 }
 
-std::function<void(const Message &, const Response)> &MappingItem::getTarget()
-{
-    return target;
-}
-
-const std::function<void(const std::string &, const std::string &)> &MappingItem::getExecutor()
+const Executor &MappingItem::getExecutor() const
 {
     return executor;
 }

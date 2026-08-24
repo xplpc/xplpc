@@ -1,3 +1,5 @@
+#pragma once
+
 #include "xplpc/custom/Mapping.hpp"
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
@@ -11,30 +13,26 @@ using namespace xplpc::proxy;
 class GeneralTest : public ::testing::Test
 {
 protected:
-    GeneralTest()
-    {
-        // you can do set-up work for each test here.
-    }
-
-    ~GeneralTest() override
-    {
-        // cleanup any pending stuff, but no exceptions allowed
-    }
-
     void SetUp() override
     {
-        // code here will be called immediately after the constructor (right before each test)
+        // Every test starts from a clean registry, so leaked callbacks and stacked proxies show up instead of accumulating.
+
+        PlatformProxyList::shared()->clear();
+        MappingList::shared()->clear();
+        CallbackList::shared()->clear();
 
         auto proxy = std::make_shared<NativePlatformProxy>();
         proxy->initialize();
 
         PlatformProxyList::shared()->append(proxy);
+
+        XPLPC::initialize();
     }
 
     void TearDown() override
     {
-        // code here will be called immediately after each test (right before the destructor)
-    }
+        // A leaked callback is the defect this project has found most often, so every test is held to leaving none.
 
-    // class members declared here can be used by all tests in the test suite
+        EXPECT_EQ(CallbackList::shared()->count(), 0u);
+    }
 };

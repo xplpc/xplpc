@@ -7,6 +7,11 @@ on:
       - 'docs/**'
       - 'extras/images/**'
 
+# The default branch is never cancelled, since that is where publishing happens.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   build:
     name: ${{ matrix.config.name }}
@@ -21,12 +26,12 @@ jobs:
           }
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: "3.10"
+          python-version: "3.13"
 
       - name: Install Python Dependencies
         run: |
@@ -36,12 +41,12 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: "3.30.0"
+          cmake-version: "4.3.3"
 
       - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@master
+        uses: seanmiddleditch/gha-setup-ninja@v6
         with:
-          version: "1.12.1"
+          version: "1.13.2"
 
       - name: Verify
         run: |
@@ -55,8 +60,58 @@ jobs:
       - name: Test
         run: python3 xplpc.py swift-test
 
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Lint
+        run: python3 xplpc.py swift-lint
+
+      - name: Test With Undefined Sanitizer
+        run: python3 xplpc.py swift-test --sanitizer undefined
+
       - name: Build
         run: python3 xplpc.py swift-build --platform ios
 
       - name: Generate XCFramework
         run: python3 xplpc.py swift-build-xcframework --platform ios
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build Sample
+        run: python3 xplpc.py swift-build-sample
+
+      - name: Test On Simulator
+        run: python3 xplpc.py swift-test --platform ios
+
+      - name: Build Simulator Library With Thread Sanitizer
+        run: |
+          python3 xplpc.py swift-build --interface --platform ios-simulator --sanitizer thread
+          python3 xplpc.py swift-build-xcframework --platform ios-simulator
+
+      - name: Confirm What Was Built Is What Was Asked For
+        run: |
+          binary=build/swift-ios-simulator-xcframework/xplpc.xcframework/ios-arm64_x86_64-simulator/xplpc.framework/xplpc
+          otool -L "$binary" | grep -qi "libclang_rt.tsan" || {
+            echo "the thread sanitizer runtime is not linked, the run would prove nothing"
+            exit 1
+          }
+
+      - name: Test On Simulator With Thread Sanitizer
+        run: python3 xplpc.py swift-test --platform ios --sanitizer thread
+
+      - name: Build Simulator Library With Address Sanitizer
+        run: |
+          python3 xplpc.py swift-build --interface --platform ios-simulator --sanitizer address
+          python3 xplpc.py swift-build-xcframework --platform ios-simulator
+
+      - name: Confirm What Was Built Is What Was Asked For
+        run: |
+          binary=build/swift-ios-simulator-xcframework/xplpc.xcframework/ios-arm64_x86_64-simulator/xplpc.framework/xplpc
+          otool -L "$binary" | grep -qi "libclang_rt.asan" || {
+            echo "the address sanitizer runtime is not linked, the run would prove nothing"
+            exit 1
+          }
+
+      - name: Test On Simulator With Address Sanitizer
+        run: python3 xplpc.py swift-test --platform ios --sanitizer address

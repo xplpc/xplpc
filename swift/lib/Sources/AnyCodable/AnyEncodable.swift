@@ -29,10 +29,10 @@
      let encoder = JSONEncoder()
      let json = try! encoder.encode(dictionary)
  */
-@frozen public struct AnyEncodable: Encodable {
-    public let value: Any
+struct AnyEncodable: Encodable {
+    let value: Any
 
-    public init<T>(_ value: T?) {
+    init<T>(_ value: T?) {
         self.value = value ?? ()
     }
 }
@@ -91,7 +91,12 @@ extension _AnyEncodable {
         case let double as Double:
             try container.encode(double)
         case let character as Character:
-            try container.encode(String(describing: character))
+            guard let codePoint = CodePoint(character) else {
+                let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "A character built from several unicode scalars has no single code point to encode")
+                throw EncodingError.invalidValue(character, context)
+            }
+
+            try container.encode(codePoint)
         case let string as String:
             try container.encode(string)
         #if canImport(Foundation)
@@ -144,7 +149,7 @@ extension _AnyEncodable {
 }
 
 extension AnyEncodable: Equatable {
-    public static func == (lhs: AnyEncodable, rhs: AnyEncodable) -> Bool {
+    static func == (lhs: AnyEncodable, rhs: AnyEncodable) -> Bool {
         switch (lhs.value, rhs.value) {
         case is (Void, Void):
             return true
@@ -193,7 +198,7 @@ extension AnyEncodable: Equatable {
 }
 
 extension AnyEncodable: CustomStringConvertible {
-    public var description: String {
+    var description: String {
         switch value {
         case is Void:
             return String(describing: nil as Any?)
@@ -206,7 +211,7 @@ extension AnyEncodable: CustomStringConvertible {
 }
 
 extension AnyEncodable: CustomDebugStringConvertible {
-    public var debugDescription: String {
+    var debugDescription: String {
         switch value {
         case let value as CustomDebugStringConvertible:
             return "AnyEncodable(\(value.debugDescription))"
@@ -260,7 +265,7 @@ extension _AnyEncodable {
 }
 
 extension AnyEncodable: Hashable {
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         switch value {
         case let value as Bool:
             hasher.combine(value)
@@ -307,7 +312,7 @@ extension AnyEncodable: Hashable {
 }
 
 #if canImport(Foundation)
-    // Types encodings: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html
+    // The runtime type encodings are documented at https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html.
     private let cpp_or_c99_bool_objc_encoding = "B".unicodeScalars.first?.value
     private let char_objc_encoding = "c".unicodeScalars.first?.value
     private let short_objc_encoding = "s".unicodeScalars.first?.value

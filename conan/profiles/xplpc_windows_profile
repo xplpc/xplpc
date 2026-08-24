@@ -1,6 +1,6 @@
 include(default)
 
 [settings]
+compiler.cppstd=20
 os=Windows
 arch=x86_64
-compiler=Visual Studio

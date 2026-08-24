@@ -1,7 +1,8 @@
-# files
 set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/xplpc.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/client/CallAwaitable.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/client/Client.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/client/SyncAnswer.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/core/XPLPC.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/data/CallbackList.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/data/MappingList.hpp"
@@ -14,8 +15,12 @@ set(XPLPC_INC_FILES ${XPLPC_INC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/message/Response.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/proxy/PlatformProxy.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/proxy/NativePlatformProxy.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/serializer/JsonSerializer.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/serializer/JsonSerializerTypes.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/serializer/Serializer.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/type/DataView.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/util/Log.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/util/NativeBoundary.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/util/TSMap.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/xplpc/util/UniqueID.hpp"
     PARENT_SCOPE
@@ -28,6 +33,7 @@ set(XPLPC_SRC_FILES ${XPLPC_SRC_FILES}
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/data/PlatformProxyList.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/map/MappingItem.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/proxy/NativePlatformProxy.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/util/Log.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/xplpc/util/UniqueID.cpp"
     PARENT_SCOPE
 )

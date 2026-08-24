@@ -10,20 +10,12 @@ import 'package:xplpc_example/custom/mapping.dart';
 import 'main.reflectable.dart';
 
 void main() {
-  // initialize reflectable
   initializeReflectable();
 
-  // initialize xplpc library
-  XPLPC.instance.initialize(
-    Config(
-      JsonSerializer(),
-    ),
-  );
+  XPLPC.instance.initialize(Config(JsonSerializer()));
 
-  // mapping
   Mapping.instance.initialize();
 
-  // run application
   runApp(const MyApp());
 }
 
@@ -48,12 +40,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void onBatteryLevelSubmitButtonClick() {
-    final request = Request(
-      "platform.battery.level",
-      [
-        Param("suffix", "%"),
-      ],
-    );
+    final request = Request("platform.battery.level", [Param("suffix", "%")]);
 
     Client.call<String>(request, (response) {
       setState(() {
@@ -80,9 +67,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('XPLPC'),
-        ),
+        appBar: AppBar(title: const Text('XPLPC')),
         body: SingleChildScrollView(
           child: Container(
             width: double.infinity,
@@ -142,9 +127,7 @@ class _MyAppState extends State<MyApp> {
                     icon: Icon(Icons.person),
                     hintText: 'Your username',
                   ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -156,19 +139,14 @@ class _MyAppState extends State<MyApp> {
                     icon: Icon(Icons.key),
                     hintText: 'Your password',
                   ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 16),
                 CheckboxListTile(
                   value: rememberMe,
                   title: const Text(
                     "Remember",
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.black87,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.black87),
                   ),
                   controlAffinity: ListTileControlAffinity.leading,
                   onChanged: (bool? value) {

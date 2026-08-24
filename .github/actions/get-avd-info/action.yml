@@ -1,40 +1,16 @@
 name: 'Get AVD Info'
-description: 'Get the AVD info based on its API level and host architecture.'
-inputs:
-    api-level:
-        required: true
+description: 'Get the emulator architecture that matches the host it runs on.'
 outputs:
     arch:
         value: ${{ steps.get-avd-arch.outputs.arch }}
-    target:
-        value: ${{ steps.get-avd-target.outputs.target }}
 runs:
     using: "composite"
     steps:
-        - id: get-host-arch
-          run: echo "host-arch=$(uname -m)" >> $GITHUB_OUTPUT
-          shell: bash
         - id: get-avd-arch
           run: |
-            host_arch=${{ steps.get-host-arch.outputs['host-arch'] }}
-            api_level=${{ inputs.api-level }}
-
-            if [ "$host_arch" = "arm64" ]; then
-              if [ "$api_level" -ge 30 ]; then
-                avd_arch="arm64-v8a"
-              else
-                avd_arch="armeabi-v7a"
-              fi
+            if [ "$(uname -m)" = "arm64" ] || [ "$(uname -m)" = "aarch64" ]; then
+              echo "arch=arm64-v8a" >> $GITHUB_OUTPUT
             else
-              if [ "$api_level" -ge 30 ]; then
-                avd_arch="x86_64"
-              else
-                avd_arch="x86"
-              fi
+              echo "arch=x86_64" >> $GITHUB_OUTPUT
             fi
-
-            echo "arch=$avd_arch" >> $GITHUB_OUTPUT
-          shell: bash
-        - id: get-avd-target
-          run: echo "target=default" >> $GITHUB_OUTPUT
           shell: bash

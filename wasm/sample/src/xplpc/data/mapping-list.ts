@@ -1,30 +1,36 @@
-import { XMappingItem } from "../map/mapping-item";
+import { MappingItem } from "../map/mapping-item";
 
-export class XMappingList {
-    private static instance: XMappingList;
-    private list = new Map<string, XMappingItem>();
+export class MappingList {
+    private static instance: MappingList;
+    private list = new Map<string, MappingItem>();
 
-    private constructor() {
-        // ignore
-    }
+    private constructor() {}
 
-    public static shared(): XMappingList {
-        if (!XMappingList.instance) {
-            XMappingList.instance = new XMappingList();
+    public static shared(): MappingList {
+        if (!MappingList.instance) {
+            MappingList.instance = new MappingList();
         }
 
-        return XMappingList.instance;
+        return MappingList.instance;
     }
 
-    public add(name: string, item: XMappingItem): void {
+    public add(name: string, item: MappingItem): void {
         this.list.set(name, item);
     }
 
-    public find(name: string): XMappingItem | undefined {
-        if (this.list.has(name)) {
-            return this.list.get(name);
-        }
+    public find(name: string): MappingItem | undefined {
+        return this.list.get(name);
+    }
 
-        return undefined;
+    public has(name: string): boolean {
+        return this.list.has(name);
+    }
+
+    public clear(): void {
+        this.list.clear();
+    }
+
+    public count(): number {
+        return this.list.size;
     }
 }

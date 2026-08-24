@@ -1,12 +1,10 @@
 import os
 
 from pygemstones.io import file as f
-from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
-from core import conan
+from core import conan, net, run, tool, util
 from core import config as c
-from core import net, tool, util
 
 
 # -----------------------------------------------------------------------------
@@ -31,52 +29,28 @@ def run_task_build():
     build_type = util.get_param_build_type(target, format="cmake")
     l.i(f"Build type: {build_type}")
 
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
     target_data = get_target_data_for_platform("wasm")
 
     build_dir = os.path.join(c.proj_path, "build", target)
     conan_build_dir = os.path.join(c.proj_path, "build", "conan", target)
 
-    # dry run
-    if not dry_run:
+    if not incremental:
         f.recreate_dir(build_dir)
 
     # dependencies
     no_deps = util.get_param_no_deps()
 
-    if not dry_run and not no_deps and c.dependency_tool == "conan":
+    if not incremental and not no_deps and c.dependency_tool == "conan":
         for item in target_data:
             l.i(f"Building dependencies for arch {item['arch']}...")
 
             arch_dir = os.path.join(conan_build_dir, item["arch"])
             f.recreate_dir(arch_dir)
 
-            # conan
-            build_profile = conan.get_build_profile()
-
-            if build_profile != "default":
-                build_profile = os.path.join(
-                    c.proj_path, "conan", "profiles", build_profile
-                )
-
-            run_args = [
-                "conan",
-                "install",
-                c.proj_path,
-                "-pr:b",
-                build_profile,
-                "-pr:h",
-                os.path.join(c.proj_path, "conan", "profiles", item["conan_profile"]),
-            ]
-
-            conan.add_target_setup_common_args(run_args, item, build_type)
-
-            run_args.append("--build=missing")
-            run_args.append("--update")
-
-            r.run(run_args, cwd=arch_dir)
+            conan.install(item, build_type, arch_dir)
 
     # build
     for item in target_data:
@@ -95,6 +69,7 @@ def run_task_build():
             "-DXPLPC_ADD_CUSTOM_DATA=ON",
             f"-DCMAKE_BUILD_TYPE={build_type}",
             f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+            f"-DXPLPC_SANITIZER={util.get_param_sanitizer()}",
         ]
 
         # toolchain
@@ -113,10 +88,10 @@ def run_task_build():
             toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
             run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
 
-        r.run(run_args)
+        run.run(run_args)
 
         # build
-        r.run(["cmake", "--build", arch_dir])
+        run.run(["cmake", "--build", arch_dir])
 
     l.ok()
 
@@ -134,16 +109,16 @@ def run_task_build_sample():
     sample_dir = os.path.join(c.proj_path, "wasm", "sample")
 
     # dependencies
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    if not dry_run:
+    if not incremental:
         l.i("Installing dependencies...")
-        r.run(["npm", "install"], cwd=sample_dir)
+        run.run(["npm", "ci"], cwd=sample_dir)
 
     # build
     l.i("Building...")
-    r.run(["npm", "run", "build"], cwd=sample_dir)
+    run.run(["npm", "run", "build"], cwd=sample_dir)
 
     l.ok()
 
@@ -158,24 +133,40 @@ def run_task_run_sample():
     sample_dir = os.path.join(c.proj_path, "wasm", "sample")
 
     # dependencies
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    if not dry_run:
+    if not incremental:
         l.i("Installing dependencies...")
-        r.run(["npm", "install"], cwd=sample_dir)
+        run.run(["npm", "ci"], cwd=sample_dir)
 
     # build
     l.i("Building...")
-    r.run(["npm", "run", "dev"], cwd=sample_dir)
+    run.run(["npm", "run", "dev"], cwd=sample_dir)
 
     l.ok()
 
 
 # -----------------------------------------------------------------------------
 def run_task_serve_sample():
+    # The sample is built for the path it is published under, so it is served under the same one rather than at the root, where every asset it asks for would be missing.
+
     dist_dir = os.path.join(c.proj_path, "wasm", "sample", "dist")
-    net.serve(dist_dir)
+
+    if not f.dir_exists(dist_dir):
+        l.e("The sample was not built, build it with: wasm-build-sample")
+
+    serve_dir = os.path.join(c.proj_path, "build", "wasm-serve")
+    base_dir = os.path.join(serve_dir, c.wasm_base_url.strip("/"))
+
+    f.recreate_dir(serve_dir)
+    f.copy_dir(dist_dir, base_dir)
+
+    l.i(
+        f"Serving at http://{c.http_server_host}:{c.http_server_port}{c.wasm_base_url}/"
+    )
+
+    net.serve(serve_dir)
     l.ok()
 
 
@@ -188,16 +179,16 @@ def run_task_test():
     sample_dir = os.path.join(c.proj_path, "wasm", "sample")
 
     # dependencies
-    dry_run = util.get_param_dry()
-    l.i(f"Dry run: {dry_run}")
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
 
-    if not dry_run:
+    if not incremental:
         l.i("Installing dependencies...")
-        r.run(["npm", "install"], cwd=sample_dir)
+        run.run(["npm", "ci"], cwd=sample_dir)
 
     # test
     l.i("Testing...")
-    r.run(["npm", "run", "test:unit"], cwd=sample_dir)
+    run.run(["npm", "run", "test:unit"], cwd=sample_dir)
 
     l.ok()
 
@@ -212,8 +203,8 @@ def run_task_format():
 
     # format js/css/html
     l.i("Formatting Web files...")
-    r.run(["npm", "install"], cwd=sample_dir, silent=True)
-    r.run(["npm", "run", "lint"], cwd=sample_dir, silent=True)
+    run.run(["npm", "ci"], cwd=sample_dir, silent=True)
+    run.run(["npm", "run", "lint"], cwd=sample_dir, silent=True)
 
     l.ok()
 

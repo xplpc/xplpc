@@ -8,6 +8,7 @@ import android.net.Uri
 import com.xplpc.core.Config
 import com.xplpc.core.XPLPC
 import com.xplpc.serializer.JsonSerializer
+import com.xplpc.util.Log
 
 class PlatformInitializer : ContentProvider() {
     override fun onCreate(): Boolean {
@@ -22,8 +23,10 @@ class PlatformInitializer : ContentProvider() {
             debug = it.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
         }
 
+        Log.isEnabled = debug
+
         XPLPC.initialize(
-            Config(debug, JsonSerializer()),
+            Config(JsonSerializer()),
         )
     }
 
@@ -33,35 +36,25 @@ class PlatformInitializer : ContentProvider() {
         selection: String?,
         selectionArgs: Array<String>?,
         sortOrder: String?
-    ): Cursor? {
-        return null
-    }
+    ): Cursor? = null
 
-    override fun getType(uri: Uri): String? {
-        return null
-    }
+    override fun getType(uri: Uri): String? = null
 
     override fun insert(
         uri: Uri,
         values: ContentValues?
-    ): Uri? {
-        return null
-    }
+    ): Uri? = null
 
     override fun delete(
         uri: Uri,
         selection: String?,
         selectionArgs: Array<out String>?
-    ): Int {
-        return 0
-    }
+    ): Int = 0
 
     override fun update(
         uri: Uri,
         values: ContentValues?,
         selection: String?,
         selectionArgs: Array<out String>?
-    ): Int {
-        return 0
-    }
+    ): Int = 0
 }

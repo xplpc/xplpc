@@ -2,20 +2,20 @@
 
 #include <exception>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
+#include <utility>
 
+#include "xplpc/client/CallAwaitable.hpp"
+#include "xplpc/client/SyncAnswer.hpp"
+#include "xplpc/core/XPLPC.hpp"
 #include "xplpc/data/CallbackList.hpp"
 #include "xplpc/data/PlatformProxyList.hpp"
 #include "xplpc/message/Request.hpp"
 #include "xplpc/serializer/Serializer.hpp"
+#include "xplpc/util/Log.hpp"
 #include "xplpc/util/UniqueID.hpp"
-
-#include "spdlog/spdlog.h"
-
-#ifndef __EMSCRIPTEN__
-#include <future>
-#endif
 
 #if defined(__EMSCRIPTEN__)
 #include <emscripten/bind.h>
@@ -36,30 +36,11 @@ using namespace xplpc::util;
 class Client
 {
 public:
-    Client() = default;
-
     template <typename T>
     static void call(const Request &request, const std::function<void(const std::optional<T> &)> &callback)
     {
-        // check if have any platform proxy configured
-        if (!PlatformProxyList::shared()->count())
-        {
-            spdlog::error("[Client : call] No platform proxy was configured");
-
-            if (callback)
-            {
-                callback(std::nullopt);
-            }
-
-            return;
-        }
-
-        // generate unique id for callback
-        const auto key = UniqueID::generate();
-
-        // add the callback to the list
         // clang-format off
-        CallbackList::shared()->add(key, [callback](const std::string &response) {
+        const auto key = dispatch(request.functionName(), request.data(), [callback](const std::string &response) {
             std::optional<T> decodedData;
 
             try
@@ -68,8 +49,8 @@ public:
             }
             catch (const std::exception &e)
             {
-                spdlog::error("[Client : call] Error when decode data: {}", e.what());
-                decodedData = std::nullopt;
+                util::Log::e("[Client : call] Error when decode data");
+                util::Log::d("[Client : call] Error when decode data: {}", e.what());
             }
 
             if (callback)
@@ -79,51 +60,16 @@ public:
         });
         // clang-format on
 
-        // find the mapped function in proxy list
-        auto functionName = request.functionName();
-        auto found = false;
-
-        // clang-format off
-        found = PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
-            if (proxy->hasMapping(functionName))
-            {
-                // call the platform proxy mapped function
-                proxy->callProxy(key, request.data());
-                return true;
-            }
-
-            return false;
-        });
-        // clang-format on
-
-        if (!found)
+        if (key.empty() && callback)
         {
-            spdlog::error("[Client : call] Function not found: {}", functionName);
             callback(std::nullopt);
         }
     }
 
-    static void call(const std::string &requestData, const std::function<void(const std::string &)> callback)
+    static void call(const std::string &requestData, const std::function<void(const std::string &)> &callback)
     {
-        // check if have any platform proxy configured
-        if (!PlatformProxyList::shared()->count())
-        {
-            spdlog::error("[Client : call] No platform proxy was configured");
-
-            if (callback)
-            {
-                callback("");
-            }
-
-            return;
-        }
-
-        // generate unique id for callback
-        const auto key = UniqueID::generate();
-
         // clang-format off
-        // add the callback to the list
-        CallbackList::shared()->add(key, [callback](const std::string& response) {
+        const auto key = dispatch(Serializer::decodeFunctionName(requestData), requestData, [callback](const std::string &response) {
             if (callback)
             {
                 callback(response);
@@ -131,95 +77,145 @@ public:
         });
         // clang-format on
 
-        // find the mapped function in proxy list
-        auto functionName = Serializer::decodeFunctionName(requestData);
-        bool found = false;
-
-        // clang-format off
-        found = PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy>& proxy) {
-            if (proxy->hasMapping(functionName))
-            {
-                // call the platform proxy mapped function
-                proxy->callProxy(key, requestData);
-                return true;
-            }
-
-            return false;
-        });
-        // clang-format on
-
-        if (!found)
+        if (key.empty() && callback)
         {
-            spdlog::error("[Client : call] Function not found: {}", functionName);
             callback("");
         }
     }
 
-#ifndef __EMSCRIPTEN__
     template <typename T>
-    static std::future<std::optional<T>> callAsync(const Request &request)
+    static std::optional<T> callSync(const Request &request)
     {
-        // creating a promise to store the result
-        auto promise = std::make_shared<std::promise<std::optional<T>>>();
+        const auto response = answerSynchronously(request.functionName(), request.data());
 
+        if (!response.has_value())
+        {
+            return std::nullopt;
+        }
+
+        try
+        {
+            return Serializer::decodeFunctionReturnValue<T>(response.value());
+        }
+        catch (const std::exception &e)
+        {
+            util::Log::e("[Client : callSync] Error when decode data");
+            util::Log::d("[Client : callSync] Error when decode data: {}", e.what());
+        }
+
+        return std::nullopt;
+    }
+
+    static std::string callSync(const std::string &requestData)
+    {
+        return answerSynchronously(Serializer::decodeFunctionName(requestData), requestData).value_or("");
+    }
+
+    template <typename T>
+    static CallAwaitable<T> callAsync(const Request &request)
+    {
         // clang-format off
-        // calling the existing 'call' method with a lambda as callback
-        call<T>(request, [promise](const std::optional<T> &result) {
-            // setting the value of the promise
-            promise->set_value(result);
+        return CallAwaitable<T>([request](const std::function<void(std::optional<T>)> &answer) {
+            call<T>(request, [answer](const std::optional<T> &result) {
+                answer(result);
+            });
         });
         // clang-format on
-
-        // returning the future associated with the promise
-        return promise->get_future();
     }
-#endif
 
 #if defined(__EMSCRIPTEN__)
     static void call(const std::string &requestData, emscripten::val callback)
     {
-        // check if have any platform proxy configured
-        if (!PlatformProxyList::shared()->count())
-        {
-            spdlog::error("[Client : call] No platform proxy was configured");
-            callback(std::string{});
-            return;
-        }
-
-        // generate unique id for callback
-        const auto key = UniqueID::generate();
-
         // clang-format off
-        // add the callback to the list
-        CallbackList::shared()->add(key, [callback](const std::string& response) {
+        const auto key = dispatch(Serializer::decodeFunctionName(requestData), requestData, [callback](const std::string &response) {
             callback(response);
         });
         // clang-format on
 
-        // find the mapped function in proxy list
-        auto functionName = Serializer::decodeFunctionName(requestData);
-        auto found = false;
-
-        // clang-format off
-        found = PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy> &proxy) {
-            if (proxy->hasMapping(functionName))
-            {
-                // call the platform proxy mapped function
-                proxy->callProxy(key, requestData);
-                return true;
-            }
-
-            return false;
-        });
-        // clang-format on
-
-        if (!found)
+        if (key.empty())
         {
-            spdlog::error("[Client : call] Function not found: {}", functionName);
             callback(std::string{});
         }
     }
 #endif
+
+private:
+    static std::optional<std::string> answerSynchronously(const std::string &functionName, const std::string &requestData)
+    {
+        // A mapping is free to answer from a thread of its own after this function has returned, so what it writes into outlives the frame and is guarded.
+        const auto answer = std::make_shared<SyncAnswer>();
+
+        // clang-format off
+        const auto key = dispatch(functionName, requestData, [answer](const std::string &response) {
+            answer->set(response);
+        });
+        // clang-format on
+
+        if (key.empty())
+        {
+            return std::nullopt;
+        }
+
+        // Taking the key back is what decides the two cases, since a mapping that answered inline has already taken it and one that deferred never will.
+        CallbackList::shared()->remove(key);
+
+        auto response = answer->get();
+
+        if (!response.has_value())
+        {
+            util::Log::e("[Client : callSync] The function did not answer synchronously");
+        }
+
+        return response;
+    }
+
+    static std::string dispatch(const std::string &functionName, const std::string &requestData, Callback callback)
+    {
+        // The callback is registered and the request goes to the first proxy owning the function, and the registration is dropped when nothing handles it.
+
+        // Routing happens here, so a library that cannot serve a call has to refuse before a mapping runs rather than after it has answered.
+        if (!core::XPLPC::isInitialized())
+        {
+            util::Log::e("[Client : dispatch] The library is not initialized");
+            return "";
+        }
+
+        if (!PlatformProxyList::shared()->count())
+        {
+            util::Log::e("[Client : dispatch] No platform proxy was configured");
+            return "";
+        }
+
+        if (functionName.empty())
+        {
+            // The decoder is the one that knows whether the document was unreadable or merely carried no name, so it reports and this answers.
+            return "";
+        }
+
+        const auto key = UniqueID::generate();
+        CallbackList::shared()->add(key, std::move(callback));
+
+        // clang-format off
+        const auto dispatched = PlatformProxyList::shared()->forEach([&](const std::shared_ptr<PlatformProxy> &proxy) {
+            if (!proxy->hasMapping(functionName))
+            {
+                return false;
+            }
+
+            proxy->callProxy(key, requestData);
+            return true;
+        });
+        // clang-format on
+
+        if (!dispatched)
+        {
+            util::Log::e("[Client : dispatch] Function not found: {}", functionName);
+            CallbackList::shared()->remove(key);
+            return "";
+        }
+
+        return key;
+    }
 };
 
 } // namespace client

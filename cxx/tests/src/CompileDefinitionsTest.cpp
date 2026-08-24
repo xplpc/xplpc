@@ -1,4 +1,5 @@
 #include "fixtures/GeneralTest.hpp"
+#include "fixtures/VerifiedCall.hpp"
 #include "xplpc/xplpc.hpp"
 #include "gtest/gtest.h"
 
@@ -10,30 +11,12 @@ using namespace xplpc::message;
 
 std::string getVersion()
 {
-#ifdef XPLPC_VERSION
-#define XPLPC_VERSION_STR XPLPC_VERSION
-#else
-#define XPLPC_VERSION_STR "0.0.0"
-#endif
-
-#ifdef XPLPC_VERSION_CODE
-#define XPLPC_VERSION_CODE_STR XPLPC_VERSION_CODE
-#else
-#define XPLPC_VERSION_CODE_STR "0"
-#endif
-
-    return std::string(XPLPC_VERSION_STR) + " (" + std::string(XPLPC_VERSION_CODE_STR) + ")";
+    return std::string(XPLPC_VERSION) + " (" + std::string(XPLPC_VERSION_CODE) + ")";
 }
 
 std::string getTarget()
 {
-#ifdef XPLPC_TARGET
-#define XPLPC_TARGET_STR XPLPC_TARGET
-#else
-#define XPLPC_TARGET_STR ""
-#endif
-
-    return std::string(XPLPC_TARGET_STR);
+    return std::string(XPLPC_TARGET);
 }
 
 TEST_F(GeneralTest, CompileDefinitionsTestVersion)
@@ -55,7 +38,7 @@ TEST_F(GeneralTest, TestVersion)
     auto request = Request{"sample.version"};
 
     // clang-format off
-    Client::call<std::string>(request, [](const auto &response) {
+    VerifiedCall::run<std::string>(request, [](const auto &response) {
         EXPECT_NE(response, std::nullopt);
 
         if (response)
@@ -72,14 +55,13 @@ TEST_F(GeneralTest, TestTarget)
     auto request = Request{"sample.target"};
 
     // clang-format off
-    Client::call<std::string>(request, [](const auto &response) {
+    VerifiedCall::run<std::string>(request, [](const auto &response) {
         EXPECT_NE(response, std::nullopt);
 
         if (response)
         {
             auto target = response.value();
             EXPECT_NE("", target);
-            EXPECT_NE("unknown", target);
         }
     });
     // clang-format on

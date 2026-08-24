@@ -1,11 +1,10 @@
 import os
 
 from pygemstones.io import file as f
-from pygemstones.system import runner as r
 from pygemstones.util import log as l
 
 from core import config as c
-from core import tool, util
+from core import host, run, tool, util
 
 
 # -----------------------------------------------------------------------------
@@ -20,14 +19,17 @@ def run_task_build():
     f.copy_all(module_dir, build_dir)
 
     l.i("Copying binary files...")
-    lib_arch = util.get_arch_path()
-    binary_dir = os.path.join("build", "c-shared", lib_arch, util.get_lib_binary_dir())
+    lib_arch = host.get_arch_path()
+    binary_dir = os.path.join("build", "c-shared", lib_arch, host.get_lib_binary_dir())
     build_binary_dir = os.path.join(build_dir, "src", "xplpc", "lib", lib_arch)
     f.copy_all(binary_dir, build_binary_dir)
 
     # build
     l.i("Building...")
-    r.run(["python3", "setup.py", "sdist", "bdist_wheel"], cwd=build_dir)
+
+    # A source distribution cannot produce the native library, so publishing one would let pip
+    # install a package on a platform the wheel correctly refuses and fail on the first call.
+    run.run(["python3", "-m", "build", "--wheel"], cwd=build_dir)
 
     l.ok()
 
@@ -36,33 +38,32 @@ def run_task_build():
 def run_task_install():
     tool.check_tool_pip()
 
-    use_dev = True
-
-    if use_dev:
-        # install
+    if not util.get_param_wheel():
         l.i("Installing development package...")
 
         lib_dir = os.path.join("python", "lib")
 
-        r.run(
+        run.run(
             ["python3", "-m", "pip", "install", "-e", ".", "--force-reinstall"],
             cwd=lib_dir,
         )
-    else:
-        # find package
-        l.i("Searching for package...")
-        dist_dir = os.path.join("build", "python", "dist")
-        packages = f.find_files(dist_dir, "*.whl")
 
-        if len(packages) > 0:
-            package = packages[0]
-            l.i(f"Package found: {package}")
-        else:
-            l.e("No package found, you need build it first")
+        l.ok()
+        return
 
-        # install
-        l.i("Installing wheel package...")
-        r.run(["python3", "-m", "pip", "install", package, "--force-reinstall"])
+    l.i("Searching for package...")
+
+    dist_dir = os.path.join("build", "python", "dist")
+    packages = f.find_files(dist_dir, "*.whl")
+
+    if len(packages) == 0:
+        l.e("No package found, you need build it first")
+
+    package = packages[0]
+    l.i(f"Package found: {package}")
+
+    l.i("Installing wheel package...")
+    run.run(["python3", "-m", "pip", "install", package, "--force-reinstall"])
 
     l.ok()
 
@@ -71,9 +72,14 @@ def run_task_install():
 def run_task_test():
     tool.check_tool_pytest()
 
+    if util.get_param_sanitizer() != "none":
+        l.e(
+            "The sanitizer instruments the native library, so build it with c-build-shared --sanitizer and the suite picks it up from the environment"
+        )
+
     l.i("Testing...")
     python_dir = os.path.join("python", "tests")
-    r.run(["pytest"], cwd=python_dir)
+    run.run(["pytest"], cwd=python_dir)
     l.ok()
 
 
@@ -83,13 +89,14 @@ def run_task_run_sample():
 
     l.i("Running...")
     sample_dir = os.path.join("python", "sample", "src")
-    r.run(["python3", "main.py"], cwd=sample_dir)
+    run.run(["python3", "main.py"], cwd=sample_dir)
     l.ok()
 
 
 # -----------------------------------------------------------------------------
 def run_task_pyinstaller():
-    tool.check_tool_pyinstaller()
+    # The task runs pyinstaller through poetry, so poetry is the only tool that has to be on the path.
+    tool.check_tool_poetry()
 
     l.i("Running...")
 
@@ -101,9 +108,18 @@ def run_task_pyinstaller():
 
     sample_dir = os.path.join("python", "sample", "pyinstaller")
 
-    r.run(["poetry", "install", "--sync"], cwd=sample_dir)
+    # Poetry adopts an activated environment when it finds one, and syncing removes everything the lock does not name, so it would empty the environment this task is running in.
+    sample_env = os.environ.copy()
+    sample_env.pop("VIRTUAL_ENV", None)
 
-    r.run(
+    # Analysing the sample imports kivymd, which asks kivy for a font size and makes it open a window, so packaging would need a display it never uses.
+    sample_env["SDL_VIDEODRIVER"] = "dummy"
+    sample_env["KIVY_DPI"] = "96"
+    sample_env["KIVY_METRICS_DENSITY"] = "1"
+
+    run.run(["poetry", "sync"], cwd=sample_dir, env=sample_env)
+
+    run.run(
         [
             "poetry",
             "run",
@@ -117,6 +133,46 @@ def run_task_pyinstaller():
             "--clean",
         ],
         cwd=sample_dir,
+        env=sample_env,
+    )
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_lint():
+    # check
+    tool.check_tool_python_linter()
+
+    # lint
+    l.i("Linting Python files...")
+
+    run.run(
+        [
+            "ruff",
+            "check",
+            "--config",
+            os.path.join(c.proj_path, "ruff.toml"),
+            os.path.join(c.proj_path, "xplpc.py"),
+            os.path.join(c.proj_path, "conanfile.py"),
+            os.path.join(c.proj_path, "core"),
+            os.path.join(c.proj_path, "python", "lib", "src"),
+            os.path.join(c.proj_path, "python", "tests"),
+        ],
+        cwd=c.proj_path,
+    )
+
+    # The package is annotated, so the annotations are checked rather than taken on trust.
+    l.i("Checking Python types...")
+
+    run.run(
+        [
+            "mypy",
+            "--config-file",
+            os.path.join(c.proj_path, "mypy.ini"),
+            os.path.join(c.proj_path, "python", "lib", "src", "xplpc"),
+        ],
+        cwd=c.proj_path,
     )
 
     l.ok()
@@ -154,7 +210,7 @@ def run_task_format():
 
         util.run_format(
             path_list=path_list,
-            formatter=lambda file_item: r.run(
+            formatter=lambda file_item: run.run(
                 [
                     "black",
                     "-q",

@@ -2,12 +2,10 @@ from ctypes import c_char
 
 
 class ByteArrayHelper:
+    # Reading from a null address would take the process down, and an empty view carries no bytes.
     @staticmethod
-    def create_from_data_view(data_view):
-        # create ctypes array from dataview's address and size
-        ctypes_array = (c_char * data_view.size).from_address(data_view.ptr)
+    def create_from_data_view(data_view) -> bytearray:
+        if not data_view.ptr or data_view.size <= 0:
+            return bytearray()
 
-        # create bytearray from ctypes array
-        byte_array = bytearray(ctypes_array)
-
-        return byte_array
+        return bytearray((c_char * data_view.size).from_address(data_view.ptr))

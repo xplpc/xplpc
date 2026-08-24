@@ -2,13 +2,14 @@ import Foundation
 import os.log
 
 struct Log {
-    static func d(_ msg: String, line _: Int = #line, fileName _: String = #file, funcName _: String = #function) {
-        #if XPLPC_ENABLE_LOG
-            os_log("💙 %@", log: .default, type: .debug, msg)
-        #endif
+    /// The library writes through a subsystem of its own, so a consumer can filter or silence it and can raise it to debug without a rebuild.
+    private static let log = OSLog(subsystem: "XPLPC", category: "xplpc")
+
+    static func d(_ msg: String) {
+        os_log("%@", log: log, type: .debug, msg)
     }
 
-    static func e(_ msg: String, line _: Int = #line, fileName _: String = #file, funcName _: String = #function) {
-        os_log("❤️ %@", log: .default, type: .error, msg)
+    static func e(_ msg: String) {
+        os_log("%@", log: log, type: .error, msg)
     }
 }

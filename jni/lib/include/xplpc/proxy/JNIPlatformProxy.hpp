@@ -1,8 +1,9 @@
 #pragma once
 
-#include "xplpc/jni/support.hpp"
 #include "xplpc/proxy/PlatformProxy.hpp"
 
+#include <atomic>
+#include <jni.h>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -19,24 +20,39 @@ public:
 
     virtual void initialize() override;
     virtual void initializePlatform() override;
-    virtual void finalize() override;
-    virtual void finalizePlatform() override;
+    void finalize();
+    void finalizePlatform();
     virtual void callProxy(const std::string &key, const std::string &data) override;
     virtual bool hasMapping(const std::string &name) override;
 
+    void callProxyCallback(const std::string &key, const std::string &data);
     void setJavaVM(JavaVM *jvm);
-    JNIEnv *jniGetThreadEnv();
-    JNIEnv *jniGetOptThreadEnv();
-    jclass jniFindClass(const char *name);
 
 private:
+    static constexpr const char *coreClassName = "com/xplpc/core/XPLPC";
+    static constexpr const char *platformProxyClassName = "com/xplpc/proxy/PlatformProxy";
+
     static std::shared_ptr<JNIPlatformProxy> instance;
     static std::once_flag initInstanceFlag;
 
-    thread_local static JNIEnv *threadEnv;
-    JavaVM *javaVM;
-    jobject classLoader;
-    jmethodID classLoaderMethodID;
+    // A mapping may answer from a thread of its own long after the bridge was finalized, so the entry points are published atomically.
+    std::atomic<JavaVM *> javaVM{nullptr};
+    std::atomic<jclass> platformProxyClass{nullptr};
+    std::atomic<jmethodID> onNativeProxyCallMethodID{nullptr};
+    std::atomic<jmethodID> onNativeProxyCallbackMethodID{nullptr};
+    std::atomic<jmethodID> onHasMappingMethodID{nullptr};
+
+    std::atomic<jobject> classLoader{nullptr};
+    std::atomic<jmethodID> classLoaderMethodID{nullptr};
+    jmethodID onInitializePlatformMethodID = nullptr;
+    jmethodID onFinalizePlatformMethodID = nullptr;
+
+    JNIEnv *jniGetThreadEnv() const;
+    jclass jniFindClass(JNIEnv *env, const char *name) const;
+    bool cacheClassLoader(JNIEnv *env);
+    bool cacheEntryPoints(JNIEnv *env, jclass bridgeClass);
+    bool clearPendingException(JNIEnv *env, const char *source) const;
+    bool callStaticVoid(jmethodID method, const char *source, const std::string &key, const std::string &data);
 
     JNIPlatformProxy() = default;
     JNIPlatformProxy(const JNIPlatformProxy &) = delete;

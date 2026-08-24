@@ -1,15 +1,26 @@
 import os
-import platform
-import sys
 
 from pygemstones.io import file as f
 from pygemstones.system import env as e
 from pygemstones.system import platform as p
-from pygemstones.system import runner as r
-from pygemstones.type import list as ls
 from pygemstones.util import log as l
 
 from core import config as cfg
+from core import run
+
+
+# -----------------------------------------------------------------------------
+def get_target_data_for_host():
+    if p.is_macos():
+        return cfg.targets["platform-macos"]
+
+    if p.is_windows():
+        return cfg.targets["platform-windows"]
+
+    if p.is_linux():
+        return cfg.targets["platform-linux"]
+
+    l.e("Unknown platform")
 
 
 # -----------------------------------------------------------------------------
@@ -21,11 +32,9 @@ def exec_name(name):
 
 
 # -----------------------------------------------------------------------------
-def run_name(name):
-    if p.is_windows():
-        return f"{name}.exe"
-
-    return f"./{name}"
+def run_name(directory, name):
+    # Windows resolves the executable against the directory the caller is in rather than the one the child is given, so the path is always complete.
+    return os.path.join(directory, f"{name}.exe" if p.is_windows() else name)
 
 
 # -----------------------------------------------------------------------------
@@ -45,7 +54,7 @@ def show_file_contents(file_path):
 
     run_args.append(file_path)
 
-    r.run(run_args, shell=shell)
+    run.run(run_args, shell=shell)
 
 
 # -----------------------------------------------------------------------------
@@ -60,7 +69,7 @@ def run_gradle(commands, cwd):
 
     run_args.extend(commands)
 
-    r.run(run_args, shell=shell, cwd=cwd)
+    run.run(run_args, shell=shell, cwd=cwd)
 
 
 # -----------------------------------------------------------------------------
@@ -115,17 +124,6 @@ def run_format(path_list, formatter, ignore_path_list):
 
 
 # -----------------------------------------------------------------------------
-def get_param_arch(target):
-    args = sys.argv
-    param_archs = ls.get_arg_list_values(args, "--arch")
-
-    if not param_archs:
-        return None
-
-    return param_archs[len(param_archs) - 1]
-
-
-# -----------------------------------------------------------------------------
 def get_param_build_type(target, platform=None, format=None):
     param_build_type = cfg.options["--build"]
 
@@ -146,12 +144,17 @@ def get_param_build_type(target, platform=None, format=None):
 
 
 # -----------------------------------------------------------------------------
-def get_param_interface(target):
+def get_param_interface():
     return cfg.options["--interface"]
 
 
 # -----------------------------------------------------------------------------
-def get_param_platform(target):
+def get_param_wheel():
+    return cfg.options["--wheel"]
+
+
+# -----------------------------------------------------------------------------
+def get_param_platform():
     param_platform = cfg.options["--platform"]
 
     if not param_platform:
@@ -161,8 +164,28 @@ def get_param_platform(target):
 
 
 # -----------------------------------------------------------------------------
-def get_param_dry():
-    return cfg.options["--dry"]
+def get_param_url():
+    return cfg.options["--url"]
+
+
+# -----------------------------------------------------------------------------
+def get_param_dependency_tool():
+    param_tool = cfg.options["--dependency-tool"].lower()
+
+    if param_tool not in ["cpm", "conan"]:
+        l.e("Dependency tool need be one of: cpm, conan")
+
+    return param_tool
+
+
+# -----------------------------------------------------------------------------
+def get_param_sanitizer():
+    return cfg.options["--sanitizer"] or "none"
+
+
+# -----------------------------------------------------------------------------
+def get_param_incremental():
+    return cfg.options["--incremental"]
 
 
 # -----------------------------------------------------------------------------
@@ -184,30 +207,3 @@ def get_cmake_build_type(build_type):
         return "Profile"
 
     l.e(f"Invalid build type: {build_type}")
-
-
-# -----------------------------------------------------------------------------
-def get_lib_binary_dir():
-    if p.is_windows():
-        return "bin"
-
-    return "lib"
-
-
-# -----------------------------------------------------------------------------
-def get_arch_path():
-    arch = platform.machine().lower()
-    lib_arch = ""
-
-    if arch == "armv7l" or arch == "armv7":
-        lib_arch = "arm32"
-    elif arch == "aarch64" or arch == "arm64":
-        lib_arch = "arm64"
-    elif arch == "i686" or arch == "x86":
-        lib_arch = "x86"
-    elif arch == "x86_64" or arch == "amd64":
-        lib_arch = "x86_64"
-    else:
-        l.e(f"The architecture {arch} is not supported.")
-
-    return lib_arch

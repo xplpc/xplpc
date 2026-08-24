@@ -1,47 +1,45 @@
-import { Lock } from "../util/lock";
+export interface CallbackListItem {
+    (response: string): void;
+}
 
-export interface XCallbackListItemType { (response: string): void }
+export class CallbackList {
+    private static instance: CallbackList;
+    private list = new Map<string, CallbackListItem>();
 
-export class XCallbackList {
-    private static instance: XCallbackList;
-    private list = new Map<string, XCallbackListItemType>();
-    private lock = new Lock();
+    private constructor() {}
 
-    private constructor() {
-        // ignore
-    }
-
-    public static shared(): XCallbackList {
-        if (!XCallbackList.instance) {
-            XCallbackList.instance = new XCallbackList();
+    public static shared(): CallbackList {
+        if (!CallbackList.instance) {
+            CallbackList.instance = new CallbackList();
         }
 
-        return XCallbackList.instance;
+        return CallbackList.instance;
     }
 
-    public async add(key: string, callback: XCallbackListItemType): Promise<void> {
-        await this.lock.acquire();
+    public add(key: string, callback: CallbackListItem): void {
         this.list.set(key, callback);
-        return this.lock.release();
     }
 
-    public async execute(key: string, data: string): Promise<void> {
-        await this.lock.acquire();
+    public execute(key: string, data: string): void {
+        // The wasm module answers synchronously, so registration and lookup must stay synchronous too.
 
-        if (this.list.has(key)) {
-            const callback = this.list.get(key);
+        const callback = this.list.get(key);
+
+        if (callback) {
             this.list.delete(key);
-            this.lock.release();
-            return callback?.(data);
+            callback(data);
         }
-
-        return this.lock.release();
     }
 
-    public async count(): Promise<number> {
-        await this.lock.acquire();
-        const amount = this.list.size;
-        this.lock.release();
-        return amount;
+    public remove(key: string): void {
+        this.list.delete(key);
+    }
+
+    public clear(): void {
+        this.list.clear();
+    }
+
+    public count(): number {
+        return this.list.size;
     }
 }

@@ -3,10 +3,11 @@ import logging
 import threading
 
 import pytest
-
+from verified_call import verify_call
 from xplpc.client.client import Client
 from xplpc.core.config import Config
 from xplpc.core.xplpc import XPLPC
+from xplpc.data.callback_list import CallbackList
 from xplpc.data.mapping_list import MappingList
 from xplpc.helper.byte_array_helper import ByteArrayHelper
 from xplpc.map.mapping_item import MappingItem
@@ -14,18 +15,13 @@ from xplpc.message.message import Message
 from xplpc.message.param import Param
 from xplpc.message.request import Request
 from xplpc.message.response import Response
+from xplpc.proxy.platform_proxy import PlatformProxy
 from xplpc.serializer.json_serializer import JsonSerializer
 from xplpc.type.dataview import DataView
 
-# ------------------------------------------------------------------------------
-# FIXTURES
-# ------------------------------------------------------------------------------
 
-
-# general fixture before and after all tests
 @pytest.fixture(scope="session", autouse=True)
 def setup_and_teardown_session():
-    # general command before all tests
     logging.basicConfig(level=logging.DEBUG)
 
     serializer = JsonSerializer()
@@ -34,20 +30,13 @@ def setup_and_teardown_session():
 
     yield
 
-    # general command after all tests
 
-
-# fixture before and after each individual test
 @pytest.fixture(autouse=True)
 def setup_and_teardown():
-    # command before each test
     yield
-    # command after each test
 
-
-# ------------------------------------------------------------------------------
-# CALLBACKS
-# ------------------------------------------------------------------------------
+    # A leaked callback is the defect this project has found most often, so every test is held to leaving none.
+    assert CallbackList().count() == 0
 
 
 def battery_level(m: Message, r: Response):
@@ -57,14 +46,11 @@ def battery_level(m: Message, r: Response):
 
 def battery_level_async(m: Message, r: Response):
     async def main():
-        # async sleep
         await asyncio.sleep(0.1)
 
-        # return response
         suffix = m.get("suffix")
         r(f"100{suffix}")
 
-    # create a new event loop
     loop = asyncio.new_event_loop()
 
     try:
@@ -75,11 +61,6 @@ def battery_level_async(m: Message, r: Response):
 
 def reverse(m: Message, r: Response):
     r("ok")
-
-
-# ------------------------------------------------------------------------------
-# WORKERS
-# ------------------------------------------------------------------------------
 
 
 def battery_level_worker():
@@ -95,7 +76,7 @@ def battery_level_worker():
         ],
     )
 
-    response = Client.call(request)
+    response = verify_call(request)
     assert response == "100%"
 
 
@@ -107,29 +88,25 @@ def reverse_worker():
 
     request = Request("sample.reverse")
 
-    response = Client.call(request)
+    response = verify_call(request)
     assert response == "response-is-ok"
 
 
 def grayscale_image_with_dataView_worker():
     data = bytearray(
         [
-            # red pixel
             255,
             0,
             0,
             255,
-            # green pixel
             0,
             255,
             0,
             255,
-            # blue pixel
             0,
             0,
             255,
             255,
-            # transparent pixel
             0,
             0,
             0,
@@ -146,7 +123,7 @@ def grayscale_image_with_dataView_worker():
         ],
     )
 
-    response = Client.call(request)
+    response = verify_call(request)
     assert response == "OK"
 
     data = ByteArrayHelper.create_from_data_view(data_view)
@@ -156,11 +133,6 @@ def grayscale_image_with_dataView_worker():
     assert data[4] == 85
     assert data[8] == 85
     assert data[12] == 0
-
-
-# ------------------------------------------------------------------------------
-# TESTS
-# ------------------------------------------------------------------------------
 
 
 @pytest.mark.asyncio
@@ -200,3 +172,62 @@ async def test_grayscale_image_with_dataView_worker_concurrent():
 
     for thread in threads:
         thread.join()
+
+
+# The mapping answers after the call returned, from a thread it created, and still has to reach python.
+@pytest.mark.asyncio
+async def test_core_mapping_answers_from_its_own_thread():
+    answered = threading.Event()
+
+    Client.call(Request("sample.async"), lambda *_: answered.set())
+
+    assert answered.wait(5)
+
+
+def test_initializing_from_many_threads_keeps_one_set_of_callbacks():
+    # The native side is handed the ctypes callback objects the proxy holds, so replacing them while it still points at the old ones is a dangling function pointer.
+
+    proxy = PlatformProxy()
+
+    before = (
+        proxy.native_proxy_call_callback,
+        proxy.native_proxy_callback_callback,
+        proxy.native_proxy_call_from_thread_callback,
+        proxy.native_proxy_callback_from_thread_callback,
+    )
+
+    threads = [threading.Thread(target=proxy.initialize) for _ in range(16)]
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    after = (
+        proxy.native_proxy_call_callback,
+        proxy.native_proxy_callback_callback,
+        proxy.native_proxy_call_from_thread_callback,
+        proxy.native_proxy_callback_from_thread_callback,
+    )
+
+    for original, current in zip(before, after, strict=True):
+        assert original is current
+
+
+def test_initializing_the_library_from_many_threads_keeps_the_first_config():
+    serializer = XPLPC().config.serializer
+
+    threads = [
+        threading.Thread(target=XPLPC().initialize, args=(Config(JsonSerializer()),))
+        for _ in range(16)
+    ]
+
+    for thread in threads:
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    assert XPLPC().config.serializer is serializer
+    assert XPLPC().initialized

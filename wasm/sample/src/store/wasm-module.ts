@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
 
 type WasmModuleState = {
-    loaded: boolean
-}
+    loaded: boolean;
+};
 
 export const useWasmModuleStore = defineStore("wasm-module", {
     state: (): WasmModuleState => ({
-        loaded: false
+        loaded: false,
     }),
     getters: {
         isLoaded: (state) => state.loaded,

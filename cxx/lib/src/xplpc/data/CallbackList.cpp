@@ -8,23 +8,43 @@ namespace data
 std::shared_ptr<CallbackList> CallbackList::instance = nullptr;
 std::once_flag CallbackList::initInstanceFlag;
 
-void CallbackList::add(const std::string &key, const std::function<void(const std::string &)> callback)
+void CallbackList::add(const std::string &key, Callback callback)
 {
-    list.set(key, callback);
+    list.set(key, std::move(callback));
 }
 
 void CallbackList::execute(const std::string &key, const std::string &data)
 {
-    const auto callback = list.get(key);
+    auto callback = list.take(key);
 
     if (callback.has_value())
     {
-        list.remove(key);
         callback.value()(data);
     }
 }
 
-size_t CallbackList::count() const noexcept
+void CallbackList::remove(const std::string &key)
+{
+    list.remove(key);
+}
+
+void CallbackList::clear()
+{
+    list.clear();
+}
+
+void CallbackList::answerAndClear(const std::string &data)
+{
+    // Every entry is taken before any of them is invoked, so a callback is free to reenter and none can be answered twice.
+    auto taken = list.takeAll();
+
+    for (auto &entry : taken)
+    {
+        entry.second(data);
+    }
+}
+
+size_t CallbackList::count() const
 {
     return list.count();
 }

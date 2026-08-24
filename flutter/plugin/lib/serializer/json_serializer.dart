@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:reflectable/reflectable.dart';
+import 'package:xplpc/message/decoded_request.dart';
 import 'package:xplpc/message/message.dart';
 import 'package:xplpc/message/param.dart';
 import 'package:xplpc/reflectable/reflector.dart';
@@ -9,32 +10,27 @@ import 'package:xplpc/util/log.dart';
 
 class JsonSerializer implements Serializer {
   @override
-  String decodeFunctionName(String data) {
-    try {
-      return json.decode(data)["f"];
-    } catch (e) {
-      Log.e("[JsonSerializer : decodeFunctionName] Error when parse json: $e");
+  T? decodeFunctionReturnValue<T>(String data) {
+    // An empty response is the empty value every failing path answers with, not a document that failed to parse.
+    if (data.isEmpty) {
+      return null;
     }
 
-    return "";
-  }
-
-  @override
-  T? decodeFunctionReturnValue<T>(String data) {
-    // try find the class mirror for type T
+    // A reflected type is filled through the fromJson constructor it declares.
     try {
       ClassMirror? classMirror = reflector.reflectType(T) as ClassMirror?;
 
       if (classMirror != null &&
-          classMirror.declarations.values.whereType<MethodMirror>().any((m) =>
-              m.simpleName
-                  .toString()
-                  .substring(m.simpleName.toString().lastIndexOf(".") + 1) ==
-              "fromJson")) {
-        var instanceMirror = classMirror.newInstance(
-          "fromJson",
-          [json.decode(data)["r"]],
-        );
+          classMirror.declarations.values.whereType<MethodMirror>().any(
+            (m) =>
+                m.simpleName.toString().substring(
+                  m.simpleName.toString().lastIndexOf(".") + 1,
+                ) ==
+                "fromJson",
+          )) {
+        var instanceMirror = classMirror.newInstance("fromJson", [
+          json.decode(data)["r"],
+        ]);
 
         return instanceMirror as T?;
       }
@@ -44,15 +40,21 @@ class JsonSerializer implements Serializer {
       );
     } catch (e) {
       Log.e(
+        "[JsonSerializer : decodeFunctionReturnValue] Error when find class mirror",
+      );
+      Log.d(
         "[JsonSerializer : decodeFunctionReturnValue] Error when find class mirror: $e",
       );
     }
 
-    // use default dart types
+    // Anything else is answered as the plain dart type the wire carried.
     try {
-      return json.decode(data)["r"];
+      return json.decode(data)["r"] as T?;
     } catch (e) {
       Log.e(
+        "[JsonSerializer : decodeFunctionReturnValue] Error when parse json",
+      );
+      Log.d(
         "[JsonSerializer : decodeFunctionReturnValue] Error when parse json: $e",
       );
     }
@@ -61,21 +63,20 @@ class JsonSerializer implements Serializer {
   }
 
   @override
-  Message? decodeMessage(String data) {
+  DecodedRequest? decodeRequest(String data) {
     try {
-      // decode parameters
-      var decodedData = json.decode(data);
+      final decodedData = json.decode(data) as Map<String, dynamic>;
+      final message = Message();
 
-      // message data
-      var message = Message();
-
-      for (var param in decodedData["p"]) {
-        message.set(param["n"], param["v"]);
+      for (final param in (decodedData["p"] as List<dynamic>? ?? [])) {
+        final entry = param as Map<String, dynamic>;
+        message.set(entry["n"] as String, entry["v"]);
       }
 
-      return message;
+      return DecodedRequest(decodedData["f"] as String? ?? "", message);
     } catch (e) {
-      Log.e("[JsonSerializer : decodeMessage] Error when decode message: $e");
+      Log.e("[JsonSerializer : decodeRequest] Error when decode request");
+      Log.d("[JsonSerializer : decodeRequest] Error when decode request: $e");
     }
 
     return null;
@@ -87,6 +88,9 @@ class JsonSerializer implements Serializer {
       return jsonEncode({"r": data});
     } catch (e) {
       Log.e(
+        "[JsonSerializer : encodeFunctionReturnValue] Error when encode data",
+      );
+      Log.d(
         "[JsonSerializer : encodeFunctionReturnValue] Error when encode data: $e",
       );
     }
@@ -97,12 +101,10 @@ class JsonSerializer implements Serializer {
   @override
   String encodeRequest(String functionName, [List<Param>? params]) {
     try {
-      return json.encode({
-        "f": functionName,
-        "p": params,
-      });
+      return json.encode({"f": functionName, "p": params ?? []});
     } catch (e) {
-      Log.e("[JsonSerializer : encodeRequest] Error when encode data: $e");
+      Log.e("[JsonSerializer : encodeRequest] Error when encode data");
+      Log.d("[JsonSerializer : encodeRequest] Error when encode data: $e");
     }
 
     return "";
