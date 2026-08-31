@@ -1,0 +1,17 @@
+<resources>
+    <!-- base application theme -->
+    <style name="Theme.Runner" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- primary brand color -->
+        <item name="colorPrimary">@color/primary_color</item>
+        <item name="colorPrimaryVariant">@color/primary_color</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- secondary brand color -->
+        <item name="colorSecondary">@color/primary_color</item>
+        <item name="colorSecondaryVariant">@color/primary_color</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">?attr/colorPrimary</item>
+        <!-- status bar color -->
+        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- customize your theme here -->
+    </style>
+</resources>

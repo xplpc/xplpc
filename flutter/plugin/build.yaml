@@ -1,0 +1,8 @@
+targets:
+  $default:
+    builders:
+      reflectable_builder:
+        generate_for:
+          - test/client_test.dart
+        options:
+          formatted: true

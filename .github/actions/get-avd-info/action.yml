@@ -1,0 +1,16 @@
+name: 'Get AVD Info'
+description: 'Get the emulator architecture that matches the host it runs on.'
+outputs:
+    arch:
+        value: ${{ steps.get-avd-arch.outputs.arch }}
+runs:
+    using: "composite"
+    steps:
+        - id: get-avd-arch
+          run: |
+            if [ "$(uname -m)" = "arm64" ] || [ "$(uname -m)" = "aarch64" ]; then
+              echo "arch=arm64-v8a" >> $GITHUB_OUTPUT
+            else
+              echo "arch=x86_64" >> $GITHUB_OUTPUT
+            fi
+          shell: bash

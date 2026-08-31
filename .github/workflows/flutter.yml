@@ -1,0 +1,232 @@
+name: Flutter
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+# The default branch is never cancelled, since that is where publishing happens.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            library-task: "swift-build --interface --platform macos-flutter",
+            xcframework-task: "swift-build-xcframework --platform macos-flutter"
+          }
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: "stable"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+          flutter --version
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
+
+      - name: Build Native Library
+        run: |
+          python3 xplpc.py ${{ matrix.config.library-task }}
+          python3 xplpc.py ${{ matrix.config.xcframework-task }}
+
+      - name: Test
+        run: python3 xplpc.py flutter-test
+
+      - name: Verify Formatting
+        run: |
+          python3 xplpc.py flutter-format
+          git diff --exit-code -- "*.dart"
+
+      # Building the example is what resolves the podspec and links the xcframework it names.
+      - name: Build Example
+        working-directory: flutter/plugin/example
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter build macos --debug
+
+  android:
+    name: "Android Example"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "corretto"
+          java-version: "17"
+
+      - name: Install NDK (only when use cpm)
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r29
+          add-to-path: true
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: "stable"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+          java -version
+          flutter --version
+
+      - name: Conan (only when use conan)
+        run: python3 xplpc.py conan-setup
+
+      - name: Build Native Library
+        run: python3 xplpc.py kotlin-build --interface --platform flutter
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build AAR
+        run: python3 xplpc.py kotlin-build-aar --platform flutter
+
+      - name: Build Example
+        run: |
+          flutter pub get
+          dart run build_runner build
+          flutter build apk --debug
+        working-directory: flutter/plugin/example
+
+  linux:
+    name: "Linux ${{ matrix.sanitizer }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [none, address, undefined]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.8"
+          channel: "stable"
+
+      - name: Build Native Library
+        run: python3 xplpc.py c-build-shared --sanitizer ${{ matrix.sanitizer }}
+
+      - name: Confirm What Was Built Is What Was Asked For
+        run: |
+          ldd build/c-shared/x86_64/lib/libxplpc.so | grep -iE "asan|ubsan" > /dev/null && linked=yes || linked=no
+          echo "sanitizer runtime linked: $linked"
+
+          if [ "${{ matrix.sanitizer }}" = "none" ] && [ "$linked" = "yes" ]; then
+            echo "the plain build is instrumented, so it would pass as an instrumented one" && exit 1
+          fi
+
+          if [ "${{ matrix.sanitizer }}" != "none" ] && [ "$linked" = "no" ]; then
+            echo "the sanitizer runtime is not linked, the run would prove nothing" && exit 1
+          fi
+
+      - name: Prepare
+        run: |
+          flutter pub get
+          dart run build_runner build
+        working-directory: flutter/plugin
+
+      - name: Test
+        run: |
+          if [ "${{ matrix.sanitizer }}" != "none" ]; then
+            export LD_PRELOAD=$(gcc -print-file-name=lib${{ matrix.sanitizer == 'address' && 'asan' || 'ubsan' }}.so)
+          fi
+
+          export ASAN_OPTIONS=detect_leaks=0
+          export UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1
+
+          # The suite runs on the host vm, where nothing bundled the library, so the instrumented one is named directly.
+          export XPLPC_LIBRARY_PATH=$GITHUB_WORKSPACE/build/c-shared/x86_64/lib/libxplpc.so
+
+          flutter test
+        working-directory: flutter/plugin

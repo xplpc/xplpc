@@ -1,0 +1,22 @@
+pygemstones==0.0.14
+docopt==0.6.2
+
+# conan
+conan==2.31.2
+
+# format
+black==26.5.1
+
+# lint
+ruff==0.16.4
+mypy==2.3.1
+
+# tests
+pytest==9.1.1
+pytest-asyncio==1.4.0
+pytest-randomly==4.1.0
+
+# package
+build==1.5.0
+setuptools==84.0.0
+wheel==0.48.0

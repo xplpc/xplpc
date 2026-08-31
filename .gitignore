@@ -1,0 +1,67 @@
+# os
+Thumbs.db
+.DS_Store
+
+# ide
+.idea
+.vscode
+.iml
+.claude
+.cursor
+
+# auto generated
+**/*.pyc
+*.autosave
+*.user
+*.user.*
+.vs
+__pycache__
+Brewfile.lock.json
+.metals
+.ruff_cache
+
+# node
+node_modules
+
+# cmake
+CMakeUserPresets.json
+CMakeSettings.json
+CMakeLists.txt.user
+CMakePresets.json
+
+# conan
+conan_toolchain.cmake
+conandeps_legacy.cmake
+cmakedeps_macros.cmake
+conanbuild*.sh
+conanrun*.sh
+deactivate_conan*.sh
+
+# java/kotlin
+.gradle
+.kotlin
+
+# cxx
+.cxx
+
+# flutter
+*.reflectable.dart
+
+# custom
+build/
+build-*/
+build_*/
+
+# python
+*.egg-info
+.pytest_cache
+
+# environments
+.env
+.venv
+env/
+venv/
+.venv*/
+ENV/
+env.bak/
+venv.bak/

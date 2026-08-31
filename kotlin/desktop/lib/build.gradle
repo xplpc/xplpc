@@ -1,0 +1,70 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.4.10'
+    id 'java-library'
+}
+
+group = 'com.xplpc.library'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
+    implementation 'com.google.code.gson:gson:2.14.0'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+test {
+    useJUnitPlatform()
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java', '../../shared/src'
+        }
+    }
+
+    test {
+        java {
+            srcDirs 'src/test/java', '../../shared/tests'
+        }
+    }
+}
+
+jar {
+    archiveFileName = "${project.name}.jar"
+}
+
+processResources {
+    def arch = project.hasProperty('xplpc_arch') ? project.property('xplpc_arch') : null
+    def libsArchPath = arch ? arch : file("../../../build/kotlin-desktop").listFiles().find { it.directory }?.name
+
+    if (libsArchPath == null || libsArchPath == '') {
+        throw new GradleException("The architecture of native library cannot be null or empty!")
+    } else {
+        println("Architecture of native library: $libsArchPath")
+    }
+
+    def osName = System.getProperty('os.name').toLowerCase()
+    def libsPath = osName.contains('win') ? 'bin' : 'lib'
+
+    from("../../../build/kotlin-desktop/${libsArchPath}/${libsPath}") {
+        into 'native-libs'
+    }
+}

@@ -1,0 +1,8 @@
+include(default)
+
+[settings]
+compiler.cppstd=20
+os=tvOS
+os.version=12.0
+os.sdk=appletvos
+arch=armv8

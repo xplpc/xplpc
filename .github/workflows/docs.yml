@@ -1,0 +1,42 @@
+name: Docs
+
+on:
+  workflow_dispatch:
+  push:
+
+# The default branch is never cancelled, since that is where publishing happens.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  format:
+    name: "Format"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install Remark
+        run: npm install -g remark-cli@12.0.1
+
+      - name: Format
+        run: python3 xplpc.py docs-format
+
+      - name: Verify Nothing Changed
+        run: git diff --exit-code

@@ -1,0 +1,28 @@
+PODS:
+  - battery_plus (1.0.0):
+    - Flutter
+  - Flutter (1.0.0)
+  - xplpc (1.0.0):
+    - Flutter
+
+DEPENDENCIES:
+  - battery_plus (from `.symlinks/plugins/battery_plus/ios`)
+  - Flutter (from `Flutter`)
+  - xplpc (from `.symlinks/plugins/xplpc/ios`)
+
+EXTERNAL SOURCES:
+  battery_plus:
+    :path: ".symlinks/plugins/battery_plus/ios"
+  Flutter:
+    :path: Flutter
+  xplpc:
+    :path: ".symlinks/plugins/xplpc/ios"
+
+SPEC CHECKSUMS:
+  battery_plus: b42253f6d2dde71712f8c36fef456d99121c5977
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  xplpc: cd6c61d06901290a5e8fe792b79dd401c7198944
+
+PODFILE CHECKSUM: d2243213672c3c48aae53c36642ba411a6be7309
+
+COCOAPODS: 1.17.0

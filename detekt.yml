@@ -1,0 +1,56 @@
+config:
+  validation: true
+  warningsAsErrors: false
+  excludes: ''
+comments:
+  active: true
+  AbsentOrWrongFileLicense:
+    active: false
+  CommentOverPrivateFunction:
+    active: false
+  CommentOverPrivateProperty:
+    active: false
+  DeprecatedBlockTag:
+    active: false
+  EndOfSentenceFormat:
+    active: false
+  KDocReferencesNonPublicProperty:
+    active: false
+  OutdatedDocumentation:
+    active: false
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
+  UndocumentedPublicProperty:
+    active: false
+complexity:
+  LongMethod:
+    active: false
+  TooManyFunctions:
+    active: false
+exceptions:
+  SwallowedException:
+    active: true
+  TooGenericExceptionCaught:
+    active: false
+style:
+  MagicNumber:
+    active: false
+  ReturnCount:
+    active: false
+  MaxLineLength:
+    maxLineLength: 200
+  UnusedParameter:
+    active: false
+  ForbiddenComment:
+    active: false
+potential-bugs:
+  ExplicitGarbageCollectionCall:
+    active: false
+empty-blocks:
+  EmptyFunctionBlock:
+    active: false
+performance:
+  SpreadOperator:
+    active: false

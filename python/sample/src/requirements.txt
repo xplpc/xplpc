@@ -1,0 +1,4 @@
+kivy==2.3.1
+kivymd2==2.0.1
+pygame==2.6.1
+psutil==7.2.2

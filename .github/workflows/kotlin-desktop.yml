@@ -1,0 +1,169 @@
+name: Kotlin Desktop
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+# The default branch is never cancelled, since that is where publishing happens.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+          name: "Windows Latest MSVC",
+          os: windows-latest
+        }
+        - {
+          name: "Ubuntu Latest GCC",
+          os: ubuntu-latest
+        }
+        - {
+          name: "macOS Latest Clang",
+          os: macos-latest
+        }
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "corretto"
+          java-version: "17"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+          java -version
+
+      - name: Conan (only when use conan)
+        run: python3 xplpc.py conan-setup
+
+      - name: Install Detekt
+        if: runner.os == 'macOS'
+        run: brew install detekt
+
+      - name: Lint
+        if: runner.os == 'macOS'
+        run: python3 xplpc.py kotlin-lint
+
+      - name: Build
+        run: python3 xplpc.py kotlin-build --platform desktop
+
+      - name: Test
+        run: python3 xplpc.py kotlin-test --platform desktop
+
+      - name: Build JAR
+        run: python3 xplpc.py kotlin-build-jar --platform desktop
+
+      - name: Build Sample
+        run: python3 xplpc.py kotlin-build-sample --platform desktop
+
+      - name: Run Sample
+        if: matrix.config.os == 'macos-latest'
+        run: |
+          set +e
+          XPLPC_LOG_LEVEL=debug python3 xplpc.py kotlin-run-sample --platform desktop > /tmp/sample.log 2>&1 &
+          runner=$!
+          started=0
+          for i in $(seq 1 60); do
+            sleep 5
+            if grep -q "XPLPC native library loaded" /tmp/sample.log; then
+              started=1
+              break
+            fi
+            if ! kill -0 "$runner" 2>/dev/null; then
+              break
+            fi
+          done
+          cat /tmp/sample.log
+          pkill -f MainKt 2>/dev/null
+          kill "$runner" 2>/dev/null
+          test "$started" -eq 1
+
+  sanitizer:
+    name: "JNI Bridge Under The ${{ matrix.sanitizer }} Sanitizer"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, undefined]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: "corretto"
+          java-version: "17"
+
+      - name: Build Native Library With Sanitizer
+        run: python3 xplpc.py kotlin-build --platform desktop --sanitizer ${{ matrix.sanitizer }}
+
+      - name: Confirm The Sanitizer Runtime Is Linked
+        run: |
+          ldd build/kotlin-desktop/x86_64/lib/libxplpc.so | grep -iE "asan|ubsan" || \
+            (echo "the sanitizer runtime is not linked, the run would prove nothing" && exit 1)
+
+      - name: Test
+        run: |
+          export LD_PRELOAD=$(gcc -print-file-name=lib${{ matrix.sanitizer == 'address' && 'asan' || 'ubsan' }}.so)
+          export ASAN_OPTIONS=detect_leaks=0:handle_segv=0:allow_user_segv_handler=1:detect_odr_violation=0
+          export UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1
+          ./gradlew cleanTest test --no-daemon
+        working-directory: kotlin/desktop/lib

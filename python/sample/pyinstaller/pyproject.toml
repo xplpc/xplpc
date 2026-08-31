@@ -1,0 +1,33 @@
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "xplpc-sample"
+version = "1.0.0"
+description = "XPLPC - Sample"
+requires-python = ">=3.10,<3.14"
+license = "MIT"
+authors = [{ name = "Paulo Coutinho", email = "paulocoutinhox@gmail.com" }]
+dependencies = [
+    "xplpc",
+    "kivy==2.3.1",
+    "kivymd2==2.0.1",
+    "pygame==2.6.1",
+    "psutil==7.2.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/xplpc/xplpc"
+Repository = "https://github.com/xplpc/xplpc"
+Documentation = "https://github.com/xplpc/xplpc"
+
+[tool.poetry]
+# This is an application that pyinstaller packages, not a python package, so there is no root to install.
+package-mode = false
+
+[tool.poetry.dependencies]
+xplpc = { path = "../../../build/python", develop = true }
+
+[tool.poetry.group.dev.dependencies]
+pyinstaller = "6.22.2"

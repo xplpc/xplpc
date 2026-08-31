@@ -1,0 +1,124 @@
+plugins {
+    id 'com.android.library'
+}
+
+// The target platform selects which native build output is packaged, and it comes from the command line or from local.properties.
+def resolveXplpcPlatform() {
+    def localPropsFile = rootProject.file("local.properties")
+
+    if (localPropsFile.exists()) {
+        def localProps = new Properties()
+        localPropsFile.withInputStream { localProps.load(it) }
+
+        if (localProps.getProperty("xplpc.platform")) {
+            return localProps.getProperty("xplpc.platform")
+        }
+    }
+
+    if (project.hasProperty("xplpc_platform") && project.property("xplpc_platform")) {
+        return project.property("xplpc_platform")
+    }
+
+    return "android"
+}
+
+def xplpcPlatform = resolveXplpcPlatform()
+def xplpcRootDir = file("$projectDir/../../../..")
+def jniLibsDir = file("$xplpcRootDir/build/kotlin-jni-libs-$xplpcPlatform")
+def jniLibsAbis = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
+
+android {
+    namespace 'com.xplpc.library'
+
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 37
+        compileSdk = 37
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs += [jniLibsDir]
+
+            kotlin {
+                srcDirs 'src/main/java', '../../../shared/src'
+            }
+        }
+
+        test {
+            kotlin {
+                srcDirs 'src/test/java'
+            }
+        }
+
+        androidTest {
+            kotlin {
+                srcDirs 'src/androidTest/java', '../../../shared/tests'
+            }
+        }
+    }
+
+
+    lint {
+        // A dependency this project pins on purpose is not a finding.
+        disable 'GradleDependency', 'AndroidGradlePluginVersion'
+        warningsAsErrors true
+        abortOnError true
+    }
+
+    buildTypes {
+        debug {
+            packagingOptions {
+                doNotStrip '**/*.so'
+            }
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlin {
+        jvmToolchain(17)
+    }
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
+    implementation 'com.google.code.gson:gson:2.14.0'
+
+    androidTestImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+}
+
+// The native output is mirrored into the jni libs source directory before anything reads it.
+tasks.register('copyJniLibs', Sync) {
+    jniLibsAbis.each { abi ->
+        def abiSourceDir = file("$xplpcRootDir/build/kotlin-$xplpcPlatform/$abi/lib")
+
+        doFirst {
+            if (!abiSourceDir.exists()) {
+                throw new GradleException("XPLPC: You need build libraries for platform \"$xplpcPlatform\" and ABI \"$abi\" inside path \"$abiSourceDir\".")
+            }
+        }
+
+        from(abiSourceDir) {
+            into abi
+        }
+    }
+
+    into jniLibsDir
+}
+
+tasks.named('preBuild') {
+    dependsOn 'copyJniLibs'
+}

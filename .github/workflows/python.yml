@@ -1,0 +1,215 @@
+name: Python
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+# The default branch is never cancelled, since that is where publishing happens.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { name: "Linux", os: ubuntu-latest }
+          - { name: "macOS", os: macos-latest }
+          - { name: "Windows", os: windows-latest }
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          ninja --version
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
+
+      - name: Build Native Library
+        run: python3 xplpc.py c-build-shared
+
+      - name: Build Python Package
+        run: python3 xplpc.py python-build
+
+      - name: Install Python Package
+        run: python3 xplpc.py python-install
+
+      - name: Lint
+        run: python3 xplpc.py python-lint
+
+      - name: Test
+        run: python3 xplpc.py python-test
+
+      - name: Test In A Random Order
+        run: python3 -m pytest -q -p randomly
+        working-directory: python/tests
+
+      - name: Verify Formatting
+        if: matrix.config.os == 'ubuntu-latest' && matrix.python-version == '3.14'
+        run: |
+          python3 xplpc.py python-format
+          git diff --exit-code
+
+  pyinstaller:
+    name: "PyInstaller Sample"
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Kivy publishes no wheel past cpython 3.13, so the sample is capped by it rather than by anything this project decides.
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+          python3 -m pip install -r python/sample/pyinstaller/requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - name: Build Native Library
+        run: python3 xplpc.py c-build-shared
+
+      - name: Build Python Package
+        run: python3 xplpc.py python-build
+
+      - name: Build The Sample
+        run: python3 xplpc.py python-pyinstaller
+
+      - name: Verify The Sample Was Produced
+        run: test -d build/pyinstaller/Runner.app
+
+  sanitizer:
+    name: "Linux Under The ${{ matrix.sanitizer }} Sanitizer"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, undefined, thread]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - name: Build Native Library With Sanitizer
+        run: python3 xplpc.py c-build-shared --sanitizer ${{ matrix.sanitizer }}
+
+      - name: Install Python Package
+        run: python3 xplpc.py python-install
+
+      - name: Confirm The Sanitizer Runtime Is Linked
+        run: |
+          ldd build/c-shared/x86_64/lib/libxplpc.so | grep -iE "asan|ubsan|tsan" || \
+            (echo "the sanitizer runtime is not linked, the run would prove nothing" && exit 1)
+
+      - name: Test
+        run: |
+          export LD_PRELOAD=$(gcc -print-file-name=lib${{ matrix.sanitizer == 'address' && 'asan' || matrix.sanitizer == 'thread' && 'tsan' || 'ubsan' }}.so)
+          export ASAN_OPTIONS=detect_leaks=0
+          export UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1
+          export TSAN_OPTIONS=halt_on_error=1:second_deadlock_stack=1
+          python3 -m pytest -q
+        working-directory: python/tests
+
+  free-threaded:
+    name: "Linux Without The GIL"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14t"
+
+      - name: Confirm The Interpreter Is Free Threaded
+        run: python3 -c "import sys; assert not sys._is_gil_enabled(), 'the gil is on, the run would prove nothing'; print('gil disabled')"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.3.3"
+
+      - name: Install Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v6
+        with:
+          version: "1.13.2"
+
+      - name: Build Native Library
+        run: python3 xplpc.py c-build-shared
+
+      - name: Install Python Package
+        run: python3 xplpc.py python-install
+
+      - name: Test
+        run: python3 xplpc.py python-test

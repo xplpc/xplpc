@@ -1,0 +1,381 @@
+import os
+
+from pygemstones.io import file as f
+from pygemstones.util import log as l
+
+from core import conan, run, tool, util
+from core import config as c
+
+
+# -----------------------------------------------------------------------------
+def run_task_build_static():
+    # check
+    tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
+    # environment
+    target = "cxx-static"
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # configure
+    l.i("Configuring...")
+
+    build_type = util.get_param_build_type(target, format="cmake")
+    l.i(f"Build type: {build_type}")
+
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
+
+    interface = util.get_param_interface()
+    l.i(f"Interface: {interface}")
+
+    target_data = util.get_target_data_for_host()
+
+    # build
+    l.i("Building...")
+
+    do_build(
+        target=target,
+        build_type=build_type,
+        target_data=target_data,
+        build_folder=target,
+        has_interface=interface,
+        has_tests=False,
+        has_sample=False,
+        has_pic=False,
+        has_custom_data=True,
+    )
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_build_sample():
+    # check
+    tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
+    # environment
+    target = "cxx-static"
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # configure
+    l.i("Configuring...")
+
+    build_type = util.get_param_build_type(target, format="cmake")
+    l.i(f"Build type: {build_type}")
+
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
+
+    target_data = util.get_target_data_for_host()
+
+    # build
+    l.i("Building...")
+
+    do_build(
+        target=target,
+        build_type=build_type,
+        target_data=target_data,
+        build_folder="cxx-sample",
+        has_interface=False,
+        has_tests=False,
+        has_sample=True,
+        has_pic=False,
+        has_custom_data=False,
+    )
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_run_sample():
+    l.i("Running...")
+
+    build_dir = os.path.join(c.proj_path, "build", "cxx-sample")
+
+    target_data = util.get_target_data_for_host()
+    arch = target_data[0]["arch"]
+    bin_dir = os.path.join(build_dir, arch, "cxx", "sample", "bin")
+
+    run.run([util.run_name(bin_dir, "xplpc-sample")], cwd=bin_dir)
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_build_leaks():
+    # check
+    tool.check_tool_cmake()
+    tool.check_tool_leaks()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
+    # environment
+    target = "cxx-static"
+    os.environ["MallocStackLogging"] = "1"
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # configure
+    l.i("Configuring...")
+
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
+
+    target_data = util.get_target_data_for_host()
+
+    # build
+    l.i("Building...")
+
+    do_build(
+        target=target,
+        build_type="Debug",
+        target_data=target_data,
+        build_folder="cxx-leaks",
+        has_interface=False,
+        has_tests=False,
+        has_sample=True,
+        has_pic=False,
+        has_custom_data=False,
+    )
+
+    # check leaks
+    l.i("Checking for leaks...")
+
+    arch = target_data[0]["arch"]
+
+    run.run(
+        [
+            "leaks",
+            "--atExit",
+            "--list",
+            "--",
+            os.path.join(
+                c.proj_path,
+                "build",
+                "cxx-leaks",
+                arch,
+                "cxx",
+                "sample",
+                "bin",
+                util.exec_name("xplpc-sample"),
+            ),
+        ]
+    )
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_test():
+    # check
+    tool.check_tool_cmake()
+
+    if c.dependency_tool == "conan":
+        tool.check_tool_conan()
+
+    # environment
+    target = "cxx-static"
+
+    # dependency
+    if c.dependency_tool == "cpm":
+        os.environ["CPM_SOURCE_CACHE"] = os.path.join(f.home_dir(), ".cache", "CPM")
+
+    # configure
+    l.i("Configuring...")
+
+    build_type = util.get_param_build_type(target, format="cmake")
+    l.i(f"Build type: {build_type}")
+
+    incremental = util.get_param_incremental()
+    l.i(f"Incremental: {incremental}")
+
+    target_data = util.get_target_data_for_host()
+
+    # build
+    l.i("Building...")
+
+    do_build(
+        target=target,
+        build_type=build_type,
+        target_data=target_data,
+        build_folder="cxx-test",
+        has_interface=False,
+        has_tests=True,
+        has_sample=False,
+        has_pic=False,
+        has_custom_data=True,
+    )
+
+    # test
+    l.i("Testing...")
+
+    build_dir = os.path.join(c.proj_path, "build", "cxx-test")
+    arch = target_data[0]["arch"]
+
+    run.run(
+        ["ctest", "-C", build_type, "--output-on-failure"],
+        cwd=os.path.join(build_dir, arch),
+    )
+
+    util.show_file_contents(
+        os.path.join(build_dir, arch, "Testing", "Temporary", "LastTest.log")
+    )
+
+    l.ok()
+
+
+# -----------------------------------------------------------------------------
+def run_task_format():
+    # check
+    tool.check_tool_cxx_formatter()
+
+    # format
+    path_list = [
+        {
+            "path": os.path.join(c.proj_path, "cxx"),
+            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "jni"),
+            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "objc"),
+            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "wasm"),
+            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
+        },
+        {
+            "path": os.path.join(c.proj_path, "c"),
+            "patterns": ["*.cpp", "*.hpp", "*.c", "*.h", "*.m", "*.mm"],
+        },
+    ]
+
+    if path_list:
+        l.i("Formatting C++ files...")
+
+        util.run_format(
+            path_list=path_list,
+            formatter=lambda file_item: run.run(
+                [
+                    "clang-format",
+                    "-style",
+                    "file",
+                    "-i",
+                    os.path.relpath(file_item),
+                ],
+                cwd=c.proj_path,
+            ),
+            ignore_path_list=[],
+        )
+
+        l.ok()
+    else:
+        l.i("No C++ files found to format")
+
+
+# -----------------------------------------------------------------------------
+def do_build(
+    target,
+    build_type,
+    target_data,
+    build_folder,
+    has_interface,
+    has_tests,
+    has_sample,
+    has_pic,
+    has_custom_data,
+):
+    build_dir = os.path.join(c.proj_path, "build", build_folder)
+    conan_build_dir = os.path.join(c.proj_path, "build", "conan", build_folder)
+
+    incremental = util.get_param_incremental()
+    if not incremental:
+        f.recreate_dir(build_dir)
+
+    # dependencies
+    no_deps = util.get_param_no_deps()
+
+    if not incremental and not no_deps and c.dependency_tool == "conan":
+        for item in target_data:
+            l.i(f"Building dependencies for arch {item['arch']}...")
+
+            arch_dir = os.path.join(conan_build_dir, item["arch"])
+            f.recreate_dir(arch_dir)
+
+            conan.install(item, build_type, arch_dir, has_tests)
+
+    # build
+    for item in target_data:
+        l.i(f"Building for arch {item['arch']}...")
+
+        arch_dir = os.path.join(build_dir, item["arch"])
+        conan_arch_dir = os.path.join(conan_build_dir, item["arch"])
+
+        # configure
+        run_args = [
+            "cmake",
+            "-S",
+            ".",
+            "-B",
+            arch_dir,
+            f"-DCMAKE_BUILD_TYPE={build_type}",
+            f"-DXPLPC_TARGET={target}",
+            f"-DXPLPC_DEPENDENCY_TOOL={c.dependency_tool}",
+            f"-DXPLPC_SANITIZER={util.get_param_sanitizer()}",
+        ]
+
+        # custom data
+        if has_custom_data:
+            run_args.append("-DXPLPC_ADD_CUSTOM_DATA=ON")
+        else:
+            run_args.append("-DXPLPC_ADD_CUSTOM_DATA=OFF")
+
+        # interface
+        if has_interface:
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=ON")
+        else:
+            run_args.append("-DXPLPC_ENABLE_INTERFACE=OFF")
+
+        # tests
+        if has_tests:
+            run_args.append("-DXPLPC_BUILD_TESTS=ON")
+        else:
+            run_args.append("-DXPLPC_BUILD_TESTS=OFF")
+
+        # sample
+        if has_sample:
+            run_args.append("-DXPLPC_BUILD_SAMPLE=ON")
+        else:
+            run_args.append("-DXPLPC_BUILD_SAMPLE=OFF")
+
+        # pic
+        if has_pic:
+            run_args.append("-DCMAKE_POSITION_INDEPENDENT_CODE=ON")
+
+        # toolchain
+        if c.dependency_tool == "conan":
+            toolchain_file = os.path.join(conan_arch_dir, "conan_toolchain.cmake")
+            run_args.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+
+        run.run(run_args)
+
+        # build
+        run.run(["cmake", "--build", arch_dir, "--config", build_type])
