@@ -1,0 +1,11 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "value",
+            "type": "double",
+            "value": 2.5
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"value\",\"v\":2.5}]}"
+}

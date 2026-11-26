@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":[1,null]}",
+    "type": "list<int32>",
+    "expect": null
+}

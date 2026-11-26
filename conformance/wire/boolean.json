@@ -1,0 +1,11 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "flag",
+            "type": "bool",
+            "value": true
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"flag\",\"v\":true}]}"
+}

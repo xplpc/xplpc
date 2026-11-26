@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":\"ção\"}",
+    "type": "string",
+    "expect": "ção"
+}

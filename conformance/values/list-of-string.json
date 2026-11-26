@@ -1,0 +1,8 @@
+{
+    "document": "{\"r\":[\"a\",\"ção\"]}",
+    "type": "list<string>",
+    "expect": [
+        "a",
+        "ção"
+    ]
+}

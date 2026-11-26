@@ -1,0 +1,11 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "nothing",
+            "type": "null",
+            "value": null
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"nothing\",\"v\":null}]}"
+}

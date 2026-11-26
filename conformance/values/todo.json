@@ -1,0 +1,13 @@
+{
+    "document": "{\"r\":{\"id\":1,\"title\":\"t\",\"body\":\"b\",\"data\":{\"k\":\"v\"},\"done\":true}}",
+    "type": "todo",
+    "expect": {
+        "id": 1,
+        "title": "t",
+        "body": "b",
+        "data": {
+            "k": "v"
+        },
+        "done": true
+    }
+}

@@ -1,0 +1,7 @@
+{
+    "document": "{\"f\":\"sample.login\",\"p\":[{\"n\":\"username\"}]}",
+    "function": "sample.login",
+    "params": {
+        "username": null
+    }
+}

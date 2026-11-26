@@ -1,0 +1,48 @@
+{
+    "name": "xplpc",
+    "private": true,
+    "description": "Demonstrates how to use XPLPC from a browser through WebAssembly.",
+    "version": "1.0.0",
+    "homepage": "https://xplpc.github.io",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc --noEmit && vite build",
+        "lint": "eslint . --fix",
+        "test:unit": "vitest run"
+    },
+    "dependencies": {
+        "@popperjs/core": "^2.11.8",
+        "bootstrap": "^5.3.9",
+        "pinia": "^4.1.0",
+        "vue": "^3.5.46",
+        "vue-router": "^5.5.1"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^26.6.6",
+        "@vitejs/plugin-vue": "^6.0.11",
+        "@vue/eslint-config-prettier": "^10.2.0",
+        "@vue/eslint-config-typescript": "^14.9.0",
+        "@vue/test-utils": "^2.6.0",
+        "eslint": "^10.15.0",
+        "eslint-plugin-vue": "^10.12.1",
+        "globals": "^17.14.0",
+        "jsdom": "^31.0.1",
+        "prettier": "^3.10.1",
+        "sass": "^1.108.2",
+        "typescript": "~6.0.3",
+        "vite": "^8.3.8",
+        "vite-plugin-checker": "^1.0.0",
+        "vite-plugin-environment": "^1.1.4",
+        "vitest": "^5.1.1",
+        "vue-tsc": "^3.3.14"
+    },
+    "overrides": {
+        "js-beautify": {
+            "editorconfig": "^4.0.1",
+            "glob": "^14.0.6"
+        }
+    }
+}

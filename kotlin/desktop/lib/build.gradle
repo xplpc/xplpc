@@ -1,0 +1,83 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.4.21'
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0'
+    implementation 'com.google.code.gson:gson:2.15.0'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+// The c++ build writes one directory per architecture, and the one the jar carries is the one a property names or the only one there is.
+def nativeLibraries() {
+    def arch = project.hasProperty('xplpc_arch') ? project.property('xplpc_arch') : null
+    def libsArchPath = arch ? arch : file("../../../build/kotlin-desktop").listFiles().find { it.directory }?.name
+
+    if (libsArchPath == null || libsArchPath == '') {
+        throw new GradleException("The architecture of native library cannot be null or empty!")
+    }
+
+    def osName = System.getProperty('os.name').toLowerCase()
+    def libsPath = osName.contains('win') ? 'bin' : 'lib'
+
+    return file("../../../build/kotlin-desktop/${libsArchPath}/${libsPath}")
+}
+
+// The suite is shared with android, where junit 4 is what the instrumentation runs, so both runtimes report a parameterized case the same way.
+test {
+    useJUnit()
+
+    def conformance = file('../../../conformance')
+
+    inputs.dir(conformance)
+    systemProperty 'xplpc.conformance', conformance.absolutePath
+
+    // The suite loads the native library the c++ build wrote, so a rebuilt library runs the tests again rather than reporting the previous result.
+    inputs.dir(nativeLibraries()).withPropertyName('nativeLibraries')
+}
+
+// The bytecode is the floor a consumer has to run, so it stays at the oldest supported long term release whatever jdk builds it.
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+        freeCompilerArgs.add("-Xjdk-release=17")
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java', '../../shared/src'
+        }
+    }
+
+    test {
+        java {
+            srcDirs 'src/test/java', '../../shared/tests'
+        }
+    }
+}
+
+jar {
+    archiveFileName = "${project.name}.jar"
+}
+
+processResources {
+    from(nativeLibraries()) {
+        into 'native-libs'
+    }
+}

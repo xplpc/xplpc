@@ -1,0 +1,11 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "value",
+            "type": "int64",
+            "value": -9223372036854775808
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"value\",\"v\":-9223372036854775808}]}"
+}

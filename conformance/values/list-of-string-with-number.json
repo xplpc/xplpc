@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":[\"a\",1]}",
+    "type": "list<string>",
+    "expect": null
+}

@@ -1,0 +1,2 @@
+# Every isolate attaches to the one router of the process under the same name, and the last one to attach replaces the layer before it, so test files that overlap take the bridge from each other.
+concurrency: 1

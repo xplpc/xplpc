@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":0.1}",
+    "type": "float",
+    "expect": 0.1
+}

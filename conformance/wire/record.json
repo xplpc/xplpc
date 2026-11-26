@@ -1,0 +1,14 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "value",
+            "type": "record",
+            "value": {
+                "count": 1,
+                "name": "n"
+            }
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"value\",\"v\":{\"count\":1,\"name\":\"n\"}}]}"
+}

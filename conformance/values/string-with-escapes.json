@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":\"a\\\"b\\\\c\\nd\"}",
+    "type": "string",
+    "expect": "a\"b\\c\nd"
+}

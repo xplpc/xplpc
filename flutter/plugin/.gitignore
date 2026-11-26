@@ -1,0 +1,16 @@
+*.class
+*.log
+*.swp
+.build/
+.swiftpm/
+*.ipr
+*.iws
+
+# Libraries should not include pubspec.lock, per https://dart.dev/guides/libraries/private-files#pubspeclock.
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+
+# The build points these at what it produced, so a checkout carries no link into a directory that may not exist.
+/ios/xplpc.xcframework
+/macos/xplpc.xcframework

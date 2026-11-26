@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":3}",
+    "type": "double",
+    "expect": 3.0
+}

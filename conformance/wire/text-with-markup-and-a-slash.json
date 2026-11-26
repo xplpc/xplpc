@@ -1,0 +1,11 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "text",
+            "type": "string",
+            "value": "<a href='x/y'>&=</a>"
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"text\",\"v\":\"<a href='x/y'>&=</a>\"}]}"
+}

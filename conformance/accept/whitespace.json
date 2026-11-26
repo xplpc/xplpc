@@ -1,0 +1,7 @@
+{
+    "document": "  { \"f\" : \"sample.login\" , \"p\" : [ { \"n\" : \"a\" , \"v\" : 1 } ] }  ",
+    "function": "sample.login",
+    "params": {
+        "a": 1
+    }
+}

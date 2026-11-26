@@ -1,0 +1,7 @@
+{
+    "document": "{\"p\":[{\"v\":\"x\",\"n\":\"b\"}],\"f\":\"sample.login\"}",
+    "function": "sample.login",
+    "params": {
+        "b": "x"
+    }
+}

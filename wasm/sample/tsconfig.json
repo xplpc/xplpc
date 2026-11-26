@@ -1,0 +1,48 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "target": "esnext",
+        "module": "esnext",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "moduleResolution": "bundler",
+        "isolatedModules": true,
+        "strict": true,
+        "noEmit": true,
+        "lib": [
+            "esnext",
+            "dom",
+            "dom.iterable"
+        ],
+        "types": [
+            "vite/client",
+            "vitest/globals",
+            "node",
+            "xplpc"
+        ],
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ],
+            "@xplpc/*": [
+                "../../*"
+            ]
+        },
+        "typeRoots": [
+            "./node_modules",
+            "./node_modules/@types",
+            "./node_modules/vitest",
+            "./types"
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+        "src/**/*.vue",
+        "tests/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

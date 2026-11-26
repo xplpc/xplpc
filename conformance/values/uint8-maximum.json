@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":255}",
+    "type": "uint8",
+    "expect": 255
+}

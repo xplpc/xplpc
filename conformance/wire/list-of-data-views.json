@@ -1,0 +1,13 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "value",
+            "type": "list<dataview>",
+            "value": [
+                7
+            ]
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"value\",\"v\":[{\"buffer\":7}]}]}"
+}

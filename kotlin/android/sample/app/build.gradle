@@ -1,0 +1,67 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace = 'com.xplpc.runner'
+
+    // The libraries are stripped by the same ndk that built them, and an ndk this names that is not installed leaves them carrying their symbols.
+    ndkVersion = "30.0.16248370"
+
+    defaultConfig {
+        applicationId "com.xplpc.runner"
+
+        minSdk = 24
+        targetSdk = 37
+        compileSdk = 37
+
+        versionCode 1
+        versionName "1.0.0"
+
+        ndk {
+            debugSymbolLevel = 'full'
+        }
+    }
+
+    lint {
+        // A dependency this project pins on purpose is not a finding, and an adaptive icon and a ktx helper are not defects in a sample whose job is to show a call crossing the bridge.
+        disable 'GradleDependency', 'AndroidGradlePluginVersion', 'MonochromeLauncherIcon', 'UseKtx'
+        warningsAsErrors = true
+        abortOnError = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources = true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+
+            // The sample is signed with the debug keys so ci can run the minified variant without a release keystore.
+            signingConfig = signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        viewBinding = true
+        buildConfig = true
+    }
+}
+
+dependencies {
+    implementation project(path: ':xplpc')
+
+    implementation 'androidx.core:core-ktx:1.19.1'
+    implementation 'androidx.appcompat:appcompat:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
+
+    implementation 'com.google.android.material:material:1.14.0'
+
+    implementation 'androidx.camera:camera-view:1.7.0'
+    implementation 'androidx.camera:camera-lifecycle:1.7.0'
+    implementation 'androidx.camera:camera-camera2:1.7.0'
+}

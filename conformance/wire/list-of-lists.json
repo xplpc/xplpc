@@ -1,0 +1,16 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "value",
+            "type": "list<list<int>>",
+            "value": [
+                [
+                    1
+                ],
+                []
+            ]
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"value\",\"v\":[[1],[]]}]}"
+}

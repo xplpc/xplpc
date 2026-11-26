@@ -1,0 +1,7 @@
+include(default)
+
+[settings]
+compiler.cppstd=20
+os=Macos
+os.subsystem=catalyst
+arch=x86_64

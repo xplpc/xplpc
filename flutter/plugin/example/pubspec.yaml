@@ -1,0 +1,27 @@
+name: xplpc_example
+description: Demonstrates how to use the XPLPC plugin.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  reflectable: ^5.2.3
+  material_ui: ^1.11.1
+  battery_plus: ^7.1.2
+
+  xplpc:
+    path: ../
+
+dev_dependencies:
+  build_runner: ^2.16.1
+  reflectable_builder: ^1.2.3
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

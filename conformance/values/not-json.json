@@ -1,0 +1,5 @@
+{
+    "document": "not-a-json",
+    "type": "string",
+    "expect": null
+}

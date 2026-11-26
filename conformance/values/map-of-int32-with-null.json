@@ -1,0 +1,5 @@
+{
+    "document": "{\"r\":{\"a\":null}}",
+    "type": "map<int32>",
+    "expect": null
+}

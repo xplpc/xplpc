@@ -1,0 +1,14 @@
+analyzer:
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  exclude:
+    - build/**
+    - test/*.reflectable.dart
+    - android/**
+    - ios/**
+    - windows/**
+    - macos/**
+    - linux/**
+include: package:flutter_lints/flutter.yaml

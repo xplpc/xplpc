@@ -1,0 +1,38 @@
+// The native library reaches the application through the aar it links, so this module only declares the plugin to flutter.
+
+group = "com.xplpc.library.flutter"
+version = "1.0.0"
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath("com.android.tools.build:gradle:9.5.2")
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: "com.android.library"
+
+android {
+    namespace = "com.xplpc.library.flutter"
+    compileSdk = 37
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    defaultConfig {
+        minSdk = 24
+    }
+}

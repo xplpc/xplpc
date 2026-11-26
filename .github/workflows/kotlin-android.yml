@@ -1,0 +1,136 @@
+name: Kotlin Android
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'extras/images/**'
+
+# The default branch is never cancelled, so every commit there keeps a complete run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu Latest",
+            os: ubuntu-latest
+          }
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.15"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.5.1"
+
+      - name: Install Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: "corretto"
+          java-version: "25"
+
+      - name: Install NDK
+        id: setup-ndk
+        run: |
+          ndk="$ANDROID_HOME/ndk/30.0.16248370"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;30.0.16248370" > /dev/null
+          echo "ndk-path=$ndk" >> "$GITHUB_OUTPUT"
+          echo "$ndk" >> "$GITHUB_PATH"
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+          java -version
+          ndk-build -version
+
+      - name: Get AVD info
+        uses: ./.github/actions/get-avd-info
+        id: avd-info
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
+
+      - name: Build
+        run: python3 xplpc.py kotlin-build --platform android
+        env:
+          ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+
+      - name: Build AAR
+        run: python3 xplpc.py kotlin-build-aar --platform android
+
+      - name: Build Sample
+        run: python3 xplpc.py kotlin-build-sample --platform android
+
+      - name: Verify The Release Ships Stripped Libraries
+        run: |
+          unzip -p kotlin/android/sample/app/build/outputs/apk/release/app-release.apk lib/arm64-v8a/libxplpc.so > libxplpc.so
+          file libxplpc.so
+
+          if file libxplpc.so | grep -q "not stripped"; then
+            echo "The release carries a native library that was never stripped"
+            exit 1
+          fi
+
+      - name: Android Lint
+        run: |
+          ./kotlin/android/lib/gradlew -p kotlin/android/lib :library:lintDebug
+          ./kotlin/android/sample/gradlew -p kotlin/android/sample :app:lintDebug
+
+      - name: Verify The Keep Rules Survived R8
+        run: |
+          seeds=kotlin/android/sample/app/build/outputs/mapping/release/seeds.txt
+          cat "$seeds" | grep -E "com\.xplpc\.(message\.Param|type\.DataView|serializer\.JsonSerializer|layer\.Layer: void onInvoke|data\.PendingCall: void onAnswer)" || true
+          for field in \
+            "com.xplpc.message.Param: java.lang.String n" \
+            "com.xplpc.message.Param: java.lang.Object v" \
+            "com.xplpc.serializer.JsonSerializer\$JsonRequestData: java.lang.String f" \
+            "com.xplpc.serializer.JsonSerializer\$JsonRequestData: java.util.ArrayList p" \
+            "com.xplpc.serializer.JsonSerializer\$JsonFunctionReturnValueData: java.lang.Object r" \
+            "com.xplpc.type.DataView: long buffer" \
+            "com.xplpc.layer.Layer: void onInvoke(long,java.lang.String)" \
+            "com.xplpc.data.PendingCall: void onAnswer(java.lang.String)"; do
+            grep -qF "$field" "$seeds" || { echo "r8 did not keep: $field"; exit 1; }
+          done
+          echo "every field the wire format reads by name and every method jni resolves by name survived"
+
+      - name: Test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: "37.0"
+          arch: ${{ steps.avd-info.outputs.arch }}
+          target: default
+          disable-animations: true
+          force-avd-creation: true
+          ram-size: 4096M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
+          script: |
+            adb devices
+            python3 xplpc.py kotlin-test --platform android

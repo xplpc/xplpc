@@ -1,0 +1,11 @@
+{
+    "function": "sample.wire",
+    "params": [
+        {
+            "name": "text",
+            "type": "string",
+            "value": "ção 😀"
+        }
+    ],
+    "bytes": "{\"f\":\"sample.wire\",\"p\":[{\"n\":\"text\",\"v\":\"ção 😀\"}]}"
+}

@@ -1,0 +1,166 @@
+name: C
+
+on:
+  workflow_dispatch:
+  push:
+    # The c guide carries a program a step compiles and runs, so a change to it runs this workflow while every other document is left out.
+    paths:
+      - '**'
+      - '!**.md'
+      - '!docs/**'
+      - '!extras/images/**'
+      - 'docs/c.md'
+
+# The default branch is never cancelled, so every commit there keeps a complete run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows Latest MSVC",
+            os: windows-latest,
+            leaks: false,
+            sanitizers: false
+          }
+        - {
+            name: "Windows Latest MinGW",
+            os: windows-latest,
+            cc: "gcc",
+            cxx: "g++",
+            generator: "MinGW Makefiles",
+            leaks: false,
+            sanitizers: false
+          }
+        - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            cc: "gcc",
+            cxx: "g++",
+            generator: "Ninja",
+            leaks: false,
+            sanitizers: true
+          }
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            cc: "clang",
+            cxx: "clang++",
+            generator: "Ninja",
+            leaks: true,
+            sanitizers: true
+          }
+
+    # The compiler and the generator reach cmake and conan through the environment, and the msvc config leaves all three empty so the platform default is what it builds with.
+    env:
+      CC: ${{ matrix.config.cc }}
+      CXX: ${{ matrix.config.cxx }}
+      CMAKE_GENERATOR: ${{ matrix.config.generator }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.15"
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "4.5.1"
+
+      - name: Install Ninja
+        if: runner.os != 'Windows'
+        run: python3 -m pip install ninja==1.13.2
+
+      - name: Verify
+        run: |
+          python3 --version
+          cmake --version
+
+      - name: Verify Ninja
+        if: runner.os != 'Windows'
+        run: ninja --version
+
+      - name: Conan
+        run: python3 xplpc.py conan-setup
+
+      - name: Test
+        run: python3 xplpc.py c-test
+
+      - name: Test In A Random Order
+        run: python3 xplpc.py c-test --shuffle --incremental
+
+      - name: Test With Conan
+        run: python3 xplpc.py c-test --dependency-tool conan
+
+      - name: Test With Address Sanitizer
+        if: matrix.config.sanitizers == true
+        run: python3 xplpc.py c-test --sanitizer address
+
+      - name: Test With Debug Logging
+        if: matrix.config.sanitizers == true
+        env:
+          XPLPC_LOG_LEVEL: debug
+        run: python3 xplpc.py c-test --sanitizer address
+
+      - name: Test With Thread Sanitizer
+        if: matrix.config.sanitizers == true
+        run: python3 xplpc.py c-test --sanitizer thread
+
+      - name: Test With Undefined Behavior Sanitizer
+        if: matrix.config.sanitizers == true
+        run: python3 xplpc.py c-test --sanitizer undefined
+
+      - name: Build
+        run: python3 xplpc.py c-build-static
+
+      - name: Build Shared
+        run: python3 xplpc.py c-build-shared
+
+      - name: Build And Run The Guide Example
+        if: matrix.config.sanitizers == true
+        run: |
+          python3 - <<'EOF'
+          import re
+
+          source = open("docs/c.md", encoding="utf-8").read()
+          blocks = re.findall(r"```c\n(.*?)```", source, re.S)
+
+          if len(blocks) != 1:
+              raise SystemExit(f"the guide carries {len(blocks)} c programs, expected one")
+
+          open("guide-example.c", "w", encoding="utf-8").write(blocks[0])
+          EOF
+
+          lib=$(dirname $(find build/c-shared -name "libxplpc.*" | head -1))
+          cc -std=c11 -Wall -Wextra -Wpedantic -o guide-example guide-example.c -Ic/lib/include -L"$lib" -lxplpc -Wl,-rpath,"$PWD/$lib"
+
+          answer=$(LD_LIBRARY_PATH="$lib" ./guide-example)
+          echo "$answer"
+
+          expected=$'{"r":"LOGGED-WITH-REMEMBER"}'
+          [ "$answer" = "$expected" ] || { echo "the guide example answered something else"; exit 1; }
+
+      - name: Build Sample
+        run: python3 xplpc.py c-build-sample
+
+      - name: Run Sample
+        run: python3 xplpc.py c-run-sample
+
+      - name: Leaks
+        if: matrix.config.leaks == true
+        run: python3 xplpc.py c-build-leaks

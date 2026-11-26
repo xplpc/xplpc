@@ -1,0 +1,8 @@
+include(default)
+
+[settings]
+compiler.cppstd=20
+os=watchOS
+os.version=9.0
+os.sdk=watchos
+arch=armv8_32
